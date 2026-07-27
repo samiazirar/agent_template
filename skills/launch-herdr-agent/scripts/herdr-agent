@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    printf 'Usage: herdr-agent <codex|claude|claudex> "Role · PersonName Goal" [working-directory]\n' >&2
+}
+
+if [ "${HERDR_ENV:-}" != "1" ]; then
+    printf 'herdr-agent must be run from inside a Herdr-managed pane.\n' >&2
+    exit 2
+fi
+
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    usage
+    exit 2
+fi
+
+surface="$1"
+label="$2"
+launch_dir="${3:-$PWD}"
+
+if [ -z "$label" ]; then
+    printf 'Provide a human task name for the Herdr tab.\n' >&2
+    exit 2
+fi
+
+if [ ! -d "$launch_dir" ]; then
+    printf 'Working directory does not exist: %s\n' "$launch_dir" >&2
+    exit 2
+fi
+
+case "$surface" in
+    codex)
+        launch_argv=(codex)
+        ;;
+    claudex)
+        runtime_json="$(claudex --runtime-json)"
+        runtime_model="$(
+            python3 -c 'import json,sys; print(json.load(sys.stdin)["model"])' \
+                <<<"$runtime_json"
+        )"
+        if [ "$runtime_model" != "gpt-5.6-sol" ]; then
+            printf 'Claudex is synchronized to %s, expected gpt-5.6-sol.\n' \
+                "$runtime_model" >&2
+            exit 2
+        fi
+        launch_argv=(claudex)
+        ;;
+    claude)
+        claude_effort="${HERDR_CLAUDE_EFFORT:-medium}"
+        case "$claude_effort" in
+            low|medium|high|xhigh|max) ;;
+            *)
+                printf 'Unsupported Claude effort: %s\n' "$claude_effort" >&2
+                exit 2
+                ;;
+        esac
+        launch_argv=(claude --model claude-opus-5 --effort "$claude_effort")
+        ;;
+    *)
+        usage
+        exit 2
+        ;;
+esac
+
+if ! command -v "${launch_argv[0]}" >/dev/null 2>&1; then
+    printf 'Agent executable is unavailable: %s\n' "${launch_argv[0]}" >&2
+    exit 2
+fi
+
+tab_json="$(
+    herdr tab create \
+        --workspace "$HERDR_WORKSPACE_ID" \
+        --cwd "$launch_dir" \
+        --label "$label" \
+        --no-focus
+)"
+
+readarray -t created_ids < <(
+    python3 -c '
+import json
+import sys
+result = json.load(sys.stdin)["result"]
+print(result["tab"]["tab_id"])
+print(result["root_pane"]["pane_id"])
+' <<<"$tab_json"
+)
+tab_id="${created_ids[0]}"
+pane_id="${created_ids[1]}"
+
+cleanup_failed_launch() {
+    herdr tab close "$tab_id" >/dev/null 2>&1 || true
+}
+trap cleanup_failed_launch ERR
+
+herdr pane rename "$pane_id" "$label" >/dev/null
+printf -v launch_command '%q ' "${launch_argv[@]}"
+herdr pane run "$pane_id" "${launch_command% }" >/dev/null
+herdr wait agent-status "$pane_id" --status idle --timeout 30000 >/dev/null
+
+trap - ERR
+printf 'Ready: %s using %s.\n' "$label" "$surface"

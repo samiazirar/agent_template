@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt GPT-5.6 Sol"
+  short_description: "Shape lean prompts for GPT-5.6 Sol"
+  default_prompt: "Use $prompt-gpt-5p6-sol to adapt these instructions for GPT-5.6 Sol in Claudex."

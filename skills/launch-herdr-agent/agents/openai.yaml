@@ -1,0 +1,4 @@
+interface:
+  display_name: "Launch Herdr Agent"
+  short_description: "Open named Codex, Claude, or Claudex sessions"
+  default_prompt: "Use $launch-herdr-agent to open a named native Herdr session for the selected coding agent."

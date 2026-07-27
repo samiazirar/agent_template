@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt Claude Opus 5"
+  short_description: "Shape focused prompts for Claude Opus 5"
+  default_prompt: "Use $prompt-claude-opus-5 to adapt these instructions for Claude Opus 5."
