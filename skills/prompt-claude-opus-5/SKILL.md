@@ -54,6 +54,19 @@ performs.
 - Keep written artifacts proportional; remove filler sections, repeated
   summaries, and boilerplate.
 
+## Preserve role boundaries
+
+- A productive Opus worker receives one task from Operations or one owning
+  suborchestrator and reports only to that assigning role.
+- Forbid direct contact with the Human Orchestrator or user, edits to
+  `HUMAN_PLAN.md`, new agents, unrelated work, and scope expansion.
+- An Opus second eye receives one bounded artifact or claim from Operations,
+  returns concrete mismatches only to Operations, and stops. It never becomes
+  an approver or starts a repair itself.
+- Include the canonical `worker` role block from
+  `launch-herdr-agent/scripts/validate_role_card.py` in a productive-worker
+  prompt.
+
 When the user asks for current or latest guidance, check the official
 [Claude Opus 5 prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)
 before rewriting the prompt.

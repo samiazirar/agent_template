@@ -84,19 +84,28 @@ OpenCode API-key provider.
   the architect, and stops; it never replaces or closes the architect.
 - The Human Orchestrator is the project's only normal human conversation. It
   confirms the goal and its meaning, asks and answers human questions, and
-  explains material results. It does not manage execution, workers, Git, or
-  internal tools.
+  explains material results. It sends every technical request to Operations
+  and returns Operations questions that require human judgment to the user. It
+  does not contact technical roles directly or manage execution, workers, Git,
+  or internal tools.
 - The Operations Orchestrator owns decomposition, execution, worker and
   suborchestrator lifecycle, integration, synchronization, and technical state.
-  It sends the Human Orchestrator only material results, genuine decisions, and
-  direction changes.
+  It is the sole normal bridge between the Human Orchestrator and every
+  technical role. It sends the Human Orchestrator only accepted material
+  results, genuine decisions, direction changes, and questions that require
+  human judgment.
+- Normal communication follows one path:
+  `Human ↔ Human Orchestrator ↔ Operations ↔ technical role`. Workers,
+  suborchestrators, plan writers, advisors, researchers, and verifiers do not
+  bypass Operations to contact the Human Orchestrator or user.
 - `00 Human Plan` is a non-agent Frogmouth view of `HUMAN_PLAN.md`. Keep the
   Human Orchestrator in `01 Orchestrators`, never in the plan pane.
 - The Human Orchestrator owns plan meaning but does not edit it directly.
-  Operations launches one temporary Human Plan Writer when the accepted meaning
-  or material evidence changes. The writer edits only the plan; the Human
-  Orchestrator checks meaning; Operations checks evidence, integrates and
-  synchronizes, then closes the writer.
+  It gives accepted meaning to Operations. Operations launches one temporary
+  Human Plan Writer when that meaning or material evidence changes. The writer
+  receives its brief from and reports its plan-only commit to Operations;
+  Operations asks the Human Orchestrator to check meaning, checks evidence,
+  integrates and synchronizes, then closes the writer.
 - `HUMAN_PLAN.md` is the single continuously maintained human-facing source of
   truth. The user should need only this Markdown file and conversation with the
   human orchestrator; every other artifact is internal evidence.
@@ -114,14 +123,17 @@ OpenCode API-key provider.
   “gate” stay internal.
 - One worker owns exactly one concrete subtask, branch, and worktree.
   Independent subtasks use concurrent workers. Operations integrates or rejects
-  each result and closes the worker immediately afterward.
+  each result and closes the worker immediately afterward. Workers receive
+  tasks from and report only to Operations or their one owning
+  suborchestrator.
 - Suborchestrators exist only for independent multi-step workstreams containing
   at least three productive subtasks. Each owns one workstream, launches one
   temporary worker per subtask, and closes when the stream ends. It may not
   create another suborchestrator.
 - Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor
   only the context for one bounded question, preferably yes/no or one concrete
-  recommendation. It never implements or manages and closes after answering.
+  recommendation. Operations launches it and receives its answer; it never
+  contacts the user, implements, or manages and closes after answering.
 - For consequential strategic planning or plan validation, the responsible
   orchestrator uses `consult-chatgpt-pro` with one compact question, then
   reconciles the advice against project evidence.

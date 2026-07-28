@@ -1,4 +1,4 @@
 interface:
   display_name: "Launch Herdr Team"
   short_description: "Launch human, operations, workers, and advisors"
-  default_prompt: "Use $launch-herdr-agent as a short-lived Launcher to create the Human Plan viewer, Human and Operations Orchestrators, and only the immediately justified workers or advisors."
+  default_prompt: "Use $launch-herdr-agent as a short-lived Launcher, validate each canonical role card, and create only the Human Plan viewer, Human and Operations Orchestrators, and immediately justified technical roles."

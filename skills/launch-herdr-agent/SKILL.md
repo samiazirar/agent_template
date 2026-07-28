@@ -89,13 +89,21 @@ Create these standing roles in `01 Orchestrators`:
 1. `Human Orchestrator · PersonName Goal` — Claudex Sol high. This is the
    project's only normal conversation with the human. Confirm the goal and its
    meaning, ask or answer necessary human questions, explain material results,
-   and own the intended human-plan content. Never dispatch workers, manage
-   execution, integrate Git, or expose internal mechanics.
+   and own the intended human-plan content. Send every technical request to
+   Operations and return Operations questions that need human judgment to the
+   human. Never contact workers, suborchestrators, writers, advisors, or
+   verifiers directly; dispatch workers; manage execution; integrate Git; or
+   expose internal mechanics.
 2. `Operations · PersonName Goal` — Codex Sol high. Own decomposition,
    execution order, worktrees, worker and suborchestrator lifecycle,
-   integration, commits, synchronization, and technical state. Route only
-   material results, genuine decisions, and direction changes to the Human
-   Orchestrator.
+   integration, commits, synchronization, and technical state. Be the sole
+   normal bridge between the Human Orchestrator and every technical role.
+   Route only accepted material results, genuine decisions, direction changes,
+   and questions needing human judgment to the Human Orchestrator.
+
+Normal communication must follow:
+`Human ↔ Human Orchestrator ↔ Operations ↔ technical role`. No technical role
+may bypass Operations to contact the Human Orchestrator or user.
 
 Do not put the Human Orchestrator in `00 Human Plan`. That tab contains exactly
 one non-agent pane rendering the canonical Markdown:
@@ -107,22 +115,26 @@ frogmouth HUMAN_PLAN.md
 If the plan is missing or its meaning changed, leave the viewer shell in place
 until the Human Orchestrator has accepted the goal. Operations then launches
 one temporary `Human Plan Writer · PersonName Update` worker. The Human
-Orchestrator supplies the accepted human meaning; the writer edits only
-`HUMAN_PLAN.md` in an isolated worktree and commits; the Human Orchestrator
-checks meaning; Operations checks evidence, integrates, synchronizes, refreshes
-the viewer, and closes the writer.
+Orchestrator gives the accepted meaning to Operations; Operations briefs the
+writer; the writer edits only `HUMAN_PLAN.md` in an isolated worktree, commits,
+and reports only to Operations. Operations asks the Human Orchestrator to check
+meaning, checks evidence, integrates, synchronizes, refreshes the viewer, and
+closes the writer.
 
 For productive work, Operations launches one named worker for each concrete
 subtask. One worker owns one deliverable, branch, and worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
 worker several unrelated subtasks. Integrate or reject its result, then close
-its session and retire its worktree.
+its session and retire its worktree. A worker receives its task from and
+reports only to Operations or its one owning suborchestrator; it never contacts
+the Human Orchestrator or user.
 
 For a genuinely independent multi-step workstream, Operations may launch one
 named suborchestrator in `03 Suborchestrators`. Give it one measurable
 workstream. It decomposes that stream, launches one temporary worker per
 subtask, integrates the stream for Operations, and closes itself when the
-workstream ends. It may not create another suborchestrator.
+workstream ends. It communicates only with Operations and its own workers. It
+may not contact the Human Orchestrator or create another suborchestrator.
 
 Do not launch standing advisors, watchers, reviewers, progress checkers, plan
 writers, or suborchestrators. Open each only for its immediate bounded purpose.
@@ -158,10 +170,11 @@ Keep `02 Strategic Council` empty until an orchestrator has one exact
 consequential question. Then launch one temporary `Strategic Advisor ·
 PersonName Question` using `codex-xhigh`.
 
-Give the advisor only the decision context needed for that question. Prefer a
-yes/no verdict; otherwise request one concrete recommended approach. The
-advisor does not inspect broadly, implement, manage, or create more agents.
-Capture the answer, let the responsible orchestrator decide, and close the
+Operations gives the advisor only the decision context needed for that
+question. Prefer a yes/no verdict; otherwise request one concrete recommended
+approach. The advisor reports only to Operations and does not contact the Human
+Orchestrator or user, inspect broadly, implement, manage, or create more agents.
+Capture the answer, let Operations route its material meaning, and close the
 advisor immediately.
 
 For consequential strategic planning or plan validation, the responsible
@@ -174,7 +187,12 @@ unless the decision is unsafe without external advice.
 ## Prompt each role
 
 Wait only until each native session is idle, then send a concise role-specific
-prompt. Every task-bearing prompt must include:
+prompt. Before sending it, render the canonical role block with
+`scripts/validate_role_card.py <role> --print`, include that block unchanged in
+the prompt, and validate the composed prompt with
+`scripts/validate_role_card.py <role> --check <prompt-file>`.
+
+Every task-bearing prompt must include:
 
 - the preserved project goal in plain language;
 - the role's differing current and expected states;
@@ -185,12 +203,19 @@ prompt. Every task-bearing prompt must include:
 - the instruction to stop and report its completion envelope when done.
 
 The Human Orchestrator prompt must identify it as the sole human conversation
-and forbid execution management. The Operations prompt must require one worker
-per subtask, concurrent independent workers, prompt closure, and material-only
-handoffs to the Human Orchestrator. Worker prompts must forbid hidden
-delegation and unrelated work. Suborchestrator prompts must define one
-multi-step workstream and forbid another orchestration layer. Advisor prompts
-must contain one bounded question and forbid implementation.
+and require all technical communication to pass through Operations. The
+Operations prompt must require one worker per subtask, concurrent independent
+workers, prompt closure, and sole-bridge routing to the Human Orchestrator.
+Worker prompts must forbid hidden delegation, unrelated work, and direct
+human-side contact. Suborchestrator prompts must define one multi-step
+workstream, report only to Operations, and forbid another orchestration layer.
+Advisor prompts must contain one bounded question, report only to Operations,
+and forbid implementation.
+
+Require the launched session to acknowledge, in one concise message, its role,
+who it receives from, who it reports to, and its main forbidden boundary.
+Reject and resend a corrected prompt if that acknowledgement contradicts the
+canonical role block. Do not open a separate checker agent.
 
 After prompting, wait only for each session to become working. If a launch
 fails, close only the failed tab, retry once with the same surface, and report
