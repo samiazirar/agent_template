@@ -1,0 +1,4 @@
+interface:
+  display_name: "Restart Research Team"
+  short_description: "Rebuild productive Herdr research teams"
+  default_prompt: "Use $restart-research-team to restore the Human Plan viewer, one Human Orchestrator, the Codex Sol-high Operations Lead, the background Claude Opus-medium Operations Collaborator, and only immediately justified 90/10-budgeted temporary roles."
