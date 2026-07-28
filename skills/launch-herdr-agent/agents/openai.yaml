@@ -1,4 +1,4 @@
 interface:
   display_name: "Launch Herdr Team"
-  short_description: "Launch and prompt Codex/Claudex sessions, then hand off"
-  default_prompt: "Use $launch-herdr-agent to launch and prompt the requested visible Herdr roles without doing any project work in this chat."
+  short_description: "Brief visible agents, report to Architect, then stop"
+  default_prompt: "Use $launch-herdr-agent as a short-lived Launcher to create and brief the requested visible Herdr roles, report readiness to the standing Architect, and stop."

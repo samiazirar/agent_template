@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and prompt named Codex or Claudex GPT-5.6 Sol sessions as visible native Herdr tabs, including a complete mixed Codex/Claudex project team when the user asks to open, launch, start, or create a Herdr space, project, team, ecosystem, or set of roles. This is launch-only: create the requested topology and hand work to the sessions, but never perform the project work, research, inspection, implementation, testing, or monitoring in the launcher conversation. Native Claude Opus 5 remains available only when explicitly requested."
+description: "Launch and brief named Codex, Claudex, Claude, Terra, or Luna sessions as visible native Herdr tabs when an Architect asks for a worker, research chain, project team, ecosystem, or set of roles. Use this in a separate short-lived Launcher session; never convert the standing Architect or user-facing session into the disposable launcher. The Launcher creates the requested topology, reports readiness to the Architect, and stops without doing project work."
 ---
 
 # Launch Herdr sessions
@@ -9,6 +9,16 @@ Require `HERDR_ENV=1`. If it is absent, explain that launching must begin from
 inside Herdr and stop.
 
 ## Launch-only boundary
+
+Keep the roles distinct:
+
+- The standing `Architect` keeps the user conversation, owns system changes,
+  interprets research reports, and remains open.
+- A separate named `Launcher` creates and briefs the requested sessions,
+  reports the result to the Architect, then stops.
+- A research lead or worker gathers evidence only. It must not edit the
+  system, turn its own findings into improvements, or redirect an
+  implementation worker unless the Architect explicitly changes its role.
 
 Do only the setup needed to hand the goal to visible sessions:
 
@@ -23,11 +33,13 @@ download assets, run experiments, submit jobs, test, review results, poll
 work, or solve any part of the project in the launcher conversation. The
 launched sessions own all productive and support work.
 
-After all requested sessions are launched and working, reply exactly:
+After all requested sessions are launched and working, send the Architect a
+short human-language summary of who is working on what, then end with:
 
-`READY — you can close this chat.`
+`LAUNCH COMPLETE — launcher stopped.`
 
-Do not summarize findings or wait for worker completion.
+The Architect remains active. Do not tell the user to close the Architect
+chat, summarize project findings, or wait for worker completion.
 
 ## One requested session
 
@@ -72,6 +84,11 @@ Create only roles with immediate ownership:
 Do not launch standing advisors, watchers, reviewers, progress checkers, or
 suborchestrators. Operations may launch them later only when the project
 standard and live work justify them.
+
+When the Architect explicitly requests a research chain, launch a named Terra
+research lead and a named Luna read-only worker. Luna reports evidence to
+Terra; Terra consolidates it for the Architect. Neither session implements the
+result.
 
 For a new project explicitly requesting isolation:
 

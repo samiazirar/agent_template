@@ -70,6 +70,12 @@ OpenCode API-key provider.
 
 ## Human structure
 
+- The standing architect owns the user conversation, system design, role
+  selection, and every improvement derived from agent reports. It remains open
+  until the user ends or replaces it.
+- For requested topology changes, the architect opens one short-lived named
+  launcher. The launcher creates and briefs the sessions, reports readiness to
+  the architect, and stops; it never replaces or closes the architect.
 - The operations orchestrator runs decomposition, workers, integration, and
   execution.
 - The human orchestrator owns `HUMAN_PLAN.md`, user communication, and the
@@ -81,6 +87,10 @@ OpenCode API-key provider.
   “gate” stay internal.
 - Suborchestrators exist only for independent tracks containing at least three
   productive tasks. They may not create another suborchestrator layer.
+- Research delegation is evidence-only unless explicitly assigned productive
+  work. A Terra research lead may direct Luna read-only observers; Luna reports
+  to Terra, Terra reports to the architect, and only the architect applies
+  resulting setup changes.
 
 ## Watcher, verifier, messenger, and limits
 
