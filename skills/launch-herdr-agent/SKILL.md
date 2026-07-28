@@ -50,7 +50,8 @@ workspace or worktree unless the user explicitly requests one.
 Run:
 
 ```bash
-herdr-agent <codex|claude|claudex> "Role · PersonName Goal" [working-directory]
+herdr-agent <codex|claude|claudex|terra|luna> \
+  "Role · PersonName Goal" [working-directory]
 ```
 
 The launcher opens only the native interactive executable:
@@ -60,6 +61,14 @@ The launcher opens only the native interactive executable:
   Claudex gateway.
 - `claude` uses native Claude Opus 5 at medium effort unless
   `HERDR_CLAUDE_EFFORT` explicitly selects another supported effort.
+- `terra` uses GPT-5.6 Terra at medium reasoning for research interpretation.
+- `luna` uses GPT-5.6 Luna at low reasoning for cheap research observation.
+
+Terra and Luna launch with normal native permissions because the local
+read-only sandbox may prevent all file reads. Their prompt must make the
+evidence-only boundary absolute: inspect only the named sources, run no broad
+repository or filesystem audit, and never edit, commit, push, test, retry
+unrelated work, or implement findings.
 
 Do not pass a task to the native executable as an argv prompt. After the new
 agent reaches its interactive prompt, send its task with `herdr pane run`.

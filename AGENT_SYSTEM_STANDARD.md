@@ -14,6 +14,9 @@ orchestration contracts provide the detailed rules.
 - Until the user says otherwise: make the smallest coherent goal-moving
   change, do not schedule test suites or browser testing, commit it with a
   human-readable message, push the canonical branch, and hand control back.
+- Treat the requested action boundary literally. A read, report, diagnose, or
+  evidence task does not authorize edits, repository-wide scans, unrelated
+  retries, tests, cleanup, launches, or implementation.
 - One task owns one branch, worktree, and named Herdr session. Accepted chunks
   are merged in dependency order; after integration, the canonical checkout
   and GitHub represent the same code.
