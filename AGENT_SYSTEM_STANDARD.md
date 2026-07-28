@@ -83,8 +83,18 @@ OpenCode API-key provider.
   execution.
 - The human orchestrator owns `HUMAN_PLAN.md`, user communication, and the
   messenger.
-- `HUMAN_PLAN.md` stays at goal, milestone, measured reality, and workstream
-  level. Worker cards remain in their named Herdr sessions.
+- `HUMAN_PLAN.md` is the single continuously maintained human-facing source of
+  truth. The user should need only this Markdown file and conversation with the
+  human orchestrator; every other artifact is internal evidence.
+- Keep it at human level: the goal, why it matters, current reality, meaningful
+  change, active milestones, next observable result, and any decision genuinely
+  needed from the user. Explain necessary technical terms in ordinary language.
+- Update it in place after each material result, accepted decision, or real
+  change in direction. Do not update it for unchanged status, polling, routine
+  commits, or agent activity.
+- Omit workers, sessions, branches, paths, hashes, job identifiers, task cards,
+  PaperPilot mechanics, and operational transcripts unless one is essential to
+  a user decision. Those remain behind the human orchestrator.
 - Human-facing names and messages use project and task words. Pane IDs,
   session IDs, hashes, phase codes, deduplication keys, and terms such as
   “gate” stay internal.
