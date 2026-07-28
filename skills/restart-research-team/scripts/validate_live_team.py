@@ -172,7 +172,7 @@ def main() -> None:
     required_sections = {
         "clear goal": r"^## .*(goal|trying to learn|scientific question|research question|project question|the question)",
         "current measured reality": r"^## .*(current|actually been measured|data exist|already exists|does not exist yet)",
-        "meaningful milestone": r"^## .*(meaningful change|milestone|first measurable)",
+        "meaningful milestone": r"^## .*(meaningful change|milestone|first measurable|frozen work)",
         "next observable result": r"^## .*(next observable|next inspectable|next productive|next result)",
     }
     for label, pattern in required_sections.items():
