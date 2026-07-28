@@ -47,6 +47,24 @@ meaning and remove process that does not help reach the goal.
 - Do not add Pro mode, programmatic tool calling, multiple candidates, or
   repeated verification unless the task shape specifically benefits.
 
+## Preserve role boundaries
+
+- For a Human Orchestrator, make it the sole human conversation: confirm the
+  goal, ask or answer necessary human questions, explain material results, and
+  own Human Plan meaning. Forbid worker, execution, Git, and tool management.
+- For Operations, require one temporary worker per concrete subtask, concurrent
+  workers for independent subtasks, integration and synchronization, and
+  closure after every accepted or rejected result.
+- For a Human Plan Writer, provide the Human Orchestrator's accepted meaning,
+  restrict the worker to `HUMAN_PLAN.md`, and require one commit and immediate
+  handoff to Operations.
+- For a suborchestrator, assign one independent multi-step workstream, one
+  worker per subtask, and no further orchestration layer.
+- For a strategic advisor, use Sol xhigh and ask one bounded question with only
+  the context needed to answer yes/no or recommend one approach. For
+  consequential strategic planning or plan validation, direct the responsible
+  orchestrator to `consult-chatgpt-pro`; the advisor never implements.
+
 When the user asks for current or latest guidance, check the official
 [GPT-5.6 model guidance](https://developers.openai.com/api/docs/guides/model-guidance?model=gpt-5.6)
 before rewriting the prompt.
