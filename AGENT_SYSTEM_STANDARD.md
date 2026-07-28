@@ -21,6 +21,24 @@ orchestration contracts provide the detailed rules.
   are merged in dependency order; after integration, the canonical checkout
   and GitHub represent the same code.
 
+### Enforce 90/10 at admission
+
+- Productive work directly changes code, data, an experiment, an evaluation,
+  accepted research evidence, or intended paper content. Attached reproduction
+  and verification belong to that productive task.
+- Every orchestrator turn, collaborative-planning turn, plan update, advisor,
+  verifier, review, status message, audit, and wait is control work. A role name
+  never changes that classification.
+- Operations Lead tracks the rolling share by active task slots and agent-hours
+  before opening control work. At or above 10%, open the next independent
+  productive task instead. Exceed 10% only for an immediate safety issue,
+  irreversible action, or a human decision that truly prevents productive work.
+- Every admitted control action must name the productive action it directly
+  unlocks. Do not open planning, advice, checking, or plan-writing sessions for
+  general reassurance.
+- Idle standing orchestrators consume no model turns. Do not wake the Human
+  Orchestrator or Operations Collaborator for routine status or unchanged state.
+
 ## GPT-5.6 prompting
 
 - Lead with the outcome. Give only the context that can change it, the hard
@@ -39,17 +57,19 @@ orchestration contracts provide the detailed rules.
 
 | Work | Session | Model |
 | --- | --- | --- |
-| Human or operations orchestration | Claudex or Codex | Sol, high |
+| Human orchestration | Claudex | Sol, high |
+| Operations Lead | Codex | Sol, high |
+| Background operations collaboration | Native Claude | Opus 5, medium |
 | Normal implementation or execution | Codex or Claudex | Sol, medium |
 | Bounded difficult implementation or decision | Codex or Claudex | Sol, high |
 | One bounded strategic question | Codex or Claudex | Sol, xhigh |
-| Human Plan writing | Codex or Claudex | Sol, medium |
+| Temporary Plan Orchestrator | Codex or Claudex | Sol, medium |
 | Independent alternative productive worker | Native Claude | Opus 5 |
 | Mechanical or context-heavy alternative worker | OpenCode | GLM 5.2 |
-| Deep research or evidence interpretation | Codex or Claudex | Terra |
+| Researcher | Codex or Claudex | Terra, medium |
 | Cheap research observation | Codex or Claudex | Luna |
 | Permanent event classification | OpenCode API key | Gemini 3.6 Flash |
-| Strange-event verification | Visible Codex or Claudex | Sol, medium |
+| Optional minimal verification | Visible Codex or Claudex | Sol, medium |
 | Human message drafting | OpenCode API key | Gemini 3.6 Flash |
 
 Claudex is the Claude Code interface backed by the local Codex gateway. It is
@@ -88,24 +108,29 @@ OpenCode API-key provider.
   and returns Operations questions that require human judgment to the user. It
   does not contact technical roles directly or manage execution, workers, Git,
   or internal tools.
-- The Operations Orchestrator owns decomposition, execution, worker and
-  suborchestrator lifecycle, integration, synchronization, and technical state.
-  It is the sole normal bridge between the Human Orchestrator and every
-  technical role. It sends the Human Orchestrator only accepted material
-  results, genuine decisions, direction changes, and questions that require
-  human judgment.
+- The Codex Sol-high Operations Lead owns decomposition, execution, worker and
+  suborchestrator lifecycle, integration, synchronization, the 90/10 budget,
+  and technical state. It is the sole operational authority and normal bridge
+  between the Human Orchestrator and every technical role.
+- The native Claude Opus-medium Operations Collaborator stays in the
+  background. Operations Lead may wake it for one bounded collaborative plan,
+  decomposition alternative, or milestone interpretation. It reports only to
+  Operations Lead, never manages workers, integrates Git, contacts the Human
+  Orchestrator, or becomes an approval step, and returns idle after one answer.
 - Normal communication follows one path:
-  `Human ↔ Human Orchestrator ↔ Operations ↔ technical role`. Workers,
-  suborchestrators, plan writers, advisors, researchers, and verifiers do not
-  bypass Operations to contact the Human Orchestrator or user.
+  `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`.
+  Operations Collaborator is a bounded side input to Operations Lead. Workers,
+  suborchestrators, Plan Orchestrators, advisors, researchers, and verifiers do
+  not bypass Operations Lead.
 - `00 Human Plan` is a non-agent Frogmouth view of `HUMAN_PLAN.md`. Keep the
   Human Orchestrator in `01 Orchestrators`, never in the plan pane.
 - The Human Orchestrator owns plan meaning but does not edit it directly.
-  It gives accepted meaning to Operations. Operations launches one temporary
-  Human Plan Writer when that meaning or material evidence changes. The writer
-  receives its brief from and reports its plan-only commit to Operations;
-  Operations asks the Human Orchestrator to check meaning, checks evidence,
-  integrates and synchronizes, then closes the writer.
+  It gives accepted meaning to Operations Lead. Operations Lead launches one
+  temporary `Plan Orchestrator` only after a material change. This is an
+  orchestrator role, not a worker. It receives the accepted meaning and checked
+  evidence from Operations Lead, edits only `HUMAN_PLAN.md`, and returns one
+  plan-only commit to Operations Lead. Operations Lead asks the Human
+  Orchestrator to check meaning, integrates, synchronizes, and closes it.
 - `HUMAN_PLAN.md` is the single continuously maintained human-facing source of
   truth. The user should need only this Markdown file and conversation with the
   human orchestrator; every other artifact is internal evidence.
@@ -122,9 +147,9 @@ OpenCode API-key provider.
   session IDs, hashes, phase codes, deduplication keys, and terms such as
   “gate” stay internal.
 - One worker owns exactly one concrete subtask, branch, and worktree.
-  Independent subtasks use concurrent workers. Operations integrates or rejects
-  each result and closes the worker immediately afterward. Workers receive
-  tasks from and report only to Operations or their one owning
+  Independent subtasks use concurrent workers. Operations Lead integrates or
+  rejects each result and closes the worker immediately afterward. Workers receive
+  tasks from and report only to Operations Lead or their one owning
   suborchestrator.
 - Suborchestrators exist only for independent multi-step workstreams containing
   at least three productive subtasks. Each owns one workstream, launches one
@@ -132,15 +157,16 @@ OpenCode API-key provider.
   create another suborchestrator.
 - Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor
   only the context for one bounded question, preferably yes/no or one concrete
-  recommendation. Operations launches it and receives its answer; it never
+  recommendation. Operations Lead launches it and receives its answer; it never
   contacts the user, implements, or manages and closes after answering.
 - For consequential strategic planning or plan validation, the responsible
   orchestrator uses `consult-chatgpt-pro` with one compact question, then
   reconciles the advice against project evidence.
-- Research delegation is evidence-only unless explicitly assigned productive
-  work. A Terra research lead may direct Luna read-only observers; Luna reports
-  to Terra, Terra reports to the architect, and only the architect applies
-  resulting setup changes.
+- Research defaults to one Terra-medium Researcher for a bounded evidence
+  question. Terra may direct Luna read-only observers when cheaper parallel
+  observation helps. Luna reports to Terra; Terra reports to Operations Lead
+  for project work or the Architect for agent-system research. Research counts
+  as productive only when it creates accepted goal-relevant evidence.
 
 ## Watcher, verifier, messenger, and limits
 
@@ -151,8 +177,9 @@ indefinitely.
    event.
 2. Tool-free API-key Gemini 3.6 Flash returns silent, message, or verify.
 3. Silent events stop immediately.
-4. Verify opens one fresh named visible Sol-medium verifier with bounded
-   redacted evidence and no project-write access.
+4. Only an unusual, consequential event may open one optional fresh
+   Sol-medium Verifier with bounded redacted evidence and no project-write
+   access. Routine work self-verifies.
 5. The verifier returns continue with one direct next action, ask the user, or
    sleep. It then closes.
 6. Tool-free Flash drafts an important human message only when the human

@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief a visible Herdr project team with a human-only Human Orchestrator, execution-owning Operations Orchestrator, Markdown-only Human Plan pane, one temporary worker per subtask, optional multi-step suborchestrators, and sparse Sol-xhigh strategic advisors. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session; never replace the standing Architect or project Human Orchestrator."
+description: "Launch and brief a visible Herdr project team with one human-only Human Orchestrator, a Codex Sol-high Operations Lead, a background native-Claude Opus-medium Operations Collaborator, Markdown-only Human Plan pane, temporary Plan Orchestrators, one worker per subtask, optional suborchestrators, Terra-default researchers, and sparse advisors or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
 ---
 
 # Launch Herdr sessions
@@ -16,7 +16,7 @@ Keep the roles distinct:
   normal project conversation goes through its `Human Orchestrator`.
 - A separate named `Launcher` creates and briefs the requested sessions,
   reports the result to the Architect, then stops.
-- A research lead or worker gathers evidence only. It must not edit the
+- A Researcher or worker gathers evidence only. It must not edit the
   system, turn its own findings into improvements, or redirect an
   implementation worker unless the Architect explicitly changes its role.
 
@@ -81,8 +81,9 @@ agent reaches its interactive prompt, send its task with `herdr pane run`.
 ## Complete project launch
 
 When the user requests a space, project, team, ecosystem, or the whole setup,
-launch a mixed GPT-5.6 Sol team. Use Codex and Claudex; do not substitute
-Claude unless the user explicitly asks for Opus.
+launch the three standing roles below. Native Claude is intentional only for
+the background Operations Collaborator; normal execution still uses Codex or
+Claudex unless the user selects Opus for one productive task.
 
 Create these standing roles in `01 Orchestrators`:
 
@@ -90,20 +91,45 @@ Create these standing roles in `01 Orchestrators`:
    project's only normal conversation with the human. Confirm the goal and its
    meaning, ask or answer necessary human questions, explain material results,
    and own the intended human-plan content. Send every technical request to
-   Operations and return Operations questions that need human judgment to the
-   human. Never contact workers, suborchestrators, writers, advisors, or
-   verifiers directly; dispatch workers; manage execution; integrate Git; or
-   expose internal mechanics.
-2. `Operations · PersonName Goal` — Codex Sol high. Own decomposition,
+   Operations Lead and return its questions that need human judgment to the
+   human. Never contact workers, suborchestrators, Plan Orchestrators, advisors,
+   researchers, verifiers, or the Operations Collaborator directly; dispatch
+   workers; manage execution; integrate Git; or expose internal mechanics.
+2. `Operations Lead · PersonName Goal` — Codex Sol high. Own decomposition,
    execution order, worktrees, worker and suborchestrator lifecycle,
-   integration, commits, synchronization, and technical state. Be the sole
-   normal bridge between the Human Orchestrator and every technical role.
-   Route only accepted material results, genuine decisions, direction changes,
-   and questions needing human judgment to the Human Orchestrator.
+   integration, commits, synchronization, technical state, and the rolling
+   90/10 budget. Be the sole operational authority and normal bridge between
+   the Human Orchestrator and every technical role.
+3. `Operations Collaborator · PersonName Goal` — native Claude Opus 5 at
+   medium effort. Stay in the background and receive only one bounded
+   collaborative-planning, decomposition-alternative, or milestone-
+   interpretation question from Operations Lead at a time. Report only to
+   Operations Lead, then return idle. Never contact the Human Orchestrator,
+   dispatch or manage workers, integrate Git, inspect broadly, become an
+   approval step, or duplicate daily operations.
 
 Normal communication must follow:
-`Human ↔ Human Orchestrator ↔ Operations ↔ technical role`. No technical role
-may bypass Operations to contact the Human Orchestrator or user.
+`Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`. Operations
+Collaborator is a bounded side input to Operations Lead, never a second
+authority. No technical role may bypass Operations Lead.
+
+## Enforce the 90/10 budget
+
+Operations Lead classifies observed outputs, not role names:
+
+- productive work changes code, data, an experiment, an evaluation, accepted
+  research evidence, or intended paper content;
+- all orchestration, collaborative planning, plan writing, advice,
+  verification, status, review, audit, and waiting are control work;
+- attached reproduction and verification remain part of the productive task.
+
+Before opening Operations Collaborator, a Plan Orchestrator, advisor, verifier,
+or other control role, Operations Lead checks the rolling share of active task
+slots and agent-hours. At or above 10% control, launch the next independent
+productive task instead. Exceed 10% only for immediate safety, an irreversible
+action, or a human decision that truly prevents productive work. Every control
+launch must name the productive action it directly unlocks. Idle standing roles
+consume no turns and must not be woken for routine status.
 
 Do not put the Human Orchestrator in `00 Human Plan`. That tab contains exactly
 one non-agent pane rendering the canonical Markdown:
@@ -113,36 +139,42 @@ frogmouth HUMAN_PLAN.md
 ```
 
 If the plan is missing or its meaning changed, leave the viewer shell in place
-until the Human Orchestrator has accepted the goal. Operations then launches
-one temporary `Human Plan Writer · PersonName Update` worker. The Human
-Orchestrator gives the accepted meaning to Operations; Operations briefs the
-writer; the writer edits only `HUMAN_PLAN.md` in an isolated worktree, commits,
-and reports only to Operations. Operations asks the Human Orchestrator to check
-meaning, checks evidence, integrates, synchronizes, refreshes the viewer, and
-closes the writer.
+until the Human Orchestrator has accepted the goal. Operations Lead then launches
+one temporary `Plan Orchestrator · PersonName Update` using Sol medium in
+`01 Orchestrators`. This is an orchestrator, not a worker. The Human
+Orchestrator gives accepted meaning to Operations Lead; Operations Lead gives
+the Plan Orchestrator that meaning plus checked evidence. The Plan Orchestrator
+edits only `HUMAN_PLAN.md` in an isolated worktree, commits, reports only to
+Operations Lead, and stops. Operations Lead asks the Human Orchestrator to
+check meaning, integrates, synchronizes, refreshes the viewer, and closes the
+Plan Orchestrator.
 
-For productive work, Operations launches one named worker for each concrete
+For productive work, Operations Lead launches one named worker for each concrete
 subtask. One worker owns one deliverable, branch, and worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
 worker several unrelated subtasks. Integrate or reject its result, then close
 its session and retire its worktree. A worker receives its task from and
-reports only to Operations or its one owning suborchestrator; it never contacts
+reports only to Operations Lead or its one owning suborchestrator; it never contacts
 the Human Orchestrator or user.
 
-For a genuinely independent multi-step workstream, Operations may launch one
+For a genuinely independent multi-step workstream, Operations Lead may launch one
 named suborchestrator in `03 Suborchestrators`. Give it one measurable
 workstream. It decomposes that stream, launches one temporary worker per
-subtask, integrates the stream for Operations, and closes itself when the
-workstream ends. It communicates only with Operations and its own workers. It
+subtask, integrates the stream for Operations Lead, and closes itself when the
+workstream ends. It communicates only with Operations Lead and its own workers. It
 may not contact the Human Orchestrator or create another suborchestrator.
 
-Do not launch standing advisors, watchers, reviewers, progress checkers, plan
-writers, or suborchestrators. Open each only for its immediate bounded purpose.
+Do not launch standing advisors, watchers, reviewers, progress checkers, Plan
+Orchestrators, verifiers, or suborchestrators. Open each only for its immediate
+bounded purpose and only within the 10% control budget.
 
-When the Architect explicitly requests a research chain, launch a named Terra
-research lead and a named Luna read-only worker. Luna reports evidence to
-Terra; Terra consolidates it for the Architect. Neither session implements the
-result.
+Research defaults to one named Terra-medium `Researcher`. Give it one bounded
+evidence question. It may launch Luna-low read-only observers when cheaper
+parallel observation helps. Luna reports to Terra; Terra reports to Operations
+Lead for project research or the Architect for agent-system research. Research
+is productive only when it creates accepted goal-relevant evidence; otherwise
+charge it to the 10% control budget. Neither session implements findings unless
+the Architect explicitly changes the assigned role.
 
 For a new project explicitly requesting isolation:
 
@@ -170,15 +202,15 @@ Keep `02 Strategic Council` empty until an orchestrator has one exact
 consequential question. Then launch one temporary `Strategic Advisor ·
 PersonName Question` using `codex-xhigh`.
 
-Operations gives the advisor only the decision context needed for that
+Operations Lead gives the advisor only the decision context needed for that
 question. Prefer a yes/no verdict; otherwise request one concrete recommended
-approach. The advisor reports only to Operations and does not contact the Human
+approach. The advisor reports only to Operations Lead and does not contact the Human
 Orchestrator or user, inspect broadly, implement, manage, or create more agents.
-Capture the answer, let Operations route its material meaning, and close the
+Capture the answer, let Operations Lead route its material meaning, and close the
 advisor immediately.
 
 For consequential strategic planning or plan validation, the responsible
-orchestrator must use `consult-chatgpt-pro` with one compact evidence packet
+Operations Lead must use `consult-chatgpt-pro` with one compact evidence packet
 and one bounded question. It reconciles Pro's advice against project evidence;
 Pro does not approve work or replace the orchestrator. If the configured Pro
 transport is unavailable, record that once and continue from project evidence
@@ -203,14 +235,20 @@ Every task-bearing prompt must include:
 - the instruction to stop and report its completion envelope when done.
 
 The Human Orchestrator prompt must identify it as the sole human conversation
-and require all technical communication to pass through Operations. The
-Operations prompt must require one worker per subtask, concurrent independent
-workers, prompt closure, and sole-bridge routing to the Human Orchestrator.
+and require all technical communication to pass through Operations Lead. The
+Operations Lead prompt must require one worker per subtask, concurrent
+independent workers, prompt closure, sole-bridge routing, and active enforcement
+of the 90/10 budget. The Operations Collaborator prompt must keep native Claude
+at medium effort, background-only, one bounded planning question at a time,
+reporting only to Operations Lead, with no operational authority.
 Worker prompts must forbid hidden delegation, unrelated work, and direct
 human-side contact. Suborchestrator prompts must define one multi-step
-workstream, report only to Operations, and forbid another orchestration layer.
-Advisor prompts must contain one bounded question, report only to Operations,
-and forbid implementation.
+workstream, report only to Operations Lead, and forbid another orchestration layer.
+Plan Orchestrator prompts must limit writes to `HUMAN_PLAN.md`, report only to
+Operations Lead, and stop after one commit. Researcher prompts use Terra by
+default. Verifier prompts are optional, minimal, read-only, and only for one
+consequential anomaly. Advisor prompts must contain one bounded question,
+report only to Operations Lead, and forbid implementation.
 
 Require the launched session to acknowledge, in one concise message, its role,
 who it receives from, who it reports to, and its main forbidden boundary.

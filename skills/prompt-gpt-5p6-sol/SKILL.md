@@ -22,7 +22,11 @@ meaning and remove process that does not help reach the goal.
 
 ## Preserve the operating standard
 
-- Direct at least 90% of effort toward changing the goal-relevant state.
+- Direct at least 90% of active task slots and agent-hours toward changing
+  code, data, experiments, evaluations, accepted evidence, or paper content.
+- Count every orchestration, planning, plan-writing, advice, checking, status,
+  audit, and waiting turn inside the shared 10% control budget. Do not relabel
+  control work as productive.
 - Make the smallest coherent requested change and hand back promptly.
 - Do not add test suites, browser testing, broad review, cleanup, or unrelated
   improvements unless the user requests them or the done condition cannot
@@ -52,27 +56,34 @@ meaning and remove process that does not help reach the goal.
 - For a Human Orchestrator, make it the sole human conversation: confirm the
   goal, ask or answer necessary human questions, explain material results, and
   own Human Plan meaning. Require every technical request and clarification to
-  pass through Operations. Forbid direct contact with workers,
-  suborchestrators, plan writers, advisors, or verifiers, plus worker,
+  pass through Operations Lead. Forbid direct contact with Operations
+  Collaborator, workers, suborchestrators, Plan Orchestrators, advisors,
+  researchers, or verifiers, plus worker,
   execution, Git, and tool management.
-- For Operations, require one temporary worker per concrete subtask, concurrent
-  workers for independent subtasks, integration and synchronization, and
-  closure after every accepted or rejected result. Make Operations the sole
-  normal bridge between the Human Orchestrator and every technical role.
-- For a Human Plan Writer, provide the Human Orchestrator's accepted meaning,
-  restrict the worker to `HUMAN_PLAN.md`, and require one commit and immediate
-  handoff only to Operations.
-- For a worker, require one task from Operations or its owning
+- For Operations Lead, require one temporary worker per concrete subtask,
+  concurrent workers for independent subtasks, integration, synchronization,
+  closure after every result, and active enforcement of the rolling 90/10
+  budget. Make it the sole operational authority and normal bridge.
+- For a Plan Orchestrator, provide the Human Orchestrator's accepted meaning
+  through Operations Lead, restrict it to `HUMAN_PLAN.md`, and require one
+  plan-only commit and immediate handoff only to Operations Lead. Treat this as
+  control work and an orchestrator, never a worker.
+- For a worker, require one task from Operations Lead or its owning
   suborchestrator, one result back to that owner, and no contact with the Human
   Orchestrator or user.
 - For a suborchestrator, assign one independent multi-step workstream, one
-  worker per subtask, reporting only to Operations, and no further
+  worker per subtask, reporting only to Operations Lead, and no further
   orchestration layer.
+- For a Researcher, select Terra-medium by default, assign one bounded evidence
+  question, permit Luna observers only when useful, and report accepted
+  evidence to Operations Lead.
+- Make a Verifier optional, minimal, read-only, and limited to one
+  consequential anomaly that routine self-verification cannot resolve.
 - For a strategic advisor, use Sol xhigh and ask one bounded question with only
   the context needed to answer yes/no or recommend one approach. For
   consequential strategic planning or plan validation, direct the responsible
-  orchestrator to `consult-chatgpt-pro`; the advisor reports only to Operations
-  and never implements.
+  Operations Lead to `consult-chatgpt-pro`; the advisor reports only to
+  Operations Lead and never implements.
 
 When the user asks for current or latest guidance, check the official
 [GPT-5.6 model guidance](https://developers.openai.com/api/docs/guides/model-guidance?model=gpt-5.6)

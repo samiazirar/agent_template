@@ -23,7 +23,10 @@ performs.
 
 ## Preserve the operating standard
 
-- Direct at least 90% of effort toward changing the goal-relevant state.
+- Direct at least 90% of active task slots and agent-hours toward changing
+  code, data, experiments, evaluations, accepted evidence, or paper content.
+- Count orchestration, collaborative planning, advice, checking, status, and
+  waiting inside the shared 10% control budget.
 - Deliver exactly the requested scope through the smallest coherent change.
 - Do not add test suites, browser testing, broad review, cleanup, abstractions,
   files, or features unless requested or necessary for the done condition.
@@ -56,13 +59,22 @@ performs.
 
 ## Preserve role boundaries
 
-- A productive Opus worker receives one task from Operations or one owning
+- The standing Operations Collaborator uses native Opus 5 at medium effort and
+  stays in the background. It receives one bounded collaborative-planning,
+  decomposition-alternative, or milestone-interpretation question from
+  Operations Lead, returns one concise recommendation only to Operations Lead,
+  then returns idle.
+- Forbid the Operations Collaborator from contacting the Human Orchestrator,
+  managing or contacting workers, integrating Git, inspecting broadly,
+  becoming an approval step, or duplicating daily operations. Every wake counts
+  against the shared 10% control budget.
+- A productive Opus worker receives one task from Operations Lead or one owning
   suborchestrator and reports only to that assigning role.
 - Forbid direct contact with the Human Orchestrator or user, edits to
   `HUMAN_PLAN.md`, new agents, unrelated work, and scope expansion.
-- An Opus second eye receives one bounded artifact or claim from Operations,
-  returns concrete mismatches only to Operations, and stops. It never becomes
-  an approver or starts a repair itself.
+- An Opus second eye receives one bounded artifact or claim from Operations Lead,
+  returns concrete mismatches only to Operations Lead, and stops. It never
+  becomes an approver or starts a repair itself.
 - Include the canonical `worker` role block from
   `launch-herdr-agent/scripts/validate_role_card.py` in a productive-worker
   prompt.

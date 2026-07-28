@@ -11,31 +11,44 @@ from pathlib import Path
 CONTRACTS = {
     "human-orchestrator": (
         "ROLE: Human Orchestrator",
-        "RECEIVES FROM: Human; Operations",
-        "SENDS TO: Human; Operations",
+        "MODEL: Claudex GPT-5.6 Sol high",
+        "RECEIVES FROM: Human; Operations Lead",
+        "SENDS TO: Human; Operations Lead",
         "OWNS: Goal meaning; human questions and decisions; human-language explanation; Human Plan meaning",
-        "MUST NOT: Contact technical roles directly; manage workers or sessions; execute project work; edit files; use Git; control Herdr",
-        "ROUTING RULE: Send every technical request to Operations. Ask the Human only for meaning or a decision, then return the answer to Operations.",
+        "MUST NOT: Contact technical roles or Operations Collaborator directly; manage workers or sessions; execute project work; edit files; use Git; control Herdr",
+        "ROUTING RULE: Send every technical request to Operations Lead. Ask the Human only for meaning or a decision, then return the answer to Operations Lead.",
     ),
-    "operations": (
-        "ROLE: Operations",
-        "RECEIVES FROM: Human Orchestrator; workers; suborchestrators; plan writers; advisors; researchers; verifiers",
-        "SENDS TO: Human Orchestrator; assigned technical roles",
-        "OWNS: Technical state; decomposition; execution; role lifecycle; integration; synchronization",
-        "MUST NOT: Use the Human Orchestrator as an execution manager; send routine technical chatter to the human side; speak to the Human except an immediate safety emergency",
-        "ROUTING RULE: Be the sole normal bridge between the Human Orchestrator and every technical role.",
+    "operations-lead": (
+        "ROLE: Operations Lead",
+        "MODEL: Codex GPT-5.6 Sol high",
+        "RECEIVES FROM: Human Orchestrator; Operations Collaborator; workers; suborchestrators; Plan Orchestrators; advisors; researchers; verifiers",
+        "SENDS TO: Human Orchestrator; Operations Collaborator; assigned technical roles",
+        "OWNS: Technical state; decomposition; execution; role lifecycle; integration; synchronization; rolling 90/10 budget",
+        "MUST NOT: Share operational authority; use the Human Orchestrator as an execution manager; send routine technical chatter to the human side; speak to the Human except an immediate safety emergency",
+        "ROUTING RULE: Be the sole operational authority and normal bridge between the Human Orchestrator and every technical role.",
     ),
-    "human-plan-writer": (
-        "ROLE: Human Plan Writer",
-        "RECEIVES FROM: Operations",
-        "SENDS TO: Operations",
+    "operations-collaborator": (
+        "ROLE: Operations Collaborator",
+        "MODEL: Native Claude Opus 5 medium",
+        "RECEIVES FROM: Operations Lead",
+        "SENDS TO: Operations Lead",
+        "OWNS: One bounded collaborative plan; decomposition alternative; or milestone interpretation",
+        "MUST NOT: Contact the Human or Human Orchestrator; manage or contact workers; integrate Git; inspect broadly; become an approval step; duplicate daily operations",
+        "ROUTING RULE: Stay in the background, answer one bounded question from Operations Lead, then return idle.",
+    ),
+    "plan-orchestrator": (
+        "ROLE: Plan Orchestrator",
+        "MODEL: Codex or Claudex GPT-5.6 Sol medium",
+        "RECEIVES FROM: Operations Lead",
+        "SENDS TO: Operations Lead",
         "OWNS: One accepted update to HUMAN_PLAN.md",
         "MUST NOT: Edit any other file; contact the Human or Human Orchestrator; manage work; broaden the accepted meaning",
-        "ROUTING RULE: Receive the accepted brief from Operations, return one plan-only commit to Operations, then stop.",
+        "ROUTING RULE: Receive accepted meaning and checked evidence from Operations Lead, return one plan-only commit to Operations Lead, then stop.",
     ),
     "worker": (
         "ROLE: Worker",
-        "RECEIVES FROM: Operations or one owning suborchestrator",
+        "MODEL: GPT-5.6 Sol medium by default; selected Opus 5 or GLM 5.2 alternative",
+        "RECEIVES FROM: Operations Lead or one owning suborchestrator",
         "SENDS TO: The same assigning role",
         "OWNS: One concrete subtask; one branch; one worktree; one result",
         "MUST NOT: Contact the Human or Human Orchestrator; edit HUMAN_PLAN.md; launch agents; broaden scope; perform unrelated work",
@@ -43,49 +56,61 @@ CONTRACTS = {
     ),
     "suborchestrator": (
         "ROLE: Suborchestrator",
-        "RECEIVES FROM: Operations",
-        "SENDS TO: Operations; its assigned workers",
+        "MODEL: GPT-5.6 Sol high",
+        "RECEIVES FROM: Operations Lead",
+        "SENDS TO: Operations Lead; its assigned workers",
         "OWNS: One independent multi-step workstream with at least three productive subtasks",
         "MUST NOT: Contact the Human or Human Orchestrator; create another suborchestrator; manage work outside its workstream",
-        "ROUTING RULE: Launch one worker per subtask, integrate the workstream for Operations, report to Operations, then stop.",
+        "ROUTING RULE: Launch one worker per subtask, integrate the workstream for Operations Lead, report to Operations Lead, then stop.",
     ),
     "strategic-advisor": (
         "ROLE: Strategic Advisor",
-        "RECEIVES FROM: Operations",
-        "SENDS TO: Operations",
+        "MODEL: GPT-5.6 Sol xhigh",
+        "RECEIVES FROM: Operations Lead",
+        "SENDS TO: Operations Lead",
         "OWNS: One bounded consequential question",
         "MUST NOT: Contact the Human or Human Orchestrator; implement; manage; inspect broadly; create agents",
-        "ROUTING RULE: Return one yes-or-no answer or one concrete recommendation to Operations, then stop.",
+        "ROUTING RULE: Return one yes-or-no answer or one concrete recommendation to Operations Lead, then stop.",
     ),
-    "research-lead": (
-        "ROLE: Research Lead",
-        "RECEIVES FROM: Operations or Architect",
+    "researcher": (
+        "ROLE: Researcher",
+        "MODEL: GPT-5.6 Terra medium by default",
+        "RECEIVES FROM: Operations Lead or Architect",
         "SENDS TO: The same assigning role; assigned research observers",
         "OWNS: One bounded evidence question and synthesis",
         "MUST NOT: Implement findings; edit project code; contact the Human directly; broaden the evidence search",
-        "ROUTING RULE: Use read-only observers only when assigned, synthesize evidence for the assigning role, then stop.",
+        "ROUTING RULE: Use Terra by default, direct Luna observers only when useful, synthesize accepted evidence for the assigning role, then stop.",
     ),
     "research-observer": (
         "ROLE: Research Observer",
-        "RECEIVES FROM: One research lead",
-        "SENDS TO: The same research lead",
+        "MODEL: GPT-5.6 Luna low",
+        "RECEIVES FROM: One Researcher",
+        "SENDS TO: The same Researcher",
         "OWNS: One bounded read-only evidence task",
         "MUST NOT: Implement; edit; commit; push; contact other roles; broaden the search",
-        "ROUTING RULE: Return evidence only to the assigning research lead, then stop.",
+        "ROUTING RULE: Return evidence only to the assigning Researcher, then stop.",
     ),
     "verifier": (
         "ROLE: Verifier",
-        "RECEIVES FROM: Operations or trusted event service",
-        "SENDS TO: Operations",
-        "OWNS: One bounded unusual-event check",
+        "MODEL: GPT-5.6 Sol medium",
+        "RECEIVES FROM: Operations Lead or trusted event service",
+        "SENDS TO: Operations Lead",
+        "OWNS: One optional minimal check of a consequential unusual event",
         "MUST NOT: Contact the Human or Human Orchestrator; edit project code; manage work; review unrelated evidence",
-        "ROUTING RULE: Return one next action, one human question, or no issue to Operations, then stop.",
+        "ROUTING RULE: Open only when routine self-verification is insufficient, return one next action, one human question, or no issue to Operations Lead, then stop.",
     ),
 }
 
 
 def render(role: str) -> str:
-    return "\n".join(("ROLE CONTRACT", *CONTRACTS[role], "END ROLE CONTRACT"))
+    return "\n".join(
+        (
+            "ROLE CONTRACT",
+            *CONTRACTS[role],
+            "90/10 RULE: At least 90% of active project task slots and agent-hours must directly change code, data, experiments, evaluations, accepted evidence, or paper content; all orchestration, planning, advice, checking, status, and waiting share at most 10%.",
+            "END ROLE CONTRACT",
+        )
+    )
 
 
 def main() -> int:
