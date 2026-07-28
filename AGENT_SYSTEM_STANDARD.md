@@ -39,8 +39,11 @@ orchestration contracts provide the detailed rules.
 
 | Work | Session | Model |
 | --- | --- | --- |
+| Human or operations orchestration | Claudex or Codex | Sol, high |
 | Normal implementation or execution | Codex or Claudex | Sol, medium |
 | Bounded difficult implementation or decision | Codex or Claudex | Sol, high |
+| One bounded strategic question | Codex or Claudex | Sol, xhigh |
+| Human Plan writing | Codex or Claudex | Sol, medium |
 | Independent alternative productive worker | Native Claude | Opus 5 |
 | Mechanical or context-heavy alternative worker | OpenCode | GLM 5.2 |
 | Deep research or evidence interpretation | Codex or Claudex | Terra |
@@ -59,8 +62,8 @@ OpenCode API-key provider.
 
 ## Native Herdr launch
 
-- Launch every independent agent as a named visible Herdr tab with
-  `herdr-agent <codex|claude|claudex> "Role · PersonName Goal" [directory]`.
+- Launch every independent agent as a named visible Herdr session with
+  `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
 - `codex` and `claudex` use the synchronized GPT-5.6 Sol medium default.
   `claude` selects native Claude Opus 5 at medium effort by default.
 - Never replace these sessions with hidden subagents or ordinary background
@@ -79,10 +82,21 @@ OpenCode API-key provider.
 - For requested topology changes, the architect opens one short-lived named
   launcher. The launcher creates and briefs the sessions, reports readiness to
   the architect, and stops; it never replaces or closes the architect.
-- The operations orchestrator runs decomposition, workers, integration, and
-  execution.
-- The human orchestrator owns `HUMAN_PLAN.md`, user communication, and the
-  messenger.
+- The Human Orchestrator is the project's only normal human conversation. It
+  confirms the goal and its meaning, asks and answers human questions, and
+  explains material results. It does not manage execution, workers, Git, or
+  internal tools.
+- The Operations Orchestrator owns decomposition, execution, worker and
+  suborchestrator lifecycle, integration, synchronization, and technical state.
+  It sends the Human Orchestrator only material results, genuine decisions, and
+  direction changes.
+- `00 Human Plan` is a non-agent Frogmouth view of `HUMAN_PLAN.md`. Keep the
+  Human Orchestrator in `01 Orchestrators`, never in the plan pane.
+- The Human Orchestrator owns plan meaning but does not edit it directly.
+  Operations launches one temporary Human Plan Writer when the accepted meaning
+  or material evidence changes. The writer edits only the plan; the Human
+  Orchestrator checks meaning; Operations checks evidence, integrates and
+  synchronizes, then closes the writer.
 - `HUMAN_PLAN.md` is the single continuously maintained human-facing source of
   truth. The user should need only this Markdown file and conversation with the
   human orchestrator; every other artifact is internal evidence.
@@ -98,8 +112,19 @@ OpenCode API-key provider.
 - Human-facing names and messages use project and task words. Pane IDs,
   session IDs, hashes, phase codes, deduplication keys, and terms such as
   “gate” stay internal.
-- Suborchestrators exist only for independent tracks containing at least three
-  productive tasks. They may not create another suborchestrator layer.
+- One worker owns exactly one concrete subtask, branch, and worktree.
+  Independent subtasks use concurrent workers. Operations integrates or rejects
+  each result and closes the worker immediately afterward.
+- Suborchestrators exist only for independent multi-step workstreams containing
+  at least three productive subtasks. Each owns one workstream, launches one
+  temporary worker per subtask, and closes when the stream ends. It may not
+  create another suborchestrator.
+- Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor
+  only the context for one bounded question, preferably yes/no or one concrete
+  recommendation. It never implements or manages and closes after answering.
+- For consequential strategic planning or plan validation, the responsible
+  orchestrator uses `consult-chatgpt-pro` with one compact question, then
+  reconciles the advice against project evidence.
 - Research delegation is evidence-only unless explicitly assigned productive
   work. A Terra research lead may direct Luna read-only observers; Luna reports
   to Terra, Terra reports to the architect, and only the architect applies

@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief named Codex, Claudex, Claude, Terra, or Luna sessions as visible native Herdr tabs when an Architect asks for a worker, research chain, project team, ecosystem, or set of roles. Use this in a separate short-lived Launcher session; never convert the standing Architect or user-facing session into the disposable launcher. The Launcher creates the requested topology, reports readiness to the Architect, and stops without doing project work."
+description: "Launch and brief a visible Herdr project team with a human-only Human Orchestrator, execution-owning Operations Orchestrator, Markdown-only Human Plan pane, one temporary worker per subtask, optional multi-step suborchestrators, and sparse Sol-xhigh strategic advisors. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session; never replace the standing Architect or project Human Orchestrator."
 ---
 
 # Launch Herdr sessions
@@ -12,8 +12,8 @@ inside Herdr and stop.
 
 Keep the roles distinct:
 
-- The standing `Architect` keeps the user conversation, owns system changes,
-  interprets research reports, and remains open.
+- The standing `Architect` owns the agent system. After a project team exists,
+  normal project conversation goes through its `Human Orchestrator`.
 - A separate named `Launcher` creates and briefs the requested sessions,
   reports the result to the Architect, then stops.
 - A research lead or worker gathers evidence only. It must not edit the
@@ -50,15 +50,20 @@ workspace or worktree unless the user explicitly requests one.
 Run:
 
 ```bash
-herdr-agent <codex|claude|claudex|terra|luna> \
+herdr-agent \
+  <codex|codex-high|codex-xhigh|claude|claudex|claudex-high|terra|luna> \
   "Role · PersonName Goal" [working-directory]
 ```
 
 The launcher opens only the native interactive executable:
 
 - `codex` uses the configured GPT-5.6 Sol model and medium reasoning.
+- `codex-high` uses GPT-5.6 Sol at high reasoning for project leadership.
+- `codex-xhigh` uses GPT-5.6 Sol at xhigh reasoning for one strategic question.
 - `claudex` uses the Codex-synchronized GPT-5.6 Sol model through the local
   Claudex gateway.
+- `claudex-high` uses the same Claudex route at high effort for the Human
+  Orchestrator.
 - `claude` uses native Claude Opus 5 at medium effort unless
   `HERDR_CLAUDE_EFFORT` explicitly selects another supported effort.
 - `terra` uses GPT-5.6 Terra at medium reasoning for research interpretation.
@@ -79,20 +84,48 @@ When the user requests a space, project, team, ecosystem, or the whole setup,
 launch a mixed GPT-5.6 Sol team. Use Codex and Claudex; do not substitute
 Claude unless the user explicitly asks for Opus.
 
-Create only roles with immediate ownership:
+Create these standing roles in `01 Orchestrators`:
 
-1. `Operations · PersonName Goal` — Codex. Own execution, task cards,
-   integration order, commits, sync, and session lifecycle.
-2. `Human Orchestrator · PersonName Goal` — Claudex. Own `HUMAN_PLAN.md`,
-   human-language status, and user-facing decisions; do not manage daily
-   execution.
-3. One named productive worker per independent first task. Alternate Codex and
-   Claudex so both surfaces are represented. Give each worker one deliverable
-   and one working directory or worktree.
+1. `Human Orchestrator · PersonName Goal` — Claudex Sol high. This is the
+   project's only normal conversation with the human. Confirm the goal and its
+   meaning, ask or answer necessary human questions, explain material results,
+   and own the intended human-plan content. Never dispatch workers, manage
+   execution, integrate Git, or expose internal mechanics.
+2. `Operations · PersonName Goal` — Codex Sol high. Own decomposition,
+   execution order, worktrees, worker and suborchestrator lifecycle,
+   integration, commits, synchronization, and technical state. Route only
+   material results, genuine decisions, and direction changes to the Human
+   Orchestrator.
 
-Do not launch standing advisors, watchers, reviewers, progress checkers, or
-suborchestrators. Operations may launch them later only when the project
-standard and live work justify them.
+Do not put the Human Orchestrator in `00 Human Plan`. That tab contains exactly
+one non-agent pane rendering the canonical Markdown:
+
+```bash
+frogmouth HUMAN_PLAN.md
+```
+
+If the plan is missing or its meaning changed, leave the viewer shell in place
+until the Human Orchestrator has accepted the goal. Operations then launches
+one temporary `Human Plan Writer · PersonName Update` worker. The Human
+Orchestrator supplies the accepted human meaning; the writer edits only
+`HUMAN_PLAN.md` in an isolated worktree and commits; the Human Orchestrator
+checks meaning; Operations checks evidence, integrates, synchronizes, refreshes
+the viewer, and closes the writer.
+
+For productive work, Operations launches one named worker for each concrete
+subtask. One worker owns one deliverable, branch, and worktree. Launch multiple
+workers concurrently when their subtasks are independent. Never give one
+worker several unrelated subtasks. Integrate or reject its result, then close
+its session and retire its worktree.
+
+For a genuinely independent multi-step workstream, Operations may launch one
+named suborchestrator in `03 Suborchestrators`. Give it one measurable
+workstream. It decomposes that stream, launches one temporary worker per
+subtask, integrates the stream for Operations, and closes itself when the
+workstream ends. It may not create another suborchestrator.
+
+Do not launch standing advisors, watchers, reviewers, progress checkers, plan
+writers, or suborchestrators. Open each only for its immediate bounded purpose.
 
 When the Architect explicitly requests a research chain, launch a named Terra
 research lead and a named Luna read-only worker. Luna reports evidence to
@@ -119,21 +152,45 @@ structure:
 
 Tabs may remain empty when no justified role exists.
 
-## Prompt every role
+## Strategic advice
 
-Wait only until each native session is idle, then send a concise prompt. Every
-prompt must include:
+Keep `02 Strategic Council` empty until an orchestrator has one exact
+consequential question. Then launch one temporary `Strategic Advisor ·
+PersonName Question` using `codex-xhigh`.
+
+Give the advisor only the decision context needed for that question. Prefer a
+yes/no verdict; otherwise request one concrete recommended approach. The
+advisor does not inspect broadly, implement, manage, or create more agents.
+Capture the answer, let the responsible orchestrator decide, and close the
+advisor immediately.
+
+For consequential strategic planning or plan validation, the responsible
+orchestrator must use `consult-chatgpt-pro` with one compact evidence packet
+and one bounded question. It reconciles Pro's advice against project evidence;
+Pro does not approve work or replace the orchestrator. If the configured Pro
+transport is unavailable, record that once and continue from project evidence
+unless the decision is unsafe without external advice.
+
+## Prompt each role
+
+Wait only until each native session is idle, then send a concise role-specific
+prompt. Every task-bearing prompt must include:
 
 - the preserved project goal in plain language;
 - the role's differing current and expected states;
-- one directly productive deliverable;
+- one role-appropriate outcome;
 - the working directory or worktree;
 - the relevant shared standards and project `AGENTS.md`;
 - the instruction to coordinate through visible Herdr sessions;
 - the instruction to stop and report its completion envelope when done.
 
-Leadership prompts must say they may launch additional visible sessions when
-justified. Worker prompts must forbid hidden delegation and unrelated work.
+The Human Orchestrator prompt must identify it as the sole human conversation
+and forbid execution management. The Operations prompt must require one worker
+per subtask, concurrent independent workers, prompt closure, and material-only
+handoffs to the Human Orchestrator. Worker prompts must forbid hidden
+delegation and unrelated work. Suborchestrator prompts must define one
+multi-step workstream and forbid another orchestration layer. Advisor prompts
+must contain one bounded question and forbid implementation.
 
 After prompting, wait only for each session to become working. If a launch
 fails, close only the failed tab, retry once with the same surface, and report
