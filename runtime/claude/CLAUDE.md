@@ -15,7 +15,7 @@
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep only
   requested code/configuration, required run files, actual outputs, and the
-  existing `HUMAN_PLAN.md`.
+  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`.
 - At least 90% of active task slots and agent-hours must directly change code,
   data, experiments, evaluations, accepted evidence, or paper content.
   Orchestration, collaborative planning, plan writing, advice, checking,

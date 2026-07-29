@@ -46,8 +46,8 @@ are mandatory; this document supplies the detailed execution contract.
 - Create no side artifacts by default. Plans, reports, manifests, dashboards,
   project hubs, review files, duplicate documentation, and status records are
   forbidden unless the user asks for that exact deliverable. The existing
-  `HUMAN_PLAN.md`, required source/configuration, run inputs, actual logs, and
-  requested outputs are sufficient.
+  `HUMAN_PLAN.md` and `OLD_HISTORY.md`, required source/configuration, run
+  inputs, actual logs, and requested outputs are sufficient.
 
 ## Semantic grounding loop
 

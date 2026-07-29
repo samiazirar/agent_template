@@ -32,7 +32,8 @@ orchestration contracts provide the detailed rules.
   review files, dashboards, project hubs, duplicate READMEs, status documents,
   or prose records merely to describe work. Allowed outputs are the requested
   source/configuration, files required to run it, actual experiment outputs,
-  and the single existing `HUMAN_PLAN.md`.
+  and the existing `HUMAN_PLAN.md` and `OLD_HISTORY.md` required by the fixed
+  Herdr layout.
 
 ### Enforce 90/10 at admission
 

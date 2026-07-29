@@ -66,7 +66,7 @@ human-language status, and session-rollover rules are mandatory.
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep the
   requested source/configuration, required run files, actual outputs, and the
-  existing `HUMAN_PLAN.md`.
+  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`.
 - Before work, run the semantic grounding loop in
   `/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md`: ground, predict, act,
   compare, integrate.

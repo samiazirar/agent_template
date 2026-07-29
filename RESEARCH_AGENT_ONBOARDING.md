@@ -42,7 +42,8 @@ is accepted. Detailed execution rules remain in
 - Default to no side artifacts. Do not create plans, reports, manifests,
   review files, dashboards, project hubs, duplicate READMEs, or status
   documents. Keep only requested code/configuration, files required to run it,
-  actual outputs, and the existing `HUMAN_PLAN.md`.
+  actual outputs, and the existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`
+  required by the fixed Herdr layout.
 
 ## 2. Leadership and model roles
 
