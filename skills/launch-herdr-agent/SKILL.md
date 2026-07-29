@@ -61,7 +61,7 @@ The launcher opens only the native interactive executable:
 - `codex-high` uses GPT-5.6 Sol at high reasoning for project leadership.
 - `codex-xhigh` uses GPT-5.6 Sol at xhigh reasoning for one strategic question.
 - `claudex` uses the Codex-synchronized GPT-5.6 Sol model through the local
-  Claudex gateway.
+  Claudex gateway at medium effort.
 - `claudex-high` uses the same Claudex route at high effort for the Human
   Orchestrator.
 - `claude` uses native Claude Opus 5 at medium effort unless
@@ -70,6 +70,10 @@ The launcher opens only the native interactive executable:
 - `terra-high` uses GPT-5.6 Terra at high reasoning for one bounded productive
   task only when the human explicitly selects Terra as a worker.
 - `luna` uses GPT-5.6 Luna at low reasoning for cheap research observation.
+
+The launcher pins Claudex sessions to the matching Sol profile without changing
+the user's current global Codex model. A main Codex session may therefore use
+Terra or another selected model without silently changing Claudex leadership.
 
 Terra and Luna launch with normal native permissions because the local
 read-only sandbox may prevent all file reads. Their prompt must make the

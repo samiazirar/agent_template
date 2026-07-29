@@ -18,6 +18,8 @@ fi
 surface="$1"
 label="$2"
 launch_dir="${3:-$PWD}"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+launch_env=()
 
 if [ -z "$label" ]; then
     printf 'Provide a human task name for the Herdr tab.\n' >&2
@@ -49,7 +51,20 @@ case "$surface" in
         launch_argv=(codex -m gpt-5.6-luna -c model_reasoning_effort=low)
         ;;
     claudex|claudex-high)
-        runtime_json="$(claudex --runtime-json)"
+        claudex_profile="medium"
+        if [ "$surface" = "claudex-high" ]; then
+            claudex_profile="high"
+        fi
+        claudex_codex_home="${XDG_CACHE_HOME:-${HOME}/.cache}/herdr/claudex-sol-${claudex_profile}"
+        mkdir -p "$claudex_codex_home"
+        install -m 600 \
+            "$script_dir/../assets/claudex-sol-${claudex_profile}.toml" \
+            "$claudex_codex_home/config.toml"
+        ln -sfn "${HOME}/.codex/models_cache.json" \
+            "$claudex_codex_home/models_cache.json"
+        runtime_json="$(
+            CODEX_HOME="$claudex_codex_home" claudex --runtime-json
+        )"
         runtime_model="$(
             python3 -c 'import json,sys; print(json.load(sys.stdin)["model"])' \
                 <<<"$runtime_json"
@@ -59,11 +74,8 @@ case "$surface" in
                 "$runtime_model" >&2
             exit 2
         fi
-        if [ "$surface" = "claudex-high" ]; then
-            launch_argv=(claudex --effort high)
-        else
-            launch_argv=(claudex)
-        fi
+        launch_env=(env "CODEX_HOME=$claudex_codex_home")
+        launch_argv=(claudex)
         ;;
     claude)
         claude_effort="${HERDR_CLAUDE_EFFORT:-medium}"
@@ -113,7 +125,7 @@ cleanup_failed_launch() {
 trap cleanup_failed_launch ERR
 
 herdr pane rename "$pane_id" "$label" >/dev/null
-printf -v launch_command '%q ' "${launch_argv[@]}"
+printf -v launch_command '%q ' "${launch_env[@]}" "${launch_argv[@]}"
 herdr pane run "$pane_id" "${launch_command% }" >/dev/null
 herdr wait agent-status "$pane_id" --status idle --timeout 30000 >/dev/null
 
