@@ -18,7 +18,8 @@ fi
 surface="$1"
 label="$2"
 launch_dir="${3:-$PWD}"
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+script_path="$(readlink -f "${BASH_SOURCE[0]}")"
+script_dir="$(cd "$(dirname "$script_path")" && pwd)"
 launch_env=()
 
 if [ -z "$label" ]; then
