@@ -20,6 +20,19 @@ orchestration contracts provide the detailed rules.
 - One task owns one branch, worktree, and named Herdr session. Accepted chunks
   are merged in dependency order; after integration, the canonical checkout
   and GitHub represent the same code.
+- Reuse before writing. Search the existing project, official upstream
+  repository, installed tools, and known working neighboring implementations
+  for the needed path. Extend or repair the best existing implementation
+  unless a concrete incompatibility makes replacement smaller and safer.
+- Delete decisively when code is clearly broken, dead, duplicated, misleading,
+  or superseded. Preserve compatibility only for a named current consumer; do
+  not accumulate wrappers, parallel implementations, commented-out code, or
+  speculative fallbacks around bad code.
+- Default to no side artifacts. Do not create plans, reports, manifests,
+  review files, dashboards, project hubs, duplicate READMEs, status documents,
+  or prose records merely to describe work. Allowed outputs are the requested
+  source/configuration, files required to run it, actual experiment outputs,
+  and the single existing `HUMAN_PLAN.md`.
 
 ### Enforce 90/10 at admission
 
@@ -142,6 +155,11 @@ API-key provider.
   technical roles use `herdr-role-message operations`. The helper resolves the
   named role inside the current workspace and keeps internal identifiers
   hidden. Human Orchestrator may use this messenger but no other Herdr control.
+- A prompt is sent with `herdr pane run`, never `send-text`. Send only after
+  the target is `idle` or `done`, then confirm it becomes `working` or
+  completes the new turn. Text shown as “Messages to be submitted after next
+  tool call” is queued, not yet accepted; do not claim it was processed and do
+  not send a duplicate.
 - “Do,” “go,” “continue,” and equivalent short confirmations authorize the
   already-discussed next action. Human Orchestrator forwards the instruction
   once and Operations Lead starts it; neither asks the user to restate it or
@@ -161,7 +179,8 @@ API-key provider.
   Orchestrator to check meaning, integrates, synchronizes, and closes it.
 - `HUMAN_PLAN.md` is the single continuously maintained human-facing source of
   truth. The user should need only this Markdown file and conversation with the
-  human orchestrator; every other artifact is internal evidence.
+  human orchestrator. In no-side-artifact mode, do not create additional
+  internal prose surfaces.
 - Keep it at human level: the goal, why it matters, current reality, meaningful
   change, active milestones, next useful result, and any decision genuinely
   needed from the user. Explain necessary technical terms in ordinary language.

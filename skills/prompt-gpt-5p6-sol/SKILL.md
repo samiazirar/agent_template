@@ -38,6 +38,12 @@ meaning and remove process that does not help reach the goal.
 - Use a separate context only for substantial independent productive work.
 - Keep human-facing plans and updates concise and natural. Omit internal IDs,
   hashes, phase labels, and bureaucratic language.
+- Require reuse of the strongest existing project or official-upstream code
+  before new implementation. Permit decisive deletion of clearly bad, dead,
+  duplicated, misleading, or superseded code.
+- Forbid side artifacts unless they are the requested result: no reports,
+  manifests, dashboards, project hubs, review files, duplicate documentation,
+  or status files.
 
 ## Tune for GPT-5.6 Sol
 

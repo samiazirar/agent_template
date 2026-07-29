@@ -83,6 +83,11 @@ unrelated work, or implement findings.
 
 Do not pass a task to the native executable as an argv prompt. After the new
 agent reaches its interactive prompt, send its task with `herdr pane run`.
+Never use `send-text` for a task or message. Do not call `pane run` while the
+target is working unless deliberate interruption is required. If the UI shows
+“Messages to be submitted after next tool call,” the message is queued rather
+than accepted: wait for it to start, do not claim delivery, and do not send it
+again.
 
 ## Complete project launch
 
@@ -282,6 +287,11 @@ Every task-bearing prompt must include:
 - the relevant shared standards and project `AGENTS.md`;
 - the instruction to coordinate through visible Herdr sessions;
 - the instruction to stop and report its completion envelope when done.
+- the existing implementation to reuse or the concrete reason no suitable one
+  exists;
+- permission to delete clearly bad, dead, duplicate, or superseded code; and
+- a no-side-artifact rule forbidding reports, manifests, dashboards, project
+  hubs, review files, duplicate documentation, and status files.
 
 The Human Orchestrator prompt must identify it as the sole human conversation
 and require all technical communication to pass through Operations Lead. It
@@ -312,9 +322,13 @@ make it recite internal routing to the human. Reject and resend a corrected
 prompt if an acknowledgement contradicts the canonical role block. Do not open
 a separate checker agent.
 
-After prompting, wait only for each session to become working. If a launch
-fails, close only the failed tab, retry once with the same surface, and report
-the concrete launch failure if the retry also fails.
+After prompting, wait only for each session to become working. Use
+`herdr pane run` only after the target reports `idle` or `done`, and confirm
+the target becomes `working` or completes the submitted turn. This is the
+mechanical send check; text merely visible in an input box or queue is not an
+accepted prompt. If a launch fails, close only the failed tab, retry once with
+the same surface, and report the concrete launch failure if the retry also
+fails.
 
 All three agents inherit the global execution standard. Codex loads shared
 personal skills from `~/.agents/skills`; native Claude and Claudex load the same

@@ -32,6 +32,17 @@ is accepted. Detailed execution rules remain in
   run the smallest useful change, record the observed result, commit and sync
   the coherent chunk, and return to the user. Do not schedule test suites,
   browser testing, broad reviews, or cleanup as separate work.
+- Reuse existing code first: inspect the project, official upstream code,
+  installed tools, and known working neighboring implementations before
+  writing a replacement. Extend or repair the best existing path unless a
+  demonstrated mismatch makes replacement smaller.
+- Delete clearly bad, dead, duplicated, misleading, or superseded code. Do not
+  preserve it behind wrappers, parallel paths, commented blocks, or speculative
+  fallbacks unless a named current consumer requires compatibility.
+- Default to no side artifacts. Do not create plans, reports, manifests,
+  review files, dashboards, project hubs, duplicate READMEs, or status
+  documents. Keep only requested code/configuration, files required to run it,
+  actual outputs, and the existing `HUMAN_PLAN.md`.
 
 ## 2. Leadership and model roles
 
@@ -67,6 +78,11 @@ is accepted. Detailed execution rules remain in
   `herdr-role-message operations "..."`; Operations Lead answers with
   `herdr-role-message human "..."`. Human Orchestrator may use this one
   messenger and no other Herdr control command.
+- Direct prompting uses `herdr pane run` only after the target is `idle` or
+  `done`, followed by confirmation that the new turn started or completed.
+  Never use `send-text` for a prompt. A “Messages to be submitted after next
+  tool call” banner means queued, not processed; wait for its turn and never
+  duplicate it.
 - Treat “do,” “go,” or “continue” as a real instruction when the next action
   was already discussed. Forward it and start; do not bounce it back to the
   user or respond with readiness alone.
@@ -341,10 +357,12 @@ control-work percentage.
 
 ## 10. PaperPilot
 
-- Follow `PAPERPILOT_PROJECT_STANDARD.md` and use `$paperpilot`.
-- Every research project has exactly one corresponding live PaperPilot project,
-  reused when present and created only when verified absent. It must be visible
-  from the user’s confirmed account, not merely through administrator access.
+- Use PaperPilot only when the user requests it, a real manuscript/publication
+  needs it, or the project already has an accepted live PaperPilot surface.
+  An explicit no-side-artifact instruction disables PaperPilot setup,
+  `PAPERPILOT.md`, and `project-plan/` creation for that project.
+- When enabled, follow `PAPERPILOT_PROJECT_STANDARD.md` and reuse an existing
+  live project before creating one.
 - A recurring named `PaperPilot Maintainer · PersonName Project Hub` performs
   one bounded synchronization task in `04 Workers`, using its dedicated
   worktree/repository plus the bridge mount, routes its result, and closes.

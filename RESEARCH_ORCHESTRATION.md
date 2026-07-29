@@ -37,6 +37,17 @@ are mandatory; this document supplies the detailed execution contract.
   coherent goal-moving change, record the observed result, commit, push through
   the canonical branch, and hand the turn back. Do not create separate test
   suites, browser-testing rounds, broad reviews, or cleanup passes.
+- Start from existing code. Search the current repository, official upstream,
+  installed tools, and known working nearby implementations; extend or repair
+  the strongest existing path before inventing a new one.
+- Remove bad code aggressively when it is dead, duplicated, misleading,
+  irreparably wrong, or superseded. Do not keep compatibility layers without a
+  named live consumer.
+- Create no side artifacts by default. Plans, reports, manifests, dashboards,
+  project hubs, review files, duplicate documentation, and status records are
+  forbidden unless the user asks for that exact deliverable. The existing
+  `HUMAN_PLAN.md`, required source/configuration, run inputs, actual logs, and
+  requested outputs are sufficient.
 
 ## Semantic grounding loop
 
@@ -100,6 +111,10 @@ not help.
 Reject tasks whose only outcome is “investigate further,” “make a plan,”
 “resolve a gate,” “write a report,” or “wait.” Convert them into a concrete
 implementation, experiment, evaluation, or isolated external-wait record.
+
+Every build card also states which existing implementation will be reused or
+why none is suitable, what obsolete path will be deleted, and confirms that no
+side document or process artifact will be created.
 
 Task slices should normally fit about one hour, but do not rely on a model's
 time estimate. Bound them to one deliverable, one reproduction, and one done
@@ -166,11 +181,14 @@ alone cannot complete an empirical milestone.
   orchestrator uses `consult-chatgpt-pro` with one compact evidence packet and
   one exact question. The consultation informs the decision but does not become
   a standing approval layer.
-- Every project has one named PaperPilot Maintainer following
+- A project with an accepted live PaperPilot surface or explicit PaperPilot
+  request has one named PaperPilot Maintainer following
   `/home/user/azirar/.agents/PAPERPILOT_PROJECT_STANDARD.md`. It owns the
   PaperPilot human project hub and optional scientific paper, uses its own
   dedicated worktree or repository plus the isolated bridge mount, and verifies
   that the live project is visible from the user's confirmed account.
+- An explicit no-side-artifact instruction disables PaperPilot setup and its
+  local hub files for that project.
 - Timing and progress observation use the bounded roles below. Neither role can
   approve, stop, or hold productive work.
 

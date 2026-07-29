@@ -8,6 +8,14 @@
   smallest coherent requested change, commit and sync it, and hand the turn
   back. Do not schedule test suites, browser testing, broad reviews, or cleanup
   passes.
+- Reuse the strongest existing project or official-upstream implementation
+  before writing a new path. Delete clearly bad, dead, duplicated, misleading,
+  or superseded code instead of preserving it behind wrappers without a named
+  current consumer.
+- Create no side artifacts by default: no reports, manifests, dashboards,
+  project hubs, review files, duplicate READMEs, or status documents. Keep only
+  requested code/configuration, required run files, actual outputs, and the
+  existing `HUMAN_PLAN.md`.
 - At least 90% of active task slots and agent-hours must directly change code,
   data, experiments, evaluations, accepted evidence, or paper content.
   Orchestration, collaborative planning, plan writing, advice, checking,
@@ -74,11 +82,8 @@
   optional and minimal. Sol-high suborchestrators exist only for independent
   workstreams with at least three productive tasks; Sol-xhigh advisors answer
   one sparse bounded decision.
-- Every research project must have exactly one corresponding PaperPilot
-  project. Use `$paperpilot`, reuse an existing project before creating a
-  missing one, record the confirmed link in `PAPERPILOT.md`, and assign one
-  named PaperPilot Maintainer to the human plan, scientific status, optional
-  manuscript, and native comments.
-- Follow `/home/user/azirar/.agents/PAPERPILOT_PROJECT_STANDARD.md`, including
-  the maintainer's dedicated worktree/repository and the account-scoped proof
-  that the project is visible from the user's confirmed PaperPilot account.
+- Use PaperPilot only when explicitly requested, required by a real
+  manuscript/publication, or already accepted as the project's live surface.
+  A no-side-artifact instruction disables PaperPilot setup and local hub files.
+  When enabled, follow
+  `/home/user/azirar/.agents/PAPERPILOT_PROJECT_STANDARD.md`.

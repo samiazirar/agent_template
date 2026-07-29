@@ -37,6 +37,13 @@ performs.
   unrelated external, or scope-expanding action.
 - Keep human communication natural and omit internal IDs, hashes, phase labels,
   and bureaucratic language.
+- Reuse the strongest existing project or official-upstream implementation
+  before writing a new path. Delete clearly bad, dead, duplicated, misleading,
+  or superseded code rather than preserving it behind wrappers without a named
+  live consumer.
+- Create no side artifacts unless they are the requested deliverable: no
+  reports, manifests, dashboards, project hubs, review files, duplicate
+  documentation, or status files.
 
 ## Tune for Claude Opus 5
 

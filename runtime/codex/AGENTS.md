@@ -59,6 +59,14 @@ human-language status, and session-rollover rules are mandatory.
 - Until further notice, optimize for fast goal movement: implement the smallest
   coherent requested change, commit and sync it, then hand the turn back. Do not
   schedule test suites, browser testing, broad reviews, or cleanup passes.
+- Reuse the strongest existing project or official-upstream implementation
+  before writing a new path. Delete clearly bad, dead, duplicated, misleading,
+  or superseded code instead of wrapping or preserving it without a named live
+  consumer.
+- Create no side artifacts by default: no reports, manifests, dashboards,
+  project hubs, review files, duplicate READMEs, or status documents. Keep the
+  requested source/configuration, required run files, actual outputs, and the
+  existing `HUMAN_PLAN.md`.
 - Before work, run the semantic grounding loop in
   `/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md`: ground, predict, act,
   compare, integrate.
@@ -131,12 +139,12 @@ human-language status, and session-rollover rules are mandatory.
 
 # PaperPilot
 
-- Read and follow
-  `/home/user/azirar/.agents/PAPERPILOT_PROJECT_STANDARD.md`.
-- Every multi-session research project must have exactly one corresponding
-  PaperPilot project. Use `$paperpilot`: discover and reuse an existing project
-  first; if none exists, create one and verify its live URL or ID. Never create
-  a duplicate.
+- Use PaperPilot only when explicitly requested, required by a real
+  manuscript/publication, or already accepted as the project's live surface.
+  A no-side-artifact instruction disables PaperPilot setup and local hub files.
+- When enabled, read and follow
+  `/home/user/azirar/.agents/PAPERPILOT_PROJECT_STANDARD.md`, discover and
+  reuse before creating, and never create a duplicate.
 - Record the confirmed link in project-root `PAPERPILOT.md`. Use one named
   `PaperPilot Maintainer · PersonName Project Hub` for the complete human plan,
   scientific status, optional manuscript, and native PaperPilot comments.
