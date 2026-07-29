@@ -67,6 +67,7 @@ orchestration contracts provide the detailed rules.
 | Independent alternative productive worker | Native Claude | Opus 5 |
 | Mechanical or context-heavy alternative worker | OpenCode | GLM 5.2 |
 | Researcher | Codex or Claudex | Terra, medium |
+| Human-selected bounded productive worker | Codex | Terra, high |
 | Cheap research observation | Codex or Claudex | Luna |
 | Permanent event classification | OpenCode API key | Gemini 3.6 Flash |
 | Optional minimal verification | Visible Codex or Claudex | Sol, medium |
@@ -76,9 +77,11 @@ Claudex is the Claude Code interface backed by the local Codex gateway. It is
 not native Anthropic Claude. Launch it through `claudex` with an explicit Codex
 model. Native Claude is selected separately when Opus 5 is wanted.
 
-Terra and Luna are research, interpretation, and observation models, not the
-normal implementation workers. Never use Vertex; Gemini routes use the
-OpenCode API-key provider.
+Terra and Luna normally serve research, interpretation, and observation.
+Terra-high may be a productive worker only when the human explicitly selects
+it for one bounded task; launch it as a Worker with normal worktree, commit,
+reporting, and closure rules. Never use Vertex; Gemini routes use the OpenCode
+API-key provider.
 
 ## Native Herdr launch
 
@@ -202,6 +205,8 @@ OpenCode API-key provider.
   observation helps. Luna reports to Terra; Terra reports to Operations Lead
   for project work or the Architect for agent-system research. Research counts
   as productive only when it creates accepted goal-relevant evidence.
+- Explicitly selected Terra-high productive work uses one bounded named Worker,
+  one worktree, and the normal worker completion and closure rules.
 
 ## Watcher, verifier, messenger, and limits
 

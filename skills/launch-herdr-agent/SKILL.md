@@ -51,7 +51,7 @@ Run:
 
 ```bash
 herdr-agent \
-  <codex|codex-high|codex-xhigh|claude|claudex|claudex-high|terra|luna> \
+  <codex|codex-high|codex-xhigh|claude|claudex|claudex-high|terra|terra-high|luna> \
   "Role · PersonName Goal" [working-directory]
 ```
 
@@ -67,6 +67,8 @@ The launcher opens only the native interactive executable:
 - `claude` uses native Claude Opus 5 at medium effort unless
   `HERDR_CLAUDE_EFFORT` explicitly selects another supported effort.
 - `terra` uses GPT-5.6 Terra at medium reasoning for research interpretation.
+- `terra-high` uses GPT-5.6 Terra at high reasoning for one bounded productive
+  task only when the human explicitly selects Terra as a worker.
 - `luna` uses GPT-5.6 Luna at low reasoning for cheap research observation.
 
 Terra and Luna launch with normal native permissions because the local
@@ -213,6 +215,11 @@ Lead for project research or the Architect for agent-system research. Research
 is productive only when it creates accepted goal-relevant evidence; otherwise
 charge it to the 10% control budget. Neither session implements findings unless
 the Architect explicitly changes the assigned role.
+
+When the human explicitly selects Terra-high for productive work, launch
+`terra-high` as a `Worker`, not a Researcher. Give it one bounded deliverable,
+one worktree, the normal worker write and completion rules, and no authority to
+delegate or broaden the task.
 
 For a new project explicitly requesting isolation:
 

@@ -113,8 +113,9 @@ human-language status, and session-rollover rules are mandatory.
 - Reproduce first, implement or run, verify, then compare the expected and
   observed state.
 - Normal workers use Sol medium. Opus 5 and OpenCode GLM 5.2 are selectable
-  productive alternatives. Terra and Luna are reserved for research,
-  interpretation, and observation.
+  productive alternatives. Terra and Luna normally handle research,
+  interpretation, and observation. Terra-high may be a productive worker only
+  when the human explicitly selects it for one bounded task.
 - Research defaults to one Terra-medium Researcher. It may direct Luna-low
   read-only observers. A Verifier is optional, Sol medium, minimal, and opened
   only for one consequential anomaly that routine self-verification cannot

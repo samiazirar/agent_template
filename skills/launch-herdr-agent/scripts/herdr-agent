@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-    printf 'Usage: herdr-agent <codex|codex-high|codex-xhigh|claude|claudex|claudex-high|terra|luna> "Role · PersonName Goal" [working-directory]\n' >&2
+    printf 'Usage: herdr-agent <codex|codex-high|codex-xhigh|claude|claudex|claudex-high|terra|terra-high|luna> "Role · PersonName Goal" [working-directory]\n' >&2
 }
 
 if [ "${HERDR_ENV:-}" != "1" ]; then
@@ -41,6 +41,9 @@ case "$surface" in
         ;;
     terra)
         launch_argv=(codex -m gpt-5.6-terra -c model_reasoning_effort=medium)
+        ;;
+    terra-high)
+        launch_argv=(codex -m gpt-5.6-terra -c model_reasoning_effort=high)
         ;;
     luna)
         launch_argv=(codex -m gpt-5.6-luna -c model_reasoning_effort=low)

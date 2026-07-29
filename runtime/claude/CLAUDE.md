@@ -14,8 +14,10 @@
   status, review, audit, and waiting share at most 10%. Every control action
   must name the productive action it directly unlocks.
 - Sol medium is the normal Codex/Claudex worker. Native Claude Opus 5 and
-  OpenCode GLM 5.2 are selectable productive alternatives. Terra and Luna are
-  reserved for research, interpretation, and observation.
+  OpenCode GLM 5.2 are selectable productive alternatives. Terra and Luna
+  normally handle research, interpretation, and observation. Terra-high may
+  be a productive worker only when the human explicitly selects it for one
+  bounded task.
 - Long-running observation uses an external service with read-only API-key
   `opencode/gemini-3.6-flash`, or Luna for research observation. Never use
   Vertex. The watcher cannot inspect or modify code and trusted service code
@@ -66,10 +68,12 @@
   approval step.
 - A temporary Sol-medium Plan Orchestrator edits only `HUMAN_PLAN.md`, reports
   only to the Operations Lead, and closes after one plan-only commit. Terra
-  medium is the default Researcher; Luna is its read-only observer. Sol-medium
-  Verifiers are optional and minimal. Sol-high suborchestrators exist only for
-  independent workstreams with at least three productive tasks; Sol-xhigh
-  advisors answer one sparse bounded decision.
+  medium is the default Researcher; Luna is its read-only observer. An
+  explicitly selected Terra-high productive Worker follows the normal
+  one-task, worktree, commit, and closure rules. Sol-medium Verifiers are
+  optional and minimal. Sol-high suborchestrators exist only for independent
+  workstreams with at least three productive tasks; Sol-xhigh advisors answer
+  one sparse bounded decision.
 - Every research project must have exactly one corresponding PaperPilot
   project. Use `$paperpilot`, reuse an existing project before creating a
   missing one, record the confirmed link in `PAPERPILOT.md`, and assign one

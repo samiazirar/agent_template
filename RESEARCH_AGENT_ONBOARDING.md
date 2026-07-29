@@ -81,6 +81,10 @@ is accepted. Detailed execution rules remain in
   selected model in the task card; do not treat either as a hidden fallback.
 - Research defaults to Terra-medium. A Terra Researcher may direct Luna-low
   read-only observers. They are not normal implementation workers.
+- When the human explicitly selects Terra-high for productive work, it may be
+  one bounded named Worker with the normal one-task, worktree, commit, routing,
+  and closure rules. Launch it with `herdr-agent terra-high`; do not relabel a
+  Terra-medium Researcher.
 - Codex or Claudex may implement work. Launch and resume Claudex only through
   `claudex`, with the explicitly selected model. Never silently substitute
   generic Claude or a different model.

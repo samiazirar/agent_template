@@ -94,6 +94,9 @@ meaning and remove process that does not help reach the goal.
 - For a Researcher, select Terra-medium by default, assign one bounded evidence
   question, permit Luna observers only when useful, and report accepted
   evidence to Operations Lead.
+- If the human explicitly selects Terra-high as a productive worker, preserve
+  that choice and give it one bounded deliverable and the normal worker
+  worktree, commit, reporting, and closure rules.
 - Make a Verifier optional, minimal, read-only, and limited to one
   consequential anomaly that routine self-verification cannot resolve.
 - For a strategic advisor, use Sol xhigh and ask one bounded question with only

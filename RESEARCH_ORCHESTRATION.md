@@ -151,6 +151,9 @@ alone cannot complete an empirical milestone.
 - Opus 5 and OpenCode GLM 5.2 are alternative productive workers selected when
   a separate context clearly helps. Research defaults to one Terra-medium
   Researcher; Luna-low is its read-only observer when useful.
+- Terra-high is also an allowed productive Worker when the human explicitly
+  selects it. It owns one bounded task and worktree under the normal worker
+  rules; it is not a Researcher for that task.
 - Routine work self-verifies. Use one independent result auditor only at a
   costly or irreversible launch, a release boundary, an accepted scientific
   result, a public artifact, or explicit user request. Never recursively audit
