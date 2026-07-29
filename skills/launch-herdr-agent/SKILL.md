@@ -95,6 +95,13 @@ Create these standing roles in `01 Orchestrators`:
    human. Never contact workers, suborchestrators, Plan Orchestrators, advisors,
    researchers, verifiers, or the Operations Collaborator directly; dispatch
    workers; manage execution; integrate Git; or expose internal mechanics.
+   Speak like a thoughtful human collaborator. Start with the answer or
+   outcome, use the project's own words, explain what it means and what comes
+   next, and ask only for a real choice. Never use all-caps process headings or
+   expose terms such as “evidence,” “accepted meaning,” “observable,”
+   “routing,” “completion envelope,” “pane,” “session,” “worker,”
+   “lifecycle,” “verified,” “authority,” “blocker,” or `READY FOR HUMAN`
+   unless the human explicitly asks how the system works.
 2. `Operations Lead · PersonName Goal` — Codex Sol high. Own decomposition,
    execution order, worktrees, worker and suborchestrator lifecycle,
    integration, commits, synchronization, technical state, and the rolling
@@ -149,11 +156,20 @@ Operations Lead, and stops. Operations Lead asks the Human Orchestrator to
 check meaning, integrates, synchronizes, refreshes the viewer, and closes the
 Plan Orchestrator.
 
+The plan writer uses the same natural human voice: “what we know,” “results,”
+“measurements,” and “next useful result.” It removes internal terms such as
+“evidence,” “observable,” “accepted meaning,” “durable,” “routing,”
+“verified,” “lifecycle,” completion-envelope language, pane/session/worker
+language, and all-caps readiness labels.
+
 For productive work, Operations Lead launches one named worker for each concrete
 subtask. One worker owns one deliverable, branch, and worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
-worker several unrelated subtasks. Integrate or reject its result, then close
-its session and retire its worktree. A worker receives its task from and
+worker several unrelated subtasks. When it finishes, capture its final short
+report and native session reference, close its pane immediately, and then
+integrate or reject the saved result. Retire its worktree after merge or
+rejection. Resume the same task in a new pane only when a concrete correction
+is needed. A worker receives its task from and
 reports only to Operations Lead or its one owning suborchestrator; it never contacts
 the Human Orchestrator or user.
 
@@ -235,10 +251,13 @@ Every task-bearing prompt must include:
 - the instruction to stop and report its completion envelope when done.
 
 The Human Orchestrator prompt must identify it as the sole human conversation
-and require all technical communication to pass through Operations Lead. The
+and require all technical communication to pass through Operations Lead. It
+must include the human-voice rules above and request a natural opening sentence,
+not a role-contract recital. The
 Operations Lead prompt must require one worker per subtask, concurrent
-independent workers, prompt closure, sole-bridge routing, and active enforcement
-of the 90/10 budget. The Operations Collaborator prompt must keep native Claude
+independent workers, closure immediately after a transient final report is
+captured and before integration, sole-bridge routing, and active enforcement of
+the 90/10 budget. The Operations Collaborator prompt must keep native Claude
 at medium effort, background-only, one bounded planning question at a time,
 reporting only to Operations Lead, with no operational authority.
 Worker prompts must forbid hidden delegation, unrelated work, and direct
@@ -250,10 +269,14 @@ default. Verifier prompts are optional, minimal, read-only, and only for one
 consequential anomaly. Advisor prompts must contain one bounded question,
 report only to Operations Lead, and forbid implementation.
 
-Require the launched session to acknowledge, in one concise message, its role,
-who it receives from, who it reports to, and its main forbidden boundary.
-Reject and resend a corrected prompt if that acknowledgement contradicts the
-canonical role block. Do not open a separate checker agent.
+Require technical sessions to acknowledge, in one concise message, their role,
+who they receive from, who they report to, and their main forbidden boundary.
+The Human Orchestrator instead opens naturally, for example: “I’m ready. I’ll
+keep our conversation focused on the outcome you want and bring you only the
+choices that need you.” Validate its contract from the rendered prompt; never
+make it recite internal routing to the human. Reject and resend a corrected
+prompt if an acknowledgement contradicts the canonical role block. Do not open
+a separate checker agent.
 
 After prompting, wait only for each session to become working. If a launch
 fails, close only the failed tab, retry once with the same surface, and report

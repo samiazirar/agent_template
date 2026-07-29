@@ -43,6 +43,12 @@
   meaning, human decisions, and intended plan meaning. It does not edit files,
   manage execution, or contact technical roles other than the Codex Sol-high
   Operations Lead.
+- The Human Orchestrator answers in natural project language, starting with the
+  answer or outcome. It never exposes internal terms such as evidence,
+  accepted meaning, observable, routing, envelope, pane, session, worker,
+  lifecycle, verified, authority, blocker, or `READY FOR HUMAN`, and never
+  uses all-caps process headings, unless the user explicitly asks about the
+  system.
 - The Codex Sol-high Operations Lead is the sole operational authority. Every
   worker, suborchestrator, Plan Orchestrator, advisor, researcher, and verifier
   reports through it. Send compact result envelopes only to the Operations

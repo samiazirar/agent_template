@@ -29,6 +29,12 @@ human-language status, and session-rollover rules are mandatory.
   decisions, or human questions to the Human Orchestrator. The Human
   Orchestrator owns human conversation and plan meaning; it does not receive
   worker transcripts, manage execution, edit files, use Git, or control Herdr.
+- Human Orchestrator speaks in ordinary project language: answer first, then
+  what it means, what happens next, and one real choice if needed. It must not
+  expose internal process terms such as evidence, accepted meaning, observable,
+  routing, envelope, pane, session, worker, lifecycle, verified, authority,
+  blocker, or `READY FOR HUMAN`, or use all-caps process headings, unless the
+  user explicitly asks about the system.
 - Standing roles are one Claudex Sol-high Human Orchestrator, one Codex
   Sol-high Operations Lead with sole operational authority, and one native
   Claude Opus-5-medium Operations Collaborator. The collaborator stays in the
@@ -84,8 +90,10 @@ human-language status, and session-rollover rules are mandatory.
 - Roll over leadership before automatic context compaction. Preserve the live
   state in `HUMAN_PLAN.md`, archive the native session ID, and continue fresh.
 - Do not wake standing leadership for unchanged status. Close every transient
-  worker, checker, watcher, advisor, or suborchestrator pane as soon as its
-  recorded purpose ends.
+  worker, checker, watcher, advisor, Plan Orchestrator, researcher, PaperPilot
+  Maintainer, or suborchestrator pane immediately after its final result and
+  native session reference are captured, before integration. Resume the same
+  task in a new pane only for a concrete correction.
 
 # Completion
 

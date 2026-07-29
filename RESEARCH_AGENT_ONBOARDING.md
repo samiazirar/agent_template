@@ -49,6 +49,14 @@ is accepted. Detailed execution rules remain in
   `HUMAN_PLAN.md`. It reloads the handoff, plan, and cited evidence before
   every material answer or plan brief, but does not edit the file directly or
   contact technical roles other than Operations Lead.
+- Human Orchestrator talks naturally. It leads with the answer and uses the
+  project's own words. It says what happened, why it matters, what comes next,
+  and asks only for a choice that is genuinely needed. It never speaks to the
+  user in internal process language such as “evidence,” “accepted meaning,”
+  “observable,” “durable,” “routing,” “completion envelope,” “lifecycle,”
+  “pane,” “session,” “worker,” “verified,” “authority,” “blocker,” or
+  `READY FOR HUMAN`, and never uses all-caps process headings, unless the user
+  explicitly asks about the orchestration system.
 - Human Orchestrator and Operations Lead are peer interfaces with different
   responsibilities. The human talks to Human Orchestrator; Human Orchestrator
   exchanges technical requests and human decisions only with Operations Lead;
@@ -117,8 +125,10 @@ is accepted. Detailed execution rules remain in
   one final pane and one `OLD_HISTORY.md` file, not a collection of idle agents.
 - Only the Human Orchestrator, Operations Lead, and background Operations
   Collaborator are standing model panes while the project exists. Every other
-  pane closes immediately after its bounded result and result routing are
-  recorded. Archive the native session ID first.
+  pane closes as soon as its final short result and native session reference
+  are captured. Integration happens afterward from the saved artifact or
+  worktree. If a correction is needed, resume the same task in a new pane and
+  close it again when it stops.
 - A finished, idle, or stalled transient pane is a lifecycle defect. Preserve
   useful state, close it, and keep its worktree only until merge, rejection, or
   an explicitly continuing maintenance purpose.
@@ -234,12 +244,17 @@ control-work percentage.
   messenger may turn an approved compact envelope or automatic important event
   into a short update, but it may not inspect code, make project decisions, or
   invent urgency.
-- Material plan or evidence changes also invoke the PaperPilot Maintainer.
+- Material plan or result changes also invoke the PaperPilot Maintainer.
 - `HUMAN_PLAN.md` explains the research question, comparison, success,
-  measured reality, missing result, next observable milestone, independent
+  measured reality, missing result, next useful milestone, independent
   workstreams, one user decision, and productive/control meter.
-- Include a human `Data and evidence map`: what each dataset/evidence source
-  contains, why it matters, current evidence stage, and next observable.
+- Include a human `What we know and use` section: what each dataset or result
+  contains, why it matters, what is ready or measured, and what useful result
+  comes next.
+- The plan itself must not use orchestration vocabulary such as “evidence,”
+  “observable,” “accepted meaning,” “durable,” “routing,” “verified,”
+  “lifecycle,” “completion envelope,” pane/session/worker language, or
+  all-caps process labels.
 - Define acronyms, counts, dataset names, and project terms. Do not expose
   paths, hashes, pane/session/job IDs, worker manifests, or internal codes.
 - Update the plan only from material evidence or explicit decisions, never

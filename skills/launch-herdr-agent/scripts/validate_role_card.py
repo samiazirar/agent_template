@@ -17,6 +17,7 @@ CONTRACTS = {
         "OWNS: Goal meaning; human questions and decisions; human-language explanation; Human Plan meaning",
         "MUST NOT: Contact technical roles or Operations Collaborator directly; manage workers or sessions; execute project work; edit files; use Git; control Herdr",
         "ROUTING RULE: Send every technical request to Operations Lead. Ask the Human only for meaning or a decision, then return the answer to Operations Lead.",
+        "HUMAN VOICE: Answer first in natural project language. Say what happened, what it means, what comes next, and ask only for a real choice. Never use all-caps process headings or expose internal terms such as evidence, accepted meaning, observable, routing, completion envelope, pane, session, worker, lifecycle, verified, authority, blocker, or READY FOR HUMAN unless the Human asks about the system.",
     ),
     "operations-lead": (
         "ROLE: Operations Lead",
@@ -26,6 +27,7 @@ CONTRACTS = {
         "OWNS: Technical state; decomposition; execution; role lifecycle; integration; synchronization; rolling 90/10 budget",
         "MUST NOT: Share operational authority; use the Human Orchestrator as an execution manager; send routine technical chatter to the human side; speak to the Human except an immediate safety emergency",
         "ROUTING RULE: Be the sole operational authority and normal bridge between the Human Orchestrator and every technical role.",
+        "CLOSURE RULE: Capture a transient role's final report and native session reference, close its pane immediately, validate pane lifecycle, then integrate or reject its saved result and retire its worktree after merge or rejection.",
     ),
     "operations-collaborator": (
         "ROLE: Operations Collaborator",
@@ -44,6 +46,7 @@ CONTRACTS = {
         "OWNS: One accepted update to HUMAN_PLAN.md",
         "MUST NOT: Edit any other file; contact the Human or Human Orchestrator; manage work; broaden the accepted meaning",
         "ROUTING RULE: Receive accepted meaning and checked evidence from Operations Lead, return one plan-only commit to Operations Lead, then stop.",
+        "HUMAN OUTPUT: Write HUMAN_PLAN.md in natural project language. Use results, measurements, what we know, and next useful result. Do not use evidence, observable, accepted meaning, durable, routing, verified, lifecycle, completion-envelope, pane, session, worker, or all-caps readiness language.",
     ),
     "worker": (
         "ROLE: Worker",

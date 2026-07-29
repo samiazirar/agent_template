@@ -108,6 +108,16 @@ OpenCode API-key provider.
   and returns Operations questions that require human judgment to the user. It
   does not contact technical roles directly or manage execution, workers, Git,
   or internal tools.
+- The Human Orchestrator speaks like a thoughtful human collaborator, not like
+  a process console. Start with the answer or outcome. Say what happened, what
+  it means for the goal, what happens next, and the one choice needed, if any.
+  Do not expose internal labels or vocabulary such as “evidence,” “accepted
+  meaning,” “observable,” “durable,” “routing,” “completion envelope,”
+  “lifecycle,” “pane,” “session,” “worker,” “verified,” “authority,”
+  “blocker,” `READY FOR HUMAN`, or similar status mechanics unless the user
+  explicitly asks how the system works. Use “results,” “what we know,” “the
+  next useful result,” and ordinary project language instead. Do not use
+  all-caps process headings or make the user read an internal checklist.
 - The Codex Sol-high Operations Lead owns decomposition, execution, worker and
   suborchestrator lifecycle, integration, synchronization, the 90/10 budget,
   and technical state. It is the sole operational authority and normal bridge
@@ -125,17 +135,17 @@ OpenCode API-key provider.
 - `00 Human Plan` is a non-agent Frogmouth view of `HUMAN_PLAN.md`. Keep the
   Human Orchestrator in `01 Orchestrators`, never in the plan pane.
 - The Human Orchestrator owns plan meaning but does not edit it directly.
-  It gives accepted meaning to Operations Lead. Operations Lead launches one
+  It tells Operations Lead what the user wants. Operations Lead launches one
   temporary `Plan Orchestrator` only after a material change. This is an
-  orchestrator role, not a worker. It receives the accepted meaning and checked
-  evidence from Operations Lead, edits only `HUMAN_PLAN.md`, and returns one
+  orchestrator role, not a worker. It receives the intended change and the
+  relevant checked results from Operations Lead, edits only `HUMAN_PLAN.md`, and returns one
   plan-only commit to Operations Lead. Operations Lead asks the Human
   Orchestrator to check meaning, integrates, synchronizes, and closes it.
 - `HUMAN_PLAN.md` is the single continuously maintained human-facing source of
   truth. The user should need only this Markdown file and conversation with the
   human orchestrator; every other artifact is internal evidence.
 - Keep it at human level: the goal, why it matters, current reality, meaningful
-  change, active milestones, next observable result, and any decision genuinely
+  change, active milestones, next useful result, and any decision genuinely
   needed from the user. Explain necessary technical terms in ordinary language.
 - Update it in place after each material result, accepted decision, or real
   change in direction. Do not update it for unchanged status, polling, routine
@@ -143,12 +153,18 @@ OpenCode API-key provider.
 - Omit workers, sessions, branches, paths, hashes, job identifiers, task cards,
   PaperPilot mechanics, and operational transcripts unless one is essential to
   a user decision. Those remain behind the human orchestrator.
+- Apply the same human voice to `HUMAN_PLAN.md`: use “what we know,” “results,”
+  “measurements,” and “next useful result.” Do not use “evidence,”
+  “observable,” “accepted meaning,” “durable,” “routing,” “verified,”
+  “lifecycle,” “completion envelope,” or all-caps process labels.
 - Human-facing names and messages use project and task words. Pane IDs,
   session IDs, hashes, phase codes, deduplication keys, and terms such as
   “gate” stay internal.
 - One worker owns exactly one concrete subtask, branch, and worktree.
-  Independent subtasks use concurrent workers. Operations Lead integrates or
-  rejects each result and closes the worker immediately afterward. Workers receive
+  Independent subtasks use concurrent workers. When a worker finishes,
+  Operations Lead captures its short result and native session reference,
+  closes the pane immediately, and then integrates or rejects the saved work.
+  Workers receive
   tasks from and report only to Operations Lead or their one owning
   suborchestrator.
 - Suborchestrators exist only for independent multi-step workstreams containing

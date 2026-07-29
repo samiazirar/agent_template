@@ -19,7 +19,22 @@ STANDING_PREFIXES = {
     "Operations Lead",
     "Operations Collaborator",
 }
-TRANSIENT_ORCHESTRATOR_PREFIX = "Plan Orchestrator"
+TRANSIENT_PREFIXES = {
+    "Plan Orchestrator",
+    "Worker",
+    "Suborchestrator",
+    "Suborch",
+    "Strategic Advisor",
+    "Advisor",
+    "Researcher",
+    "Research Observer",
+    "Verifier",
+    "Watcher",
+    "Progress",
+    "Progress Checker",
+    "Second Eye",
+    "PaperPilot Maintainer",
+}
 
 
 def herdr(*args: str) -> dict:
@@ -51,11 +66,8 @@ def main() -> None:
         tab_label = tab_labels[pane["tab_id"]]
         pane_label = pane.get("label", "")
         prefix = pane_label.split(" · ", 1)[0]
-        is_transient_orchestrator = (
-            tab_label == STANDING_TAB
-            and prefix == TRANSIENT_ORCHESTRATOR_PREFIX
-        )
-        if tab_label not in TRANSIENT_TABS and not is_transient_orchestrator:
+        is_named_transient = prefix in TRANSIENT_PREFIXES
+        if tab_label not in TRANSIENT_TABS and not is_named_transient:
             continue
         if not pane.get("agent") and not pane.get("agent_session"):
             continue
@@ -85,7 +97,7 @@ def main() -> None:
             prefix
             for prefix in prefixes
             if prefix not in STANDING_PREFIXES
-            and prefix != TRANSIENT_ORCHESTRATOR_PREFIX
+            and prefix != "Plan Orchestrator"
         ]
         if any(count != 1 for count in standing_counts.values()) or unexpected:
             fail(

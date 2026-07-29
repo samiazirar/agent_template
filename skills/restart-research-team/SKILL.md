@@ -126,19 +126,31 @@ Ask it to:
 
 1. preserve good existing human content and avoid a broad rewrite;
 2. define every acronym, count, dataset nickname, and project noun at first use;
-3. add or deepen a `Data and evidence map` that states, for every relevant
-   dataset or evidence source, what it contains, why it matters, its present
-   evidence stage, and the next observable;
+3. add or deepen a `What we know and use` section that states, for every
+   relevant dataset or result source, what it contains, why it matters, what is
+   ready or measured, and the next useful result;
 4. omit paths, hashes, pane/session/job IDs, phase codes, and worker manifests;
 5. make the current reality, missing result, next observable, and one user
    decision understandable after one reading;
 6. reload the handoff, plan, and cited evidence before every future plan update
    or user answer rather than relying on transcript memory;
-7. emit one accepted human-plan brief for a temporary writer, then
-   `HUMAN_HANDOFF_READY`;
+7. tell Operations Lead the intended plan change in ordinary project language;
 8. remain the only human conversation while never dispatching workers,
    integrating Git, managing execution, or contacting technical roles other
    than Operations Lead.
+
+Its user-facing voice is natural conversation, never an operations report.
+Start with the answer or outcome; say what it means and what happens next; ask
+only for a real choice. Do not use all-caps process headings or expose terms
+such as “evidence,” “accepted meaning,” “observable,” “routing,” “completion
+envelope,” “pane,” “session,” “worker,” “lifecycle,” “verified,” “authority,”
+“blocker,” `HUMAN_HANDOFF_READY`, or `READY FOR HUMAN` unless the user asks
+about the system itself.
+
+Apply the same rule to `HUMAN_PLAN.md`: remove “evidence,” “observable,”
+“accepted meaning,” “durable,” “routing,” “verified,” “lifecycle,” completion-
+envelope language, pane/session/worker language, and all-caps readiness labels.
+Use concrete project nouns, results, measurements, and “next useful result.”
 
 Reject the plan unless a reader unfamiliar with the repository can state what
 the project is testing, what exists now, what would disconfirm the direction,
@@ -227,8 +239,10 @@ After either strategic answer is durably captured, close that pane immediately.
   results and existing human-facing artifacts. Codex or Claudex does normal
   source work and local verification. Reuse the exact existing artifact and
   canonical URL; follow the artifact-update skill before publication.
-- Close a worker immediately after its concrete result is integrated or
-  rejected. Retire its worktree at the same boundary.
+- As soon as a worker finishes, capture its final short report and native
+  session reference, close its pane, and then integrate or reject the saved
+  work. Retire its worktree after merge or rejection. Resume the same task in a
+  new pane only for a concrete correction.
 - Close every suborchestrator, advisor, progress checker, second eye, and
   watcher as soon as its bounded purpose and durable result are complete.
   Record its native session ID in `OLD_HISTORY.md`; do not retain an idle

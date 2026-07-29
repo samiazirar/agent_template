@@ -60,10 +60,18 @@ meaning and remove process that does not help reach the goal.
   Collaborator, workers, suborchestrators, Plan Orchestrators, advisors,
   researchers, or verifiers, plus worker,
   execution, Git, and tool management.
+  Give it an explicit human voice: answer first in natural project language,
+  then say what it means and what happens next. Ask only for a real user
+  choice. Forbid all-caps process headings and internal terms such as
+  “evidence,” “accepted meaning,” “observable,” “routing,” “completion
+  envelope,” “pane,” “session,” “worker,” “lifecycle,” “verified,”
+  “authority,” “blocker,” and `READY FOR HUMAN` unless the user asks about the
+  system itself.
 - For Operations Lead, require one temporary worker per concrete subtask,
   concurrent workers for independent subtasks, integration, synchronization,
-  closure after every result, and active enforcement of the rolling 90/10
-  budget. Make it the sole operational authority and normal bridge.
+  closure immediately after each transient final report is captured and before
+  integration, and active enforcement of the rolling 90/10 budget. Make it the
+  sole operational authority and normal bridge.
 - For a Plan Orchestrator, provide the Human Orchestrator's accepted meaning
   through Operations Lead, restrict it to `HUMAN_PLAN.md`, and require one
   plan-only commit and immediate handoff only to Operations Lead. Treat this as

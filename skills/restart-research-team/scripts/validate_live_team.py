@@ -173,7 +173,7 @@ def main() -> None:
         "clear goal": r"^## .*(goal|trying to learn|scientific question|research question|project question|the question)",
         "current measured reality": r"^## .*(current|actually been measured|data exist|already exists|does not exist yet)",
         "meaningful milestone": r"^## .*(meaningful change|milestone|first measurable|frozen work)",
-        "next observable result": r"^## .*(next observable|next inspectable|next productive|next result)",
+        "next useful result": r"^## .*(next useful|next inspectable|next productive|next result)",
     }
     for label, pattern in required_sections.items():
         if not re.search(pattern, human_plan, re.IGNORECASE | re.MULTILINE):
@@ -198,6 +198,22 @@ def main() -> None:
         fail("HUMAN_PLAN.md contains an internal filesystem path")
     if re.search(r"\b(?:gate|gates|blocker|blockers|NO_GO)\b", human_plan, re.IGNORECASE):
         fail("HUMAN_PLAN.md contains opaque stop-process language")
+    internal_human_terms = re.compile(
+        r"\b(?:evidence|observable|durable|routing|lifecycle|pane|session|worker)\b"
+        r"|accepted meaning|completion envelope|READY FOR HUMAN|HUMAN_HANDOFF_READY",
+        re.IGNORECASE,
+    )
+    found_internal_terms = sorted({
+        match.group(0).lower()
+        for match in internal_human_terms.finditer(human_plan)
+    })
+    if found_internal_terms:
+        fail(
+            "HUMAN_PLAN.md contains internal orchestration language: "
+            f"{found_internal_terms}"
+        )
+    if re.search(r"^#{1,6}\s+[A-Z][A-Z0-9 _—-]{5,}$", human_plan, re.MULTILINE):
+        fail("HUMAN_PLAN.md contains an all-caps process heading")
 
     tab_payload = herdr("tab", "list", "--workspace", workspace_id)
     tabs = tab_payload["result"]["tabs"]

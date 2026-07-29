@@ -196,9 +196,11 @@ safety or irreversible-action emergency.
   Operations Lead reloads it for integration. Only an accepted material result,
   genuine decision, or direction change reaches the human orchestrator, which
   reloads the cited evidence before preparing a plan brief or answering.
-- After capturing the envelope, Operations Lead archives the native session ID,
-  closes the completed transient pane, and runs the pane-lifecycle validator.
-  This closure is part of task completion, not optional housekeeping.
+- The moment a transient role finishes, Operations Lead captures its envelope
+  and native session reference, closes the pane, and runs the pane-lifecycle
+  validator. It then integrates or rejects the saved result from the artifact
+  or worktree. A correction resumes the same task in a new pane. Closure is
+  part of the result handoff, not later housekeeping.
 - A verifier reports only to Operations Lead. Operations Lead decides whether a material
   trajectory change or human question reaches the Human Orchestrator.
 - The watcher remains silent for unchanged state. A trusted service may route
@@ -302,8 +304,10 @@ Use separate bounded roles. None is a standing review committee.
   canonical branch. Worktrees may differ only while their tasks are active;
   accepted code must match the pushed canonical branch.
 - One pane, one task, one worktree. Immediately after the final task report and
-  completion envelope are recorded, close the pane. Keep the worktree only
-  until merge or explicit rejection, then retire it.
+  completion envelope are captured, archive the native session reference and
+  close the pane before integration. Keep the worktree only until merge or
+  explicit rejection, then retire it. Resume the same native task in a new
+  pane only when a concrete correction is required.
 - Advisors, progress checkers, second eyes, watchers, workers, and
   suborchestrators are transient. A transient pane in `done`, `idle`, or
   `blocked` state after its purpose has ended is a lifecycle failure: archive
@@ -357,12 +361,18 @@ periodic status turns.
   what a successful result means, and the current reality. Only then show the
   next result-level milestone, its independent workstreams, one user decision,
   and the 90/10 meter.
-- Include a `Data and evidence map` at human depth. For every scientifically
-  relevant dataset or evidence source, state its human name, what it contains
-  and why it matters, its current evidence stage, and the next observable.
+- Include a `What we know and use` section at human depth. For every
+  scientifically relevant dataset or result source, state its human name, what
+  it contains and why it matters, what is ready or measured, and the next
+  useful result.
   A reader must be able to tell what has been prepared or measured, what is
   still missing, and why that changes the answer. Omit paths, hashes, pane and
   session IDs, scheduler job IDs, internal phase codes, and task manifests.
+- Keep internal orchestration words out of the plan. Replace “evidence” with
+  “results,” “measurements,” or “what we know”; “observable” with “useful
+  result”; “durable” with the concrete saved artifact; and “verified” with what
+  was actually checked. Never include routing, lifecycle, completion-envelope,
+  worker, pane, session, or all-caps readiness language.
 - Do not turn `HUMAN_PLAN.md` into a worker manifest. It may name a
   suborchestrator-owned workstream and its measurable output, but it normally
   omits individual workers, branches, files, and one-hour task cards. Those
@@ -374,7 +384,7 @@ periodic status turns.
   comparison matters.
 - The human plan fails if a reader unfamiliar with the repository cannot answer
   after one reading: “What are we trying to learn?”, “What exists now?”, and
-  “What observable result will exist after the next milestone?” Move hashes,
+  “What useful result will exist after the next milestone?” Move hashes,
   function names, protocol labels, and implementation subdivisions to the
   technical task card rather than the human plan.
 - Treat an inherited `HUMAN_PLAN.md` as a draft. On startup or rollover,
