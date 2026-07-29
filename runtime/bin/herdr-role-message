@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf '%s\n' \
+    'usage: herdr-role-message <human|operations|collaborator> MESSAGE' \
+    '       herdr-role-message named "Role · Human Name" MESSAGE' >&2
+  exit 2
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+fi
+
+[[ $# -ge 2 ]] || usage
+[[ "${HERDR_ENV:-}" == "1" ]] || {
+  printf 'herdr-role-message must run inside Herdr\n' >&2
+  exit 1
+}
+[[ -n "${HERDR_WORKSPACE_ID:-}" ]] || {
+  printf 'current Herdr workspace is unavailable\n' >&2
+  exit 1
+}
+
+mode="prefix"
+case "$1" in
+  human) target="Human Orchestrator"; shift ;;
+  operations) target="Operations Lead"; shift ;;
+  collaborator) target="Operations Collaborator"; shift ;;
+  named)
+    [[ $# -ge 3 ]] || usage
+    mode="exact"
+    target="$2"
+    shift 2
+    ;;
+  *) usage ;;
+esac
+message="$*"
+[[ -n "$message" ]] || usage
+
+pane_id="$(
+  herdr pane list --workspace "$HERDR_WORKSPACE_ID" |
+    python3 -c '
+import json
+import sys
+
+mode, target = sys.argv[1:3]
+panes = json.load(sys.stdin)["result"]["panes"]
+matches = [
+    pane["pane_id"]
+    for pane in panes
+    if (
+        pane.get("label", "") == target
+        if mode == "exact"
+        else pane.get("label", "").startswith(target + " · ")
+    )
+    and (pane.get("agent") or pane.get("agent_session"))
+]
+if len(matches) != 1:
+    print(
+        f"expected exactly one live {target}, found {len(matches)}",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+print(matches[0])
+' "$mode" "$target"
+)"
+
+herdr pane run "$pane_id" "$message" >/dev/null

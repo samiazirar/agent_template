@@ -102,11 +102,20 @@ Create these standing roles in `01 Orchestrators`:
    “routing,” “completion envelope,” “pane,” “session,” “worker,”
    “lifecycle,” “verified,” “authority,” “blocker,” or `READY FOR HUMAN`
    unless the human explicitly asks how the system works.
+   Send every technical instruction with
+   `herdr-role-message operations "..."`. Never use native model-agent lookup.
+   This limited messenger is its only Herdr action. Treat “do,” “go,” and
+   “continue” as authorization for the already-discussed action and forward it
+   immediately; do not answer with readiness alone.
 2. `Operations Lead · PersonName Goal` — Codex Sol high. Own decomposition,
    execution order, worktrees, worker and suborchestrator lifecycle,
    integration, commits, synchronization, technical state, and the rolling
    90/10 budget. Be the sole operational authority and normal bridge between
    the Human Orchestrator and every technical role.
+   Use `herdr-role-message human "..."` for human questions or material results
+   and `herdr-role-message collaborator "..."` for the bounded collaborator.
+   When a forwarded confirmation arrives, start the named action instead of
+   acknowledging it again.
 3. `Operations Collaborator · PersonName Goal` — native Claude Opus 5 at
    medium effort. Stay in the background and receive only one bounded
    collaborative-planning, decomposition-alternative, or milestone-
@@ -119,6 +128,16 @@ Normal communication must follow:
 `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`. Operations
 Collaborator is a bounded side input to Operations Lead, never a second
 authority. No technical role may bypass Operations Lead.
+
+Before launching, require `command -v herdr-role-message`. After launch,
+perform one real round trip: ask Human Orchestrator to send a short route-check
+message to Operations Lead through the helper; Operations Lead replies through
+the helper; Human Orchestrator confirms naturally. If either leg fails, repair
+the route or replace the failed standing session before reporting readiness.
+
+Never use `herdr pane report-agent`, `report-metadata`, or `release-agent` to
+polish standing-role status. Native integration owns status. A standing pane in
+`done` has completed its latest turn and remains valid.
 
 ## Enforce the 90/10 budget
 
@@ -253,7 +272,8 @@ Every task-bearing prompt must include:
 The Human Orchestrator prompt must identify it as the sole human conversation
 and require all technical communication to pass through Operations Lead. It
 must include the human-voice rules above and request a natural opening sentence,
-not a role-contract recital. The
+not a role-contract recital. It must name `herdr-role-message operations` as
+the only valid technical route and forbid native Agent lookup. The
 Operations Lead prompt must require one worker per subtask, concurrent
 independent workers, closure immediately after a transient final report is
 captured and before integration, sole-bridge routing, and active enforcement of
@@ -289,3 +309,8 @@ skill directories through `~/.claude/skills`.
 Use human names everywhere visible to people. Keep Herdr's internal identifiers
 internal. Do not perform project work while launching and do not leave a failed
 launch tab behind.
+
+For repairs, inspect leadership history before rebriefing. If a standing
+session has compacted, shows a blocked internal goal, or failed the real route
+check, archive its native session reference and replace it with a fresh session.
+Do not preserve a stale session merely to keep the pane count unchanged.

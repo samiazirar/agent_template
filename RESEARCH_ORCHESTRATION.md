@@ -178,6 +178,19 @@ and bridge to technical roles. Operations Collaborator is subordinate to
 Operations Lead. Operations Lead may interrupt the user only for an immediate
 safety or irreversible-action emergency.
 
+The bridge is the installed `herdr-role-message` helper, not native model-agent
+discovery. Human Orchestrator sends technical intent with
+`herdr-role-message operations`; Operations Lead sends human questions and
+material results with `herdr-role-message human`; Operations Collaborator and
+technical roles return through `herdr-role-message operations`. The helper is
+the Human Orchestrator's only permitted Herdr action.
+
+When the user says “do,” “go,” “continue,” or an equivalent confirmation after
+an action was proposed, Human Orchestrator forwards that action immediately.
+Operations Lead starts the work or returns one genuinely necessary question.
+An acknowledgement, readiness statement, plan recital, or request to restate
+the same instruction is not completion.
+
 ## Result routing
 
 - A worker or suborchestrator leaves its complete technical result in its
@@ -409,7 +422,10 @@ periodic status turns.
 - Historical sessions live in `OLD_HISTORY.md`, displayed in one final Herdr
   history pane. Resume one only for a specific unanswered historical question.
 - Roll over a leadership session before its first automatic compaction or when
-  context reaches roughly half capacity. The fresh session reconstructs from
+  context reaches roughly half capacity. If compaction already occurred, its
+  internal goal is blocked, or a real messenger round trip fails, archive and
+  replace that standing session rather than rebriefing it. The fresh session
+  reconstructs from
   the frozen question, `HUMAN_PLAN.md`, and cited evidence rather than inheriting
   opaque transcript state. Archive the old native session ID.
 - Strategic advisors are opened only for a bounded question and closed after

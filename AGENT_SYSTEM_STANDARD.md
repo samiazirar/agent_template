@@ -132,6 +132,21 @@ OpenCode API-key provider.
   Operations Collaborator is a bounded side input to Operations Lead. Workers,
   suborchestrators, Plan Orchestrators, advisors, researchers, and verifiers do
   not bypass Operations Lead.
+- That path must work mechanically, not only in prose. Roles send cross-pane
+  messages with `herdr-role-message`: Human Orchestrator uses
+  `herdr-role-message operations`, Operations Lead uses
+  `herdr-role-message human` or `herdr-role-message collaborator`, and
+  technical roles use `herdr-role-message operations`. The helper resolves the
+  named role inside the current workspace and keeps internal identifiers
+  hidden. Human Orchestrator may use this messenger but no other Herdr control.
+- “Do,” “go,” “continue,” and equivalent short confirmations authorize the
+  already-discussed next action. Human Orchestrator forwards the instruction
+  once and Operations Lead starts it; neither asks the user to restate it or
+  merely responds with readiness.
+- Never fake standing-role state with `herdr pane report-agent`,
+  `report-metadata`, or `release-agent`. Native agent integration owns activity
+  state. `done` on a standing pane means its latest turn is complete, not that
+  the standing role should close.
 - `00 Human Plan` is a non-agent Frogmouth view of `HUMAN_PLAN.md`. Keep the
   Human Orchestrator in `01 Orchestrators`, never in the plan pane.
 - The Human Orchestrator owns plan meaning but does not edit it directly.
@@ -160,6 +175,10 @@ OpenCode API-key provider.
 - Human-facing names and messages use project and task words. Pane IDs,
   session IDs, hashes, phase codes, deduplication keys, and terms such as
   “gate” stay internal.
+- Replace a standing leadership session instead of rebriefing it when its
+  context has compacted, its internal goal is blocked, or a real role-to-role
+  route check fails. Record the old native session reference in history, close
+  the old pane, and launch a fresh role in the same place.
 - One worker owns exactly one concrete subtask, branch, and worktree.
   Independent subtasks use concurrent workers. When a worker finishes,
   Operations Lead captures its short result and native session reference,

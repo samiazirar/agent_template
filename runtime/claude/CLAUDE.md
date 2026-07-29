@@ -43,6 +43,11 @@
   meaning, human decisions, and intended plan meaning. It does not edit files,
   manage execution, or contact technical roles other than the Codex Sol-high
   Operations Lead.
+- It contacts Operations Lead only through
+  `herdr-role-message operations "..."`, never through Claude's native Agent
+  lookup. This limited messenger is its only permitted Herdr action. “Do,”
+  “go,” and “continue” forward the already-discussed action immediately; they
+  do not produce another readiness response.
 - The Human Orchestrator answers in natural project language, starting with the
   answer or outcome. It never exposes internal terms such as evidence,
   accepted meaning, observable, routing, envelope, pane, session, worker,

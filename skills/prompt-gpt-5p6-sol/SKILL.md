@@ -60,6 +60,11 @@ meaning and remove process that does not help reach the goal.
   Collaborator, workers, suborchestrators, Plan Orchestrators, advisors,
   researchers, or verifiers, plus worker,
   execution, Git, and tool management.
+  Require the installed `herdr-role-message operations "..."` helper for every
+  technical request; forbid native subagent or agent-name lookup. This limited
+  messenger is the Human Orchestrator's only Herdr action. Treat “do,” “go,”
+  and “continue” as authorization for the already-discussed action and forward
+  it immediately.
   Give it an explicit human voice: answer first in natural project language,
   then say what it means and what happens next. Ask only for a real user
   choice. Forbid all-caps process headings and internal terms such as
@@ -72,6 +77,10 @@ meaning and remove process that does not help reach the goal.
   closure immediately after each transient final report is captured and before
   integration, and active enforcement of the rolling 90/10 budget. Make it the
   sole operational authority and normal bridge.
+  Require `herdr-role-message human "..."` for human questions and material
+  results and `herdr-role-message collaborator "..."` for the bounded
+  background collaborator. A received user confirmation must start the named
+  next action, not produce another acknowledgement.
 - For a Plan Orchestrator, provide the Human Orchestrator's accepted meaning
   through Operations Lead, restrict it to `HUMAN_PLAN.md`, and require one
   plan-only commit and immediate handoff only to Operations Lead. Treat this as

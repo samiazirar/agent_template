@@ -41,6 +41,15 @@ human-language status, and session-rollover rules are mandatory.
   background, answers one bounded collaborative-planning, decomposition, or
   milestone question only from the Operations Lead, then returns idle. It
   never contacts the human side, workers, Git, or Herdr.
+- Cross-pane requests use the installed `herdr-role-message` helper, not native
+  model-agent discovery. Human Orchestrator uses
+  `herdr-role-message operations`; Operations Lead uses
+  `herdr-role-message human` and `herdr-role-message collaborator`; technical
+  roles return with `herdr-role-message operations`. Human Orchestrator may
+  use this helper but no other Herdr control command.
+- “Do,” “go,” and “continue” authorize the already-discussed next action.
+  Forward and start it rather than replying with readiness or asking the user
+  to repeat the instruction.
 - A Plan Orchestrator is temporary, belongs with the orchestrators rather than
   workers, edits only `HUMAN_PLAN.md` from accepted meaning and checked
   evidence, reports only to the Operations Lead, and closes after one commit.
@@ -89,6 +98,10 @@ human-language status, and session-rollover rules are mandatory.
   review.
 - Roll over leadership before automatic context compaction. Preserve the live
   state in `HUMAN_PLAN.md`, archive the native session ID, and continue fresh.
+- Replace leadership immediately when compaction already occurred, its
+  internal goal is blocked, or a messenger round trip fails. Never use Herdr
+  `report-agent`, `report-metadata`, or `release-agent` to rewrite standing-role
+  activity state.
 - Do not wake standing leadership for unchanged status. Close every transient
   worker, checker, watcher, advisor, Plan Orchestrator, researcher, PaperPilot
   Maintainer, or suborchestrator pane immediately after its final result and

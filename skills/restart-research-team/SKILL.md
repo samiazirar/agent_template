@@ -80,6 +80,19 @@ Orchestrator is the sole normal human conversation and owns the meaning of
 Operations Lead. A temporary Plan Orchestrator receives its brief from and
 reports only to Operations Lead; it is an orchestrator, not a worker.
 
+Require `command -v herdr-role-message` before launch. Human Orchestrator sends
+technical intent only with `herdr-role-message operations`; Operations Lead
+uses `herdr-role-message human` and `herdr-role-message collaborator`;
+technical roles return with `herdr-role-message operations` or the exact
+human-named parent through `herdr-role-message named`. Never use native
+model-agent lookup. Run one real Human Orchestrator → Operations Lead → Human
+Orchestrator round trip before declaring the team restored.
+
+Do not alter standing-role status with `report-agent`, `report-metadata`, or
+`release-agent`. If a leadership context compacted, its internal goal is
+blocked, or the route check fails, archive and replace it rather than
+rebriefing the stale session.
+
 All restoration, collaborative planning, plan writing, advice, verification,
 status, and waiting count inside the shared 10% control budget. At 10%,
 Operations Lead opens no further control role unless safety, irreversibility,
@@ -267,7 +280,9 @@ After either strategic answer is durably captured, close that pane immediately.
   progress artifact in place using
   `/home/user/azirar/.agents/PROGRESS_ARTIFACT_STANDARD.md`. Do not refresh on
   unchanged timer polls or create a replacement artifact.
-- Roll over leadership before automatic compaction.
+- Roll over leadership before automatic compaction. Replace it immediately if
+  compaction already happened, its internal goal is blocked, or the messenger
+  round trip fails.
 
 ## Validation
 

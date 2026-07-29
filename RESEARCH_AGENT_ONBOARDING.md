@@ -62,6 +62,14 @@ is accepted. Detailed execution rules remain in
   exchanges technical requests and human decisions only with Operations Lead;
   workers and technical roles report through Operations Lead. Operations
   Collaborator is subordinate to Operations Lead, never a second authority.
+- Cross-pane communication uses `herdr-role-message`, never a model's native
+  subagent lookup. Human Orchestrator sends with
+  `herdr-role-message operations "..."`; Operations Lead answers with
+  `herdr-role-message human "..."`. Human Orchestrator may use this one
+  messenger and no other Herdr control command.
+- Treat “do,” “go,” or “continue” as a real instruction when the next action
+  was already discussed. Forward it and start; do not bounce it back to the
+  user or respond with readiness alone.
 - A suborchestrator uses Sol high only for an independent workstream containing
   at least three productive tasks. It decomposes that one stream and closes
   when the stream ends. It launches one temporary worker per subtask and may
@@ -132,6 +140,9 @@ is accepted. Detailed execution rules remain in
 - A finished, idle, or stalled transient pane is a lifecycle defect. Preserve
   useful state, close it, and keep its worktree only until merge, rejection, or
   an explicitly continuing maintenance purpose.
+- Native Herdr integration owns status. Do not call `report-agent`,
+  `report-metadata`, or `release-agent` to make a standing role appear idle,
+  done, waiting, or ready.
 - Independent delegated work is always a named, visible Herdr pane. A native
   Claudex helper is acceptable only while it is short-lived, remains inside one
   pane's task and worktree, and owns no separate outcome. If it needs its own
@@ -318,6 +329,8 @@ control-work percentage.
   contradiction among the task card, project files, and inherited contracts.
   Explicit current user direction has priority.
 - Roll leadership over before automatic compaction or around half context.
+  Replace it immediately if compaction already happened, its internal goal is
+  blocked, or a real `herdr-role-message` round trip fails.
   Fresh sessions reconstruct from `HUMAN_PLAN.md`, handoffs, and cited evidence.
 - Watch scheduler/process state externally. Do not burn turns polling unchanged
   state.
