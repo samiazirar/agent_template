@@ -134,6 +134,9 @@ perform one real round trip: ask Human Orchestrator to send a short route-check
 message to Operations Lead through the helper; Operations Lead replies through
 the helper; Human Orchestrator confirms naturally. If either leg fails, repair
 the route or replace the failed standing session before reporting readiness.
+When Operations Lead is intentionally working on the forwarded instruction,
+run the live-team validator with `--allow-active-standing`; do not force it idle
+merely to satisfy a readiness-only check.
 
 Never use `herdr pane report-agent`, `report-metadata`, or `release-agent` to
 polish standing-role status. Native integration owns status. A standing pane in

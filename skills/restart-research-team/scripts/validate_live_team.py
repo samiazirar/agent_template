@@ -132,11 +132,17 @@ def require_native_claude_model(
 
 
 def main() -> None:
-    if len(sys.argv) != 3:
-        fail("usage: validate_live_team.py WORKSPACE_ID PROJECT_DIR")
+    if len(sys.argv) not in {3, 4} or (
+        len(sys.argv) == 4 and sys.argv[3] != "--allow-active-standing"
+    ):
+        fail(
+            "usage: validate_live_team.py WORKSPACE_ID PROJECT_DIR "
+            "[--allow-active-standing]"
+        )
 
     workspace_id = sys.argv[1]
     project_dir = Path(sys.argv[2]).resolve()
+    allow_active_standing = len(sys.argv) == 4
 
     for contract in (ONBOARDING_PATH, ORCHESTRATION_PATH, PAPERPILOT_PATH):
         if not contract.is_file() or contract.stat().st_size == 0:
@@ -274,7 +280,12 @@ def main() -> None:
     for pane in leadership:
         if pane.get("agent") not in {"codex", "claude"}:
             fail(f"standing leadership pane is not an agent: {pane['label']}")
-        if pane.get("agent_status") not in {"idle", "done"}:
+        allowed_states = (
+            {"idle", "done", "working"}
+            if allow_active_standing
+            else {"idle", "done"}
+        )
+        if pane.get("agent_status") not in allowed_states:
             fail(f"standing leadership is not waiting: {pane['label']}")
     require_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
     require_model(liaisons[0], "Human Orchestrator", "gpt-5.6-sol", "high")
@@ -296,9 +307,20 @@ def main() -> None:
         if pane.get("agent") or pane.get("agent_session"):
             fail(f"{label} retains a completed or active agent instead of an empty bay")
 
-    active = [pane for pane in panes if pane.get("agent_status") in {"working", "blocked"}]
-    if active:
-        fail(f"active research agents remain: {[p['label'] for p in active]}")
+    blocked = [pane for pane in panes if pane.get("agent_status") == "blocked"]
+    if blocked:
+        fail(f"blocked research agents remain: {[p['label'] for p in blocked]}")
+    active = [pane for pane in panes if pane.get("agent_status") == "working"]
+    unexpected_active = (
+        [pane for pane in active if pane not in leadership]
+        if allow_active_standing
+        else active
+    )
+    if unexpected_active:
+        fail(
+            "unexpected active research agents remain: "
+            f"{[p['label'] for p in unexpected_active]}"
+        )
 
     print(json.dumps({
         "ok": True,
@@ -310,7 +332,7 @@ def main() -> None:
             operations[0]["label"],
             collaborators[0]["label"],
         ],
-        "active_agents": 0,
+        "active_agents": len(active),
     }, indent=2))
 
 
