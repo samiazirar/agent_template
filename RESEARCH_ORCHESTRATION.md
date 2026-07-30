@@ -204,13 +204,36 @@ discovery. Human Orchestrator sends technical intent with
 `herdr-role-message operations`; Operations Lead sends human questions and
 material results with `herdr-role-message human`; Operations Collaborator and
 technical roles return through `herdr-role-message operations`. The helper is
-the Human Orchestrator's only permitted Herdr action.
+the Human Orchestrator's normal Herdr action. Its only exception is the guarded
+`herdr-project-save-close --close` command after an explicit Human close
+request and completed Operations save.
 
 When the user says “do,” “go,” “continue,” or an equivalent confirmation after
 an action was proposed, Human Orchestrator forwards that action immediately.
 Operations Lead starts the work or returns one genuinely necessary question.
 An acknowledgement, readiness statement, plan recital, or request to restate
 the same instruction is not completion.
+
+## Save and close
+
+Use `save-close-herdr-project` only when the Human explicitly asks to save and
+close, park, archive, stop, or end the current project. Inactivity is not
+permission.
+
+Operations Lead stops new admission, reaches or records a coherent state for
+in-flight work, captures and closes every temporary role, stops or relocates
+local watchers, records intentionally continuing remote jobs, integrates
+accepted work, retires finished worktrees, updates `OLD_HISTORY.md`, and
+synchronizes the canonical repository. It writes project-root
+`RESTART_HANDOFF.md` last with `Status: CAN RESTART` and
+`Close state: READY TO CLOSE`, then commits and synchronizes that final save.
+
+After Operations Lead confirms completion, Human Orchestrator tells the Human
+the project is saved and runs `herdr-project-save-close --close`. The helper
+must accept no workspace argument and may close only the caller's current
+workspace after deterministic checks. Never call `herdr workspace close`
+directly, stop the shared Herdr server or named session, discard unfinished
+work, or cancel a remote job without explicit permission.
 
 ## Result routing
 

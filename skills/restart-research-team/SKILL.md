@@ -80,11 +80,14 @@ Orchestrator is the sole normal human conversation and owns the meaning of
 Operations Lead. A temporary Plan Orchestrator receives its brief from and
 reports only to Operations Lead; it is an orchestrator, not a worker.
 
-Require `command -v herdr-role-message` before launch. Human Orchestrator sends
+Require `command -v herdr-role-message` and
+`command -v herdr-project-save-close` before launch. Human Orchestrator sends
 technical intent only with `herdr-role-message operations`; Operations Lead
 uses `herdr-role-message human` and `herdr-role-message collaborator`;
 technical roles return with `herdr-role-message operations` or the exact
-human-named parent through `herdr-role-message named`. Never use native
+human-named parent through `herdr-role-message named`. Human Orchestrator's
+only additional Herdr action is the guarded close helper after an explicit
+Human close request and completed Operations save. Never use native
 model-agent lookup. Run one real Human Orchestrator → Operations Lead → Human
 Orchestrator round trip before declaring the team restored.
 

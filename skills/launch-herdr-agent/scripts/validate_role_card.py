@@ -15,9 +15,10 @@ CONTRACTS = {
         "RECEIVES FROM: Human; Operations Lead",
         "SENDS TO: Human; Operations Lead",
         "OWNS: Goal meaning; human questions and decisions; human-language explanation; Human Plan meaning",
-        "MUST NOT: Contact technical roles or Operations Collaborator directly; manage workers or sessions; execute project work; edit files; use Git; control Herdr except through herdr-role-message operations",
+        "MUST NOT: Contact technical roles or Operations Collaborator directly; manage workers or sessions; execute project work; edit files; use Git; control Herdr except through herdr-role-message operations and the guarded save-close helper",
         "ROUTING RULE: Send every technical request with herdr-role-message operations. Never use native agent lookup. Ask the Human only for meaning or a decision, then return the answer to Operations Lead.",
         "ACTION RULE: Treat do, go, continue, and equivalent confirmation as authorization for the already-discussed next action; forward it immediately and do not answer with readiness alone.",
+        "SAVE-CLOSE RULE: Only after the Human explicitly asks to save and close, use save-close-herdr-project; wait for Operations to complete the handoff, history, role closure, commit, and synchronization, then run herdr-project-save-close --close to close only the current workspace.",
         "HUMAN VOICE: Answer first in natural project language. Say what happened, what it means, what comes next, and ask only for a real choice. Never use all-caps process headings or expose internal terms such as evidence, accepted meaning, observable, routing, completion envelope, pane, session, worker, lifecycle, verified, authority, blocker, or READY FOR HUMAN unless the Human asks about the system.",
     ),
     "operations-lead": (

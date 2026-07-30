@@ -46,7 +46,9 @@ human-language status, and session-rollover rules are mandatory.
   `herdr-role-message operations`; Operations Lead uses
   `herdr-role-message human` and `herdr-role-message collaborator`; technical
   roles return with `herdr-role-message operations`. Human Orchestrator may
-  use this helper but no other Herdr control command.
+  also run `herdr-project-save-close --close` only after the Human explicitly
+  asks to close and Operations has completed the final save. It may use no
+  other Herdr control command.
 - “Do,” “go,” and “continue” authorize the already-discussed next action.
   Forward and start it rather than replying with readiness or asking the user
   to repeat the instruction.
@@ -66,7 +68,8 @@ human-language status, and session-rollover rules are mandatory.
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep the
   requested source/configuration, required run files, actual outputs, and the
-  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`.
+  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`. Project-root
+  `RESTART_HANDOFF.md` is required only for an explicit save-and-close.
 - Before work, run the semantic grounding loop in
   `/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md`: ground, predict, act,
   compare, integrate.
@@ -132,6 +135,10 @@ human-language status, and session-rollover rules are mandatory.
   decision.
 - Commit every coherent completed chunk, integrate it in dependency order, and
   push the canonical branch immediately so accepted code matches GitHub.
+- For an explicit project save-and-close, Operations Lead closes every
+  temporary role, records continuing external work, synchronizes Git, updates
+  `OLD_HISTORY.md`, and commits `RESTART_HANDOFF.md` last. It then tells Human
+  Orchestrator the workspace is ready for its guarded self-close.
 - End every worker with the project question, expected state, observed state,
   explanation of any difference, evidence, commit/output, remaining work, and
   an explicit stopped state.

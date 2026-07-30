@@ -1,0 +1,4 @@
+interface:
+  display_name: "Save and Close Herdr Project"
+  short_description: "Preserve a project and close its workspace"
+  default_prompt: "Use $save-close-herdr-project to save this project for restart and close its current Herdr workspace."

@@ -43,7 +43,9 @@ is accepted. Detailed execution rules remain in
   review files, dashboards, project hubs, duplicate READMEs, or status
   documents. Keep only requested code/configuration, files required to run it,
   actual outputs, and the existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`
-  required by the fixed Herdr layout.
+  required by the fixed Herdr layout. Project-root `RESTART_HANDOFF.md` is the
+  one additional required record when the Human explicitly asks to save and
+  close the project.
 
 ## 2. Leadership and model roles
 
@@ -77,8 +79,10 @@ is accepted. Detailed execution rules remain in
 - Cross-pane communication uses `herdr-role-message`, never a model's native
   subagent lookup. Human Orchestrator sends with
   `herdr-role-message operations "..."`; Operations Lead answers with
-  `herdr-role-message human "..."`. Human Orchestrator may use this one
-  messenger and no other Herdr control command.
+  `herdr-role-message human "..."`. Human Orchestrator may use this messenger
+  and, only after an explicit Human close request and completed Operations
+  save, `herdr-project-save-close --close`. It may use no other Herdr control
+  command.
 - Direct prompting uses `herdr pane run` only after the target is `idle` or
   `done`, followed by confirmation that the new turn started or completed.
   Never use `send-text` for a prompt. A “Messages to be submitted after next
@@ -379,6 +383,13 @@ control-work percentage.
 - A restart rebuilds context and team structure only. It does not resume
   coding, experiments, schedulers, monitoring, PaperPilot publication, or
   workers.
+- On an explicit Human request to save and close, use
+  `save-close-herdr-project`. Operations Lead stops new admission, closes all
+  temporary roles, records any continuing external job or service, integrates
+  and synchronizes accepted work, updates `OLD_HISTORY.md`, and commits
+  project-root `RESTART_HANDOFF.md` as the final save. The Human Orchestrator
+  then runs the guarded close helper. The helper closes only the caller's
+  workspace; it never stops the shared Herdr server or named session.
 - Fresh Operations Lead, Operations Collaborator, and Human Orchestrator
   reconstruct and explain the plan in
   ordinary language. Ask the human only when a material ambiguity prevents the

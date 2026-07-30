@@ -33,7 +33,8 @@ orchestration contracts provide the detailed rules.
   or prose records merely to describe work. Allowed outputs are the requested
   source/configuration, files required to run it, actual experiment outputs,
   and the existing `HUMAN_PLAN.md` and `OLD_HISTORY.md` required by the fixed
-  Herdr layout.
+  Herdr layout. Project-root `RESTART_HANDOFF.md` is the one additional
+  required record when the Human explicitly asks to save and close a project.
 
 ### Enforce 90/10 at admission
 
@@ -155,7 +156,9 @@ API-key provider.
   `herdr-role-message human` or `herdr-role-message collaborator`, and
   technical roles use `herdr-role-message operations`. The helper resolves the
   named role inside the current workspace and keeps internal identifiers
-  hidden. Human Orchestrator may use this messenger but no other Herdr control.
+  hidden. Human Orchestrator may use this messenger and the guarded
+  `herdr-project-save-close --close` command after an explicit Human close
+  request and a completed Operations save. It may use no other Herdr control.
 - A prompt is sent with `herdr pane run`, never `send-text`. Send only after
   the target is `idle` or `done`, then confirm it becomes `working` or
   completes the new turn. Text shown as “Messages to be submitted after next
@@ -202,6 +205,13 @@ API-key provider.
   context has compacted, its internal goal is blocked, or a real role-to-role
   route check fails. Record the old native session reference in history, close
   the old pane, and launch a fresh role in the same place.
+- When the Human explicitly asks to save and close, the Human Orchestrator uses
+  `save-close-herdr-project`. Operations Lead closes temporary roles, records
+  continuing external work, synchronizes the canonical repository, updates
+  history, and commits project-root `RESTART_HANDOFF.md` as the final save.
+  After Operations confirms readiness, the Human Orchestrator runs the guarded
+  helper, which may close only its own current workspace. Never stop the shared
+  Herdr server or named session, and never treat inactivity as permission.
 - One worker owns exactly one concrete subtask, branch, and worktree.
   Independent subtasks use concurrent workers. When a worker finishes,
   Operations Lead captures its short result and native session reference,

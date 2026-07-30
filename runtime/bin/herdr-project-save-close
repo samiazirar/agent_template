@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exec python3 \
+  /home/user/azirar/.agents/skills/save-close-herdr-project/scripts/save_close_workspace.py \
+  "$@"

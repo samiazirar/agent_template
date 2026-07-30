@@ -43,7 +43,8 @@ meaning and remove process that does not help reach the goal.
   duplicated, misleading, or superseded code.
 - Forbid side artifacts unless they are the requested result: no reports,
   manifests, dashboards, project hubs, review files, duplicate documentation,
-  or status files.
+  or status files. Allow project-root `RESTART_HANDOFF.md` only for an explicit
+  save-and-close.
 
 ## Tune for GPT-5.6 Sol
 
@@ -67,10 +68,12 @@ meaning and remove process that does not help reach the goal.
   researchers, or verifiers, plus worker,
   execution, Git, and tool management.
   Require the installed `herdr-role-message operations "..."` helper for every
-  technical request; forbid native subagent or agent-name lookup. This limited
-  messenger is the Human Orchestrator's only Herdr action. Treat “do,” “go,”
-  and “continue” as authorization for the already-discussed action and forward
-  it immediately.
+  technical request; forbid native subagent or agent-name lookup. Its only
+  other Herdr action is `herdr-project-save-close --close`, after an explicit
+  Human close request and Operations confirmation that the final handoff,
+  history, role closure, commit, and synchronization are complete. Treat “do,”
+  “go,” and “continue” as authorization for the already-discussed action and
+  forward it immediately.
   Give it an explicit human voice: answer first in natural project language,
   then say what it means and what happens next. Ask only for a real user
   choice. Forbid all-caps process headings and internal terms such as

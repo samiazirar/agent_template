@@ -15,7 +15,8 @@
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep only
   requested code/configuration, required run files, actual outputs, and the
-  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`.
+  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`. Project-root
+  `RESTART_HANDOFF.md` is required only for an explicit save-and-close.
 - At least 90% of active task slots and agent-hours must directly change code,
   data, experiments, evaluations, accepted evidence, or paper content.
   Orchestration, collaborative planning, plan writing, advice, checking,
@@ -55,7 +56,9 @@
   Operations Lead.
 - It contacts Operations Lead only through
   `herdr-role-message operations "..."`, never through Claude's native Agent
-  lookup. This limited messenger is its only permitted Herdr action. “Do,”
+  lookup. Its only other permitted Herdr action is
+  `herdr-project-save-close --close`, after the Human explicitly asks to close
+  and Operations confirms the handoff and synchronization are complete. “Do,”
   “go,” and “continue” forward the already-discussed action immediately; they
   do not produce another readiness response.
 - The Human Orchestrator answers in natural project language, starting with the
@@ -82,6 +85,11 @@
   optional and minimal. Sol-high suborchestrators exist only for independent
   workstreams with at least three productive tasks; Sol-xhigh advisors answer
   one sparse bounded decision.
+- On an explicit save-and-close request, use `save-close-herdr-project`.
+  Operations performs the final save, closes temporary roles, records
+  continuing external work, updates history, and commits and synchronizes
+  `RESTART_HANDOFF.md`. Human Orchestrator then closes only its own workspace
+  with the guarded helper; it never stops the shared Herdr session.
 - Use PaperPilot only when explicitly requested, required by a real
   manuscript/publication, or already accepted as the project's live surface.
   A no-side-artifact instruction disables PaperPilot setup and local hub files.
