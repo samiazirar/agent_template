@@ -45,6 +45,11 @@ TRANSIENT_PREFIXES = {
     "Second Eye",
     "PaperPilot Maintainer",
 }
+STANDING_PREFIXES = {
+    "Human Orchestrator",
+    "Operations Lead",
+    "Operations Collaborator",
+}
 IDLE_FOREGROUND = {"bash", "dash", "fish", "frogmouth", "sh", "zsh"}
 
 
@@ -155,11 +160,14 @@ def check_workspace(workspace_id: str) -> None:
 
     remaining: list[str] = []
     busy_shells: list[str] = []
+    standing: list[str] = []
     for pane in panes:
         label = pane.get("label", "")
         prefix = label.split(" · ", 1)[0]
         tab_name = tab_names.get(pane.get("tab_id"), "")
         if pane.get("agent") or pane.get("agent_session"):
+            if tab_name == "01 Orchestrators":
+                standing.append(prefix)
             if tab_name in TRANSIENT_TABS or prefix in TRANSIENT_PREFIXES:
                 remaining.append(label or f"unnamed role in {tab_name}")
             continue
@@ -184,13 +192,18 @@ def check_workspace(workspace_id: str) -> None:
             + "; ".join(busy_shells)
         )
 
-    validator = (
-        Path(__file__).resolve().parents[2]
-        / "restart-research-team"
-        / "scripts"
-        / "validate_pane_lifecycle.py"
-    )
-    require_command(sys.executable, str(validator), workspace_id)
+    unexpected = [prefix for prefix in standing if prefix not in STANDING_PREFIXES]
+    if (
+        standing.count("Human Orchestrator") != 1
+        or standing.count("Operations Lead") != 1
+        or standing.count("Operations Collaborator") > 1
+        or unexpected
+    ):
+        raise CloseError(
+            "The standing project roles are ambiguous; require one Human "
+            "Orchestrator, one Operations Lead, and at most one Operations "
+            f"Collaborator. Found: {', '.join(standing) or 'none'}."
+        )
 
 
 def main() -> int:

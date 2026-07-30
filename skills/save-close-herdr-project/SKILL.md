@@ -95,6 +95,10 @@ upstream equality when a remote exists, absence of temporary roles and
 foreground watcher processes, and then closes only
 `$HERDR_WORKSPACE_ID`.
 
+For an older project that predates the standing Operations Collaborator, do
+not launch one only for closure. Require one Human Orchestrator and one
+Operations Lead; the collaborator may be absent while closing.
+
 If the helper refuses, do not bypass it or call `herdr workspace close`
 directly. Translate the one reported issue into ordinary language, send the
 repair to Operations Lead, and run the helper again after Operations confirms
