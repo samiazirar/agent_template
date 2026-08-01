@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, an OpenCode Sol-high Operations Lead, Markdown-only Human Plan pane, OpenCode Luna-max coding workers, OpenCode Sol-medium task suborchestrators, fresh worker chats, compact restart continuity, and sparse native-Codex researchers, watchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
+description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, a native-Codex Sol-high Operations Lead, Markdown-only Human Plan pane, native-Codex Luna-max coding workers, native-Codex Sol-medium task suborchestrators, direct child-to-parent wake-ups, fresh worker chats, compact restart continuity, and sparse researchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
 ---
 
 # Launch Herdr sessions
@@ -57,19 +57,9 @@ herdr-agent \
 
 The launcher opens only the selected interactive executable:
 
-- `opencode` uses GPT-5.6 Sol at medium effort for suborchestrators, Plan
-  Orchestrators, and harder workers; `opencode-high` is the Sol-high Operations
-  Lead; `opencode-xhigh` and `opencode-max` are bounded escalations.
-- `opencode-luna` uses GPT-5.6 Luna at max effort for normal coding and
-  execution workers. `opencode-luna-low` is support-only.
-- Every OpenCode role uses the existing OpenAI OAuth credential, pins its model
-  and effort, retains the Herdr integration, and denies hidden task-agent
-  delegation. Its normal personal OpenCode default remains unchanged.
-- The launcher checks `opencode auth list` before creating a tab and stops if
-  OpenAI OAuth is absent; it never falls back to GLM. To authenticate manually,
-  start `opencode`, enter `/connect`, choose OpenAI, choose ChatGPT Plus/Pro,
-  and finish the browser login. Confirm with `opencode auth list` and
-  `opencode models openai`.
+- OpenCode profiles are alternate-provider routes only. Use them when the task
+  explicitly selects GLM 5.2 or another non-OpenAI provider; never use them as
+  the default harness for OpenAI Sol or Luna.
 
 - `codex` uses the configured GPT-5.6 Sol model and medium reasoning.
 - `codex-low` uses GPT-5.6 Sol at low reasoning for bounded research or data
@@ -100,17 +90,17 @@ research task remains read-only. Neither may broaden its task.
 
 Do not pass a task to the native executable as an argv prompt. After the new
 agent reaches its interactive prompt, send its task with `herdr pane run`.
-Never use `send-text` for a task or message. Do not call `pane run` while the
-target is working unless deliberate interruption is required. If the UI shows
-“Messages to be submitted after next tool call,” the message is queued rather
-than accepted: wait for it to start, do not claim delivery, and do not send it
-again.
+Never use `send-text` for a task or message. Native Codex accepts steering
+during an active turn and explicit next-turn queuing. Do not call `pane run`
+while an OpenCode target is working unless deliberate interruption is
+required. If it shows “Messages to be submitted after next tool call,” the
+message is queued rather than accepted: do not claim delivery or duplicate it.
 
 ## Complete project launch
 
 When the user requests a space, project, team, ecosystem, or the whole setup,
-launch the two standing roles below. Operational execution uses OpenCode unless
-the user selects another permitted harness for one productive task.
+launch the two standing roles below. Operational execution uses native Codex;
+OpenCode is an explicit alternate-provider choice for one productive task.
 
 Create these standing roles in `01 Orchestrators`:
 
@@ -136,7 +126,7 @@ Create these standing roles in `01 Orchestrators`:
    handoff, role closure, Git commit, and synchronization are complete. Treat
    “do,” “go,” and “continue” as authorization for the already-discussed
    action and forward it immediately; do not answer with readiness alone.
-2. `Operations Lead · PersonName Goal` — OpenCode Sol high. Own decomposition,
+2. `Operations Lead · PersonName Goal` — native Codex Sol high. Own decomposition,
    execution order, worktrees, worker and suborchestrator lifecycle,
    integration, commits, synchronization, technical state, and the rolling
    90/10 budget. Be the sole operational authority and normal bridge between
@@ -149,7 +139,8 @@ Normal communication must follow:
 Lead is the sole technical authority. No technical role may bypass it.
 
 Before launching, require `command -v herdr-role-message`,
-`command -v herdr-project-save-close`, and `command -v herdr-costs`. After launch,
+`command -v herdr-emergency-wake`, `command -v herdr-project-save-close`, and
+`command -v herdr-costs`. After launch,
 perform one real round trip: ask Human Orchestrator to send a short route-check
 message to Operations Lead through the helper; Operations Lead replies through
 the helper; Human Orchestrator confirms naturally. If either leg fails, repair
@@ -205,7 +196,7 @@ The plan writer uses the same natural human voice: “what we know,” “result
 language, and all-caps readiness labels.
 
 For productive work, Operations Lead or one owning suborchestrator launches one
-fresh named OpenCode Luna-max worker for each clear coding package. One worker owns one deliverable, one
+fresh named native-Codex Luna-max worker for each clear coding package. One worker owns one deliverable, one
 reproduction or run, one done check, normally no more than three tightly
 coupled files or one experiment stage, one branch, and one worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
@@ -216,18 +207,26 @@ rejection. Every later package or correction uses a fresh worker chat. A worker 
 reports only to Operations Lead or its one owning suborchestrator; it never contacts
 the Human Orchestrator or user.
 
+The parent never waits inside its model turn. After launching a child, arm
+`herdr-emergency-wake` with the child pane, a realistic maximum-silence interval,
+and one recovery action, then finish the parent turn after dispatching any
+other independent work. The child reports with `herdr-role-message`, which
+wakes or steers the parent, and stops without waiting for acknowledgement.
+Closing the child pane disarms the emergency wake. Never run `herdr wait`,
+`sleep`, or a polling loop in Operations Lead or a suborchestrator.
+
 Luna self-verifies against the attached done check. Give a harder package to a
-fresh OpenCode Sol-medium worker when Luna cannot choose between materially different approaches,
+fresh native-Codex Sol-medium worker when Luna cannot choose between materially different approaches,
 its first coherent repair fails, the work expands beyond its bounded
 subsystem, tool results contradict the task premise, or the result cannot be
 reproduced. Do not open a verifier or spend a Sol turn after every successful
 Luna task.
 
-For one meaningful multi-package task, Operations Lead launches one OpenCode Sol-medium
+For one meaningful multi-package task, Operations Lead launches one native-Codex Sol-medium
 named suborchestrator in `03 Suborchestrators`. Give it one measurable task goal
 and observed finish condition. It does no coding or experiment execution. It
 turns only the next useful work into minimal task cards, launches one fresh
-OpenCode Luna-max worker per normal coding package or OpenCode Sol-medium worker for a harder
+native-Codex Luna-max worker per normal coding package or native-Codex Sol-medium worker for a harder
 package, absorbs compact results, integrates the task for Operations Lead, and
 closes when the task ends. An already-atomic package goes directly to one
 worker to avoid overhead. It communicates only with Operations
@@ -244,19 +243,20 @@ or decision. It contains only the goal, current result/code state, running
 external work, exact next action, and Git state. `HUMAN_PLAN.md` remains the
 only human-facing plan. Do not create further status artifacts.
 
-Each native-Codex Luna-low watcher card must name success, failure, maximum silence, owner, recovery
-action, and terminal event. The trusted external service stays silent on
-unchanged state, but maximum silence wakes the owner with the recovery action;
-the watcher then ends when its condition or owner ends. Never leave an active
-task represented only by an idle or waiting pane.
+Ordinary child completion needs no model watcher: the child message wakes its
+parent and `herdr-emergency-wake` covers maximum silence. A native-Codex
+Luna-low watcher is reserved for genuinely long processes or scheduler events;
+its card names success, failure, maximum silence, owner, recovery action, and
+terminal event. Never leave an active task represented only by an idle or
+waiting pane.
 
 `herdr-agent` registers every session automatically. The lightweight
 terminal command `herdr-costs report` shows the human-named hierarchy with own
 and aggregate time, tokens, and API-equivalent cost. Do not launch an agent to
 measure usage and do not create a manual dashboard.
 
-OpenCode usage comes from its native database, including model, effort, token,
-cost, duration, and skill-tool records. Claudex uses the zero-context `SessionStart` command hook
+OpenCode alternate-provider usage comes from its native database. Native Codex
+usage is collected by the Herdr integration. Claudex uses the zero-context `SessionStart` command hook
 `herdr-costs register-hook`, so new and resumed Herdr sessions remain attached
 to the ledger even when the native Claude harness recreates its session. The
 report also shows actual skill uses with associated tokens and cost. Keep
@@ -335,8 +335,8 @@ Every task-bearing prompt must include:
 - the preserved project goal in plain language;
 - the role's differing current and expected states;
 - one role-appropriate outcome;
-- the explicitly selected model and effort, using Luna-max by default for a
-  bounded coding worker through OpenCode;
+- the explicitly selected model and effort, using native-Codex Luna-max by
+  default for a bounded coding worker;
 - the working directory or worktree;
 - the concise `AGENT_SYSTEM_STANDARD.md` and project `AGENTS.md`; only standing
   leaders and suborchestrators load the long onboarding and orchestration
@@ -359,13 +359,15 @@ the only valid technical route, name `save-close-herdr-project` and
 `herdr-project-save-close --close` as the sole explicit project-closing
 exception, require a continuously current compact `RESTART_HANDOFF.md`, and
 forbid native Agent lookup. The Operations Lead prompt must
-require OpenCode Luna-max as the default coding worker, one fresh worker per minimal package, concurrent
+require native-Codex Luna-max as the default coding worker, one fresh worker per minimal package, concurrent
 independent workers, closure immediately after a transient final report is
 captured and before integration, sole-bridge routing, and active enforcement of
-the 90/10 budget.
+the 90/10 budget. It must forbid `herdr wait`, `sleep`, and polling for child
+roles; require direct child wake messages and one armed emergency wake per
+child.
 Worker prompts must give one Luna-sized result and forbid hidden delegation,
 unrelated work, and direct human-side contact. Suborchestrator prompts use Sol
-medium through OpenCode, define one task and finish condition, forbid coding, issue minimal
+medium through native Codex, define one task and finish condition, forbid coding, issue minimal
 packages to fresh workers, report only to Operations Lead, and forbid another
 orchestration layer.
 Plan Orchestrator prompts must limit writes to `HUMAN_PLAN.md`, report only to

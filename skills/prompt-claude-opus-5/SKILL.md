@@ -73,15 +73,6 @@ performs.
 
 ## Preserve role boundaries
 
-- The standing Operations Collaborator uses native Opus 5 at medium effort and
-  stays in the background. It receives one bounded collaborative-planning,
-  decomposition-alternative, or milestone-interpretation question from
-  Operations Lead, returns one concise recommendation only to Operations Lead,
-  then returns idle.
-- Forbid the Operations Collaborator from contacting the Human Orchestrator,
-  managing or contacting workers, integrating Git, inspecting broadly,
-  becoming an approval step, or duplicating daily operations. Every wake counts
-  against the shared 10% control budget.
 - A productive Opus worker exists only when explicitly selected. It receives
   one minimal package in a fresh chat from Operations Lead or one owning
   suborchestrator and reports only to that assigning role.
@@ -93,10 +84,10 @@ performs.
 - Include the canonical `worker` role block from
   `launch-herdr-agent/scripts/validate_role_card.py` in a productive-worker
   prompt.
-- Long work uses the external event service with success, failure, maximum
-  silence, owner, recovery action, and terminal event. Do not ask Opus to poll
-  or maintain a usage report; `herdr-costs report` supplies the deterministic
-  time/token/cost tree.
+- The worker wakes its assigning orchestrator with `herdr-role-message` and
+  stops. Do not ask Opus to poll, wait for acknowledgement, or maintain a usage
+  report; the parent uses `herdr-emergency-wake` as its silence fallback and
+  `herdr-costs report` supplies the deterministic time/token/cost tree.
 
 When the user asks for current or latest guidance, check the official
 [Claude Opus 5 prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)

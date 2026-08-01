@@ -3,8 +3,7 @@
 Read `/home/user/azirar/.agents/AGENT_SYSTEM_STANDARD.md` for the concise
 system structure and model-selection map.
 
-Human Orchestrator, Operations Lead, Operations Collaborator, and each
-suborchestrator also read
+Human Orchestrator, Operations Lead, and each suborchestrator also read
 `/home/user/azirar/.agents/RESEARCH_AGENT_ONBOARDING.md` and
 `/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md`. Workers do not load
 those long manuals: the concise standard and their validated task card are the
@@ -36,16 +35,12 @@ complete operating context for one minimal work package.
   routing, envelope, pane, session, worker, lifecycle, verified, authority,
   blocker, or `READY FOR HUMAN`, or use all-caps process headings, unless the
   user explicitly asks about the system.
-- Standing roles are one native-Codex Sol-high Human Orchestrator, one OpenCode
-  Sol-high Operations Lead with sole operational authority, and one native
-  Claude Opus-5-medium Operations Collaborator. The collaborator stays in the
-  background, answers one bounded collaborative-planning, decomposition, or
-  milestone question only from the Operations Lead, then returns idle. It
-  never contacts the human side, workers, Git, or Herdr.
+- Standing roles are one native-Codex Sol-high Human Orchestrator and one
+  native-Codex Sol-high Operations Lead with sole operational authority.
 - Cross-pane requests use the installed `herdr-role-message` helper, not native
   model-agent discovery. Human Orchestrator uses
   `herdr-role-message operations`; Operations Lead uses
-  `herdr-role-message human` and `herdr-role-message collaborator`; technical
+  `herdr-role-message human`; technical
   roles return with `herdr-role-message operations`. Human Orchestrator may
   also run `herdr-project-save-close --close` only after the Human explicitly
   asks to close and Operations has completed the final save. It may use no
@@ -101,8 +96,14 @@ complete operating context for one minimal work package.
 
 # Long work and waiting
 
-- Use one external event-driven service for long work. It wakes a native-Codex
-  Luna-low watcher only on a changed event or maximum-silence event.
+- A worker wakes its parent directly with `herdr-role-message` when it finishes
+  or needs recovery. Operations and suborchestrators never run `herdr wait`,
+  `sleep`, or polling loops for child roles. They arm `herdr-emergency-wake`
+  before yielding; it wakes the parent once if the child remains open past the
+  task-specific silence interval. Closing the child disarms the fallback.
+- Use one external event-driven service only for genuinely long processes,
+  schedulers, or remote work. It wakes a native-Codex Luna-low watcher only on
+  a changed event or maximum-silence event.
 - The watcher has no project-write authority and does not perform the waiting
   loop. It receives only bounded event data. Trusted service code may wake one
   named visible
@@ -110,7 +111,7 @@ complete operating context for one minimal work package.
 - Do not issue repeated model turns to poll unchanged state. Every watch names
   success, failure, maximum silence, owner, and the recovery action fired when
   silence expires. A watcher closes on its terminal event.
-- Default coding workers to OpenCode Luna max. Luna support or supervision may use low
+- Default coding workers to native Codex Luna max. Luna support or supervision may use low
   but never higher. Use Sol medium for harder coding. Select Sol low through
   max for bounded research or data crunching according to actual difficulty;
   use Terra medium for open-ended research.
@@ -130,12 +131,12 @@ complete operating context for one minimal work package.
 
 - Reproduce first, implement or run, verify, then compare the expected and
   observed state.
-- Normal coding workers use Luna max for one clear, repeatable package with one
+- Normal coding workers use native Codex Luna max for one clear, repeatable package with one
   deliverable and reproducible done check, normally within three tightly
   coupled files or one experiment stage. Escalate the same task to Sol medium
   after one failed coherent repair, material ambiguity, scope expansion, or a
-  non-reproducible result. Opus 5 and OpenCode GLM 5.2 remain selectable
-  alternatives. Terra-high remains human-selected only.
+  non-reproducible result. Opus 5 and OpenCode GLM 5.2 remain explicitly
+  selectable alternatives. Terra-high remains human-selected only.
 - Bounded research and data crunching use Sol at the lowest sufficient effort;
   open-ended research uses one Terra-medium Researcher. A Verifier is optional, Sol medium, minimal, and opened
   only for one consequential anomaly that routine self-verification cannot

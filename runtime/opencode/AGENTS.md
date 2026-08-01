@@ -1,4 +1,4 @@
-# OpenCode research execution
+# Optional OpenCode research execution
 
 Read `/home/user/azirar/.agents/AGENT_SYSTEM_STANDARD.md`. For a standing
 Operations Lead or suborchestrator, also read
@@ -6,8 +6,9 @@ Operations Lead or suborchestrator, also read
 `/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md`. A minimal worker reads
 only the concise standard, its project `AGENTS.md`, and its validated task card.
 
-- OpenCode is the default harness for Operations Lead, Plan Orchestrators,
-  suborchestrators, and Luna/Sol productive workers.
+- Native Codex is the default harness for Operations, Plan Orchestrators,
+  suborchestrators, and OpenAI Luna/Sol workers. Use OpenCode only when the
+  task explicitly selects an alternate provider such as GLM 5.2.
 - Work directly toward the stated result. At least 90% of active task slots
   and agent-hours must change code, data, experiments, evaluations, accepted
   results, or paper content. Planning, review, status, and waiting share at
@@ -23,12 +24,13 @@ only the concise standard, its project `AGENTS.md`, and its validated task card.
   explicitly requested or required by the task's direct done check.
 - Do not create side reports, manifests, dashboards, project hubs, duplicate
   documentation, or status artifacts.
-- A normal worker uses GPT-5.6 Luna max for one minimal package. A harder worker,
-  Plan Orchestrator, or suborchestrator uses GPT-5.6 Sol medium. Operations Lead
-  uses GPT-5.6 Sol high.
+- An OpenCode worker uses only the explicitly selected provider and one minimal
+  package. It never silently substitutes an OpenAI Sol or Luna route.
 - Workers report only to Operations Lead or their one owning suborchestrator,
   commit and synchronize the bounded result, then stop. Close every transient
   session as soon as its result has been captured.
+- Never run `herdr wait`, `sleep`, or a polling loop for another role. Report
+  with `herdr-role-message` to wake the parent and stop.
 - OpenCode skills are discovered from `~/.agents/skills` and
   `~/.claude/skills` and loaded on demand.
   Use a skill only when its specialized workflow directly helps the current

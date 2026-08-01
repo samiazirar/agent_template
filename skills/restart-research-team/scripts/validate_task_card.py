@@ -110,7 +110,7 @@ def self_test() -> int:
 PROJECT QUESTION: Does measured depth improve robot planning?
 MILESTONE RESULT: One resumed GPU rehearsal produces measured progress.
 OUTCOME CLASS: run
-MODEL: OpenCode GPT-5.6 Luna max
+MODEL: Native Codex GPT-5.6 Luna max
 TASK: Resume one short training run from its saved checkpoint.
 CURRENT STATE: The program has no verified resumed GPU step.
 EXPECTED STATE: The program advances at least one step after checkpoint reload.

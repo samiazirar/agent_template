@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf '%s\n' \
+    'usage: herdr-emergency-wake arm operations WORKER_PANE SECONDS MESSAGE' \
+    '       herdr-emergency-wake arm named "Role · Human Name" WORKER_PANE SECONDS MESSAGE' >&2
+  exit 2
+}
+
+[[ "${HERDR_ENV:-}" == "1" ]] || {
+  printf 'herdr-emergency-wake must run inside Herdr\n' >&2
+  exit 1
+}
+[[ -n "${HERDR_WORKSPACE_ID:-}" ]] || {
+  printf 'current Herdr workspace is unavailable\n' >&2
+  exit 1
+}
+
+fire() {
+  local workspace_id="$1"
+  local mode="$2"
+  local owner="$3"
+  local pane_id="$4"
+  local seconds="$5"
+  local recovery="$6"
+
+  sleep "$seconds"
+
+  local pane_json
+  pane_json="$(herdr pane get "$pane_id" 2>/dev/null)" || exit 0
+
+  local summary
+  summary="$(python3 -c '
+import json
+import sys
+
+pane = json.load(sys.stdin)["result"]["pane"]
+label = pane.get("label") or "assigned role"
+status = pane.get("agent_status") or "unknown"
+print(f"{label} is still {status}")
+' <<<"$pane_json"
+  )"
+
+  export HERDR_WORKSPACE_ID="$workspace_id"
+  local message="Emergency wake after ${seconds}s: ${summary}. ${recovery} Do not wait or poll inside this turn."
+  if [[ "$mode" == "operations" ]]; then
+    herdr-role-message operations "$message"
+  else
+    herdr-role-message named "$owner" "$message"
+  fi
+}
+
+if [[ "${1:-}" == "_fire" ]]; then
+  [[ $# -eq 7 ]] || usage
+  fire "$2" "$3" "$4" "$5" "$6" "$7"
+  exit 0
+fi
+
+[[ "${1:-}" == "arm" ]] || usage
+shift
+
+mode="${1:-}"
+case "$mode" in
+  operations)
+    [[ $# -ge 4 ]] || usage
+    owner="Operations Lead"
+    shift
+    ;;
+  named)
+    [[ $# -ge 5 ]] || usage
+    owner="$2"
+    shift 2
+    ;;
+  *) usage ;;
+esac
+
+pane_id="${1:-}"
+seconds="${2:-}"
+shift 2
+recovery="$*"
+
+[[ "$seconds" =~ ^[1-9][0-9]*$ ]] || {
+  printf 'SECONDS must be a positive integer\n' >&2
+  exit 2
+}
+[[ -n "$pane_id" && -n "$recovery" ]] || usage
+
+nohup "$0" _fire "$HERDR_WORKSPACE_ID" "$mode" "$owner" "$pane_id" "$seconds" "$recovery" \
+  </dev/null >/dev/null 2>&1 &
+printf 'Emergency wake armed for %ss; closing the target pane disarms it.\n' "$seconds"

@@ -1,4 +1,4 @@
 interface:
   display_name: "Restart Research Team"
   short_description: "Rebuild productive Herdr research teams"
-  default_prompt: "Use $restart-research-team to restore the Human Plan viewer, one native-Codex Human Orchestrator, the OpenCode Sol-high Operations Lead, and only immediately justified 90/10-budgeted temporary roles."
+  default_prompt: "Use $restart-research-team to restore the Human Plan viewer, one native-Codex Human Orchestrator, one native-Codex Sol-high Operations Lead, and only immediately justified non-blocking 90/10-budgeted temporary roles."

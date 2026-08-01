@@ -134,7 +134,7 @@ alone cannot complete an empirical milestone.
 
 ## Roles
 
-- The OpenCode Sol-high **Operations Lead** owns the frozen question,
+- The native-Codex Sol-high **Operations Lead** owns the frozen question,
   evidence-based technical state, result-level milestone, decomposition,
   dependencies, dispatch, merges, run coordination, and outcome accounting. It
   is the sole operational authority and enforces the rolling 90/10 budget. It
@@ -152,21 +152,21 @@ alone cannot complete an empirical milestone.
   Operations Lead and does not contact workers,
   suborchestrators, Plan Orchestrators, advisors, researchers, or verifiers
   directly.
-- An OpenCode Sol-medium suborchestrator owns exactly one meaningful multi-package task,
+- A native-Codex Sol-medium suborchestrator owns exactly one meaningful multi-package task,
   its goal, and its observed finish condition. It does no coding or experiment
   execution. It issues only the next useful minimal packages, launches one
   fresh worker chat per package, reconciles their results, and closes when the
   task ends. It cannot create another suborchestrator. Operations sends an
   already-atomic package directly to one worker.
-- Coding workers normally use OpenCode Luna max and implement or execute exactly one
+- Coding workers normally use native Codex Luna max and implement or execute exactly one
   clear package. A Luna-sized package has one deliverable, one reproduction or
   run, one done check, and normally no more than three tightly coupled files or
   one experiment stage. Workers reproduce first, make the change or run,
   compare expected versus observed state, report only to Operations Lead or
   their one owning suborchestrator, commit, sync, and stop.
-- OpenCode Sol medium is the default harder coding worker. Native Codex and
-  OpenCode GLM 5.2 remain explicit alternatives when a separate context
-  clearly helps. Bounded
+- Native Codex Sol medium is the default harder coding worker. OpenCode GLM
+  5.2 remains an explicit alternate-provider option when a separate context
+  clearly helps; OpenCode is not the normal OpenAI-model harness. Bounded
   research and data crunching use Sol at the lowest sufficient effort, from
   low through max; open-ended synthesis defaults to one Terra-medium
   Researcher. Luna support or supervision never exceeds low.
@@ -218,6 +218,14 @@ the Human Orchestrator's normal Herdr action. Its only exception is the guarded
 `herdr-project-save-close --close` command after an explicit Human close
 request and completed Operations save.
 
+Worker and suborchestrator completion messages are active wake-ups, not status
+notes. A parent orchestrator never calls `herdr wait`, `sleep`, or a polling
+loop for a child. After dispatch it arms `herdr-emergency-wake` with the child
+pane, a task-specific maximum-silence interval, and one recovery action, then
+ends the turn after launching any other independent work. The child's
+`herdr-role-message` starts or steers the parent turn. If no message arrives,
+the helper wakes the parent once. Closing the child pane disarms the fallback.
+
 When the user says “do,” “go,” “continue,” or an equivalent confirmation after
 an action was proposed, Human Orchestrator forwards that action immediately.
 Operations Lead starts the work or returns one genuinely necessary question.
@@ -260,6 +268,9 @@ work, or cancel a remote job without explicit permission.
   REMAINING:
   ```
 
+  Sending this message wakes its parent. The child must not wait for an
+  acknowledgement; it stops after the message is accepted.
+
 - The envelope is a notification and evidence pointer, not evidence by itself.
   Operations Lead reloads it for integration. Only an accepted material result,
   genuine decision, or direction change reaches the human orchestrator, which
@@ -287,8 +298,10 @@ Use separate bounded roles. None is a standing review committee.
 
 ### Event service and Codex watcher
 
-- One external service watches Herdr, long processes, schedulers, inactivity,
-  and capacity. It may run indefinitely; a model turn may not.
+- Ordinary child roles wake their parent directly and use
+  `herdr-emergency-wake` only as a maximum-silence fallback. One external
+  service watches genuinely long processes, schedulers, remote work, and
+  capacity. It may run indefinitely; a model turn may not.
 - Use native Codex Luna low. The external service does all waiting and wakes
   the model only for a changed event or the task's maximum-silence event.
 - The watcher sees only bounded redacted event data and has no shell, code,

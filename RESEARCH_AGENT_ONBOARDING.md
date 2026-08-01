@@ -52,8 +52,7 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 
 ## 2. Leadership and model roles
 
-- `Operations Lead · PersonName Goal` uses OpenCode with OpenAI OAuth and
-  `gpt-5.6-sol` high. It is the
+- `Operations Lead · PersonName Goal` uses native Codex `gpt-5.6-sol` high. It is the
   sole operational authority and owns day-to-day decomposition, dependencies,
   dispatch, runs, integration, synchronization, outcome accounting, and the
   rolling 90/10 budget.
@@ -86,6 +85,13 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   Never use `send-text` for a prompt. A “Messages to be submitted after next
   tool call” banner means queued, not processed; wait for its turn and never
   duplicate it.
+- Operations Lead and every suborchestrator must remain interruptible. They
+  never call `herdr wait`, `sleep`, or a polling loop for a worker. After
+  dispatch, the parent arms `herdr-emergency-wake` for a task-specific maximum
+  silence and ends its turn after launching any other independent work. The
+  worker wakes the parent directly with `herdr-role-message` when it completes
+  or needs recovery. If that message never arrives, the helper wakes the parent
+  once; closing the worker pane disarms it.
 - A launched process is not a started task. Require the first real model
   response or task action and reject authentication, provider, permission, or
   immediate-exit output as a failed launch. Retry the same surface once after
@@ -96,18 +102,19 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 - Treat “do,” “go,” or “continue” as a real instruction when the next action
   was already discussed. Forward it and start; do not bounce it back to the
   user or respond with readiness alone.
-- A suborchestrator uses OpenCode Sol medium, owns exactly one meaningful task and its
+- A suborchestrator uses native Codex Sol medium, owns exactly one meaningful task and its
   finish condition, and does no coding or experiment execution. It launches a
   fresh temporary worker for each minimal package and closes when the task
   ends. It may not create another suborchestrator layer. An already-atomic task
   goes directly from Operations to one worker.
-- Coding workers normally use OpenCode `gpt-5.6-luna` max. Give Luna one clear package
+- Coding workers normally use native Codex `gpt-5.6-luna` max. Give Luna one clear package
   with one deliverable, one reproduction or run, and one done check. A harder
   package uses Sol medium. Luna support or supervision may use low but never
   higher. Every later package or correction gets a fresh worker chat.
-- Native Codex and OpenCode GLM 5.2 are selectable productive workers when
-  their separate context materially benefits the assigned task. Name the
-  selected model in the task card; do not treat either as a hidden fallback.
+- OpenCode GLM 5.2 is an explicitly selectable alternative when its separate
+  provider materially benefits the task. OpenCode is not the default harness
+  for OpenAI Sol or Luna. Name every selected alternative in the task card; do
+  not use a hidden fallback.
 - Bounded research and data crunching use Sol at the lowest sufficient effort,
   from low through max. Use Terra-medium by default for open-ended research
   that needs synthesis or interpretation.
@@ -317,8 +324,12 @@ control-work percentage.
 
 ## 8. Observation, progress, audits, and artifacts
 
-- One external service watches long-running work indefinitely. The service,
-  not a model turn, performs waiting and event detection.
+- Worker completion normally wakes its parent directly through
+  `herdr-role-message`; `herdr-emergency-wake` provides one maximum-silence
+  recovery wake. No model watcher is needed for ordinary delegated work.
+- One external service watches genuinely long-running processes, schedulers,
+  or remote work indefinitely. The service, not a model turn, performs waiting
+  and event detection.
 - Its classifier is a native Codex Luna-low watcher. The external event service
   performs the waiting; the classifier receives only
   a bounded redacted event payload. It has no code, filesystem, shell, Herdr,
@@ -377,8 +388,9 @@ control-work percentage.
   Replace it immediately if compaction already happened, its internal goal is
   blocked, or a real `herdr-role-message` round trip fails.
   Fresh sessions reconstruct from `HUMAN_PLAN.md`, handoffs, and cited evidence.
-- Watch scheduler/process state externally. Do not burn turns polling unchanged
-  state.
+- Let worker messages and the emergency helper wake parent orchestrators.
+  Watch scheduler/process state externally. Never occupy an orchestrator turn
+  with `herdr wait`, `sleep`, or polling unchanged state.
 - Run `herdr-costs report` for own and aggregate time, tokens, and
   API-equivalent dollars by human task name. The private ledger and terminal
   report replace manual usage files or dashboards.

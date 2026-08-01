@@ -1,6 +1,6 @@
 ---
 name: restart-research-team
-description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and an OpenCode Sol-high Operations Lead, reconstruct the lightweight standard layout with OpenCode Luna-max coding workers and OpenCode Sol-medium task suborchestrators under the 90/10 budget, and wait for user plan discussion without resuming research.
+description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and one native-Codex Sol-high Operations Lead, reconstruct the lightweight standard layout with native-Codex Luna-max coding workers, native-Codex Sol-medium task suborchestrators, and non-blocking child wake-ups under the 90/10 budget, and wait for user plan discussion without resuming research.
 ---
 
 # Restart Research Team
@@ -61,7 +61,7 @@ IDs remain dormant in the file.
 Create:
 
 - one fresh native Codex GPT-5.6 Sol-high Human Orchestrator and one fresh
-  OpenCode GPT-5.6 Sol-high Operations Lead in `01 Orchestrators`;
+  native-Codex GPT-5.6 Sol-high Operations Lead in `01 Orchestrators`;
 - one empty named shell bay in `02 Strategic Council`;
 - empty named shell bays in `03 Suborchestrators`, `04 Workers`, and
   `05 Progress Checks`.
@@ -76,8 +76,8 @@ Orchestrator is the sole normal human conversation and owns the meaning of
 Operations Lead. A temporary Plan Orchestrator receives its brief from and
 reports only to Operations Lead; it is an orchestrator, not a worker.
 
-Require `command -v herdr-role-message`, `command -v herdr-project-save-close`,
-and `command -v herdr-costs` before launch. Human Orchestrator sends
+Require `command -v herdr-role-message`, `command -v herdr-emergency-wake`,
+`command -v herdr-project-save-close`, and `command -v herdr-costs` before launch. Human Orchestrator sends
 technical intent only with `herdr-role-message operations`; Operations Lead
 uses `herdr-role-message human`;
 technical roles return with `herdr-role-message operations` or the exact
@@ -117,12 +117,12 @@ only the raw evidence needed to verify current reality. Ask it to:
    contract;
 3. make the first milestone end in an observable project result rather than
    enabling infrastructure;
-4. assign each meaningful multi-package task to one named OpenCode Sol-medium
+4. assign each meaningful multi-package task to one named native-Codex Sol-medium
    suborchestrator that does no coding and later emits only the next useful
    minimal worker cards; send an atomic package directly to one worker;
 5. keep at least 90% of task slots and agent-hours directly productive and
    classify every control-role turn honestly;
-6. use OpenCode Luna-max for normal coding, OpenCode Sol-medium for harder coding, selected Sol
+6. use native-Codex Luna-max for normal coding, native-Codex Sol-medium for harder coding, selected Sol
    effort for bounded research/data crunching, Terra-medium for open-ended
    synthesis, and keep verification optional and minimal;
 7. emit a compact current-state envelope for the human orchestrator;
@@ -187,7 +187,7 @@ After either strategic answer is durably captured, close that pane immediately.
 
 - Use as many concurrent productive worker sessions as independent subtasks
   justify.
-- OpenCode Luna-max is the default coding worker. One fresh worker chat owns exactly one
+- Native Codex Luna-max is the default coding worker. One fresh worker chat owns exactly one
   clear, repeatable package, one deliverable, one reproduction or run, one done check,
   normally no more than three tightly coupled files or one experiment stage,
   one task branch, and one Git worktree. Never combine unrelated subtasks.
@@ -200,10 +200,10 @@ After either strategic answer is durably captured, close that pane immediately.
   the lowest sufficient Sol effort; open-ended synthesis uses a Terra Researcher.
   Derive every pane name from the immediate goal.
 - Operations Lead decomposes the milestone into meaningful tasks. One
-  OpenCode Sol-medium suborchestrator owns one multi-package task and its finish
+  native-Codex Sol-medium suborchestrator owns one multi-package task and its finish
   condition, performs no coding or experiment execution, issues only the next
-  useful packages, launches one fresh OpenCode Luna-max worker per normal coding package
-  or OpenCode Sol-medium worker for a harder package, absorbs compact results, integrates
+  useful packages, launches one fresh native-Codex Luna-max worker per normal coding package
+  or native-Codex Sol-medium worker for a harder package, absorbs compact results, integrates
   its task for Operations Lead, and closes when the task ends. It may not create
   another suborchestrator or add a review turn after every successful package.
 - Claudex may use relevant native workflows and short-lived helpers inside one
@@ -211,7 +211,10 @@ After either strategic answer is durably captured, close that pane immediately.
   card, workspace, durable result, or reporting route must be opened as a named
   visible Herdr pane.
 - Every completed worker sends its completion envelope to its owning
-  orchestrator. Operations Lead routes only an accepted material result, genuine
+  orchestrator, waking that parent directly. The parent never runs `herdr wait`,
+  `sleep`, or a polling loop for a child. It arms `herdr-emergency-wake` after
+  dispatch and ends its turn; closing the child after its message disarms the
+  fallback. Operations Lead routes only an accepted material result, genuine
   decision, or direction change to the Human Orchestrator. Full technical
   detail remains internal; never forward a transcript to the human interface.
 - Before opening a pane, serialize the semantic task card and run:
@@ -224,7 +227,7 @@ After either strategic answer is durably captured, close that pane immediately.
   predicted-versus-observed templates in the operating contract.
 - If a worker cannot state the observable goal delta, the orchestrator rewrites
   the card without opening another review session.
-- Give a harder or failed package to a fresh OpenCode Sol-medium worker when Luna cannot choose between
+- Give a harder or failed package to a fresh native-Codex Sol-medium worker when Luna cannot choose between
   materially different approaches, its first coherent repair fails, the task
   expands beyond its bounded subsystem, tool results contradict the task
   premise, or the result cannot be reproduced. Do not open a routine verifier
@@ -236,7 +239,9 @@ After either strategic answer is durably captured, close that pane immediately.
   coherent attempt does not finish the task; after the second bounded causal
   attempt requires a materially different design, hand a fresh harder package
   to Sol medium without stopping unrelated work.
-- Use the external event service for the active project batch. It wakes one
+- Direct child messages plus `herdr-emergency-wake` handle normal delegated
+  work. Use the external event service only for a genuinely long process,
+  scheduler, remote job, or capacity condition. It wakes one
   native Codex Luna-low watcher only on a real change, maximum-silence event,
   or terminal state. The model never polls. Never create one watcher per worker
   or spend Luna worker capacity on unchanged status.
