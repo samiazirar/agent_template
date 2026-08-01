@@ -82,12 +82,16 @@ def require_fresh_frogmouth(pane_id: str, markdown_path: Path) -> None:
         fail(f"{markdown_path} changed after Frogmouth started; refresh the pane")
 
 
-def foreground_argv(pane_id: str) -> list[str]:
+def foreground_process(pane_id: str) -> dict:
     payload = herdr("pane", "process-info", "--pane", pane_id)
     processes = payload["result"]["process_info"]["foreground_processes"]
     if not processes:
         fail(f"{pane_id} has no foreground process")
-    return processes[0].get("argv", [])
+    return processes[0]
+
+
+def foreground_argv(pane_id: str) -> list[str]:
+    return foreground_process(pane_id).get("argv", [])
 
 
 def require_model(
@@ -129,6 +133,34 @@ def require_native_claude_model(
         or argv[effort_index] != effort
     ):
         fail(f"{role} is not using {effort} effort: {command}")
+
+
+def require_opencode_model(
+    pane: dict, role: str, model: str, effort: str
+) -> None:
+    process = foreground_process(pane["pane_id"])
+    argv = process.get("argv", [])
+    command = " ".join(argv)
+    executable = Path(argv[0]).name if argv else ""
+    if executable != "opencode":
+        fail(f"{role} is not using OpenCode: {command}")
+    expected_model = f"openai/{model}"
+    if expected_model not in argv:
+        fail(f"{role} is not using {expected_model}: {command}")
+    try:
+        environ = Path(f"/proc/{process['pid']}/environ").read_bytes().split(b"\0")
+        inline = next(
+            value.split(b"=", 1)[1]
+            for value in environ
+            if value.startswith(b"OPENCODE_CONFIG_CONTENT=")
+        )
+        build = json.loads(inline)["agent"]["build"]
+    except (KeyError, StopIteration, json.JSONDecodeError, OSError):
+        fail(f"{role} has no readable OpenCode Herdr profile")
+    if build.get("model") != expected_model or build.get("variant") != effort:
+        fail(f"{role} OpenCode profile does not pin {expected_model}/{effort}")
+    if (build.get("permission") or {}).get("task", {}).get("*") != "deny":
+        fail(f"{role} OpenCode profile permits hidden task agents")
 
 
 def main() -> None:
@@ -278,7 +310,7 @@ def main() -> None:
             "Operations Lead, and one Operations Collaborator"
         )
     for pane in leadership:
-        if pane.get("agent") not in {"codex", "claude"}:
+        if pane.get("agent") not in {"codex", "claude", "opencode"}:
             fail(f"standing leadership pane is not an agent: {pane['label']}")
         allowed_states = (
             {"idle", "done", "working"}
@@ -287,7 +319,7 @@ def main() -> None:
         )
         if pane.get("agent_status") not in allowed_states:
             fail(f"standing leadership is not waiting: {pane['label']}")
-    require_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
+    require_opencode_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
     require_model(liaisons[0], "Human Orchestrator", "gpt-5.6-sol", "high")
     require_native_claude_model(
         collaborators[0],

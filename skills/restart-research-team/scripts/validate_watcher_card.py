@@ -59,13 +59,10 @@ def validate(text: str) -> list[str]:
     if len(values["SESSION NAME"].split()) < 4:
         errors.append("SESSION NAME must include a person and goal-derived task")
     model = values["MODEL"].lower()
-    if model not in {"opencode/gemini-3.6-flash", "gpt-5.6-luna"}:
-        errors.append(
-            "MODEL must be opencode/gemini-3.6-flash or gpt-5.6-luna"
-        )
-    expected_effort = "none" if model == "opencode/gemini-3.6-flash" else "low"
-    if values["EFFORT"].lower() != expected_effort:
-        errors.append(f"EFFORT must be {expected_effort} for {model}")
+    if model != "gpt-5.6-luna":
+        errors.append("MODEL must be gpt-5.6-luna through native Codex")
+    if values["EFFORT"].lower() != "low":
+        errors.append("EFFORT must be low for gpt-5.6-luna")
     if values["ONE WATCHER VERIFIED"].lower() != "true":
         errors.append("ONE WATCHER VERIFIED must be true")
 
@@ -108,8 +105,8 @@ WATCHED CONDITION: Worker completion, process state change, or due evidence chec
 SUCCESS EVENT: The resumed run writes a newer checkpoint.
 FAILURE EVENT: The process exits without a newer checkpoint.
 OWNER: Orchestrator · Clara ContactFlow Results
-MODEL: opencode/gemini-3.6-flash
-EFFORT: none
+MODEL: gpt-5.6-luna
+EFFORT: low
 EVENT DRIVEN: true
 POLL SECONDS: 0
 MAXIMUM SILENCE: 30 minutes
@@ -119,7 +116,7 @@ TERMINAL EVENT: Active project batch ends.
 ONE WATCHER VERIFIED: true
 """
     invalid = valid.replace(
-        "MODEL: opencode/gemini-3.6-flash", "MODEL: gpt-5.6-sol"
+        "MODEL: gpt-5.6-luna", "MODEL: gpt-5.6-sol"
     )
     if validate(valid):
         print(f"self-test valid card failed: {validate(valid)}", file=sys.stderr)

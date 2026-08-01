@@ -1,6 +1,6 @@
 ---
 name: restart-research-team
-description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one Human Orchestrator, a Codex Sol-high Operations Lead, and a background Claude Opus-medium Operations Collaborator, reconstruct the lightweight standard layout with Luna-max coding workers and Sol-medium task suborchestrators under the 90/10 budget, and wait for user plan discussion without resuming research.
+description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator, an OpenCode Sol-high Operations Lead, and a background Claude Opus-medium Operations Collaborator, reconstruct the lightweight standard layout with OpenCode Luna-max coding workers and OpenCode Sol-medium task suborchestrators under the 90/10 budget, and wait for user plan discussion without resuming research.
 ---
 
 # Restart Research Team
@@ -61,7 +61,7 @@ IDs remain dormant in the file.
 
 Create:
 
-- one fresh Claudex GPT-5.6 Sol-high Human Orchestrator, one fresh Codex
+- one fresh native Codex GPT-5.6 Sol-high Human Orchestrator, one fresh OpenCode
   GPT-5.6 Sol-high Operations Lead, and one native Claude Opus-medium
   Operations Collaborator in `01 Orchestrators`;
 - one empty named shell bay in `02 Strategic Council`;
@@ -121,12 +121,12 @@ only the raw evidence needed to verify current reality. Ask it to:
    contract;
 3. make the first milestone end in an observable project result rather than
    enabling infrastructure;
-4. assign each meaningful multi-package task to one named Sol-medium
+4. assign each meaningful multi-package task to one named OpenCode Sol-medium
    suborchestrator that does no coding and later emits only the next useful
    minimal worker cards; send an atomic package directly to one worker;
 5. keep at least 90% of task slots and agent-hours directly productive and
    classify every control-role turn honestly;
-6. use Luna-max for normal coding, Sol-medium for harder coding, selected Sol
+6. use OpenCode Luna-max for normal coding, OpenCode Sol-medium for harder coding, selected Sol
    effort for bounded research/data crunching, Terra-medium for open-ended
    synthesis, and keep verification optional and minimal;
 7. emit a compact current-state envelope for the human orchestrator;
@@ -196,7 +196,7 @@ After either strategic answer is durably captured, close that pane immediately.
 
 - Use as many concurrent productive worker sessions as independent subtasks
   justify.
-- Luna-max is the default coding worker. One fresh worker chat owns exactly one
+- OpenCode Luna-max is the default coding worker. One fresh worker chat owns exactly one
   clear, repeatable package, one deliverable, one reproduction or run, one done check,
   normally no more than three tightly coupled files or one experiment stage,
   one task branch, and one Git worktree. Never combine unrelated subtasks.
@@ -209,10 +209,10 @@ After either strategic answer is durably captured, close that pane immediately.
   the lowest sufficient Sol effort; open-ended synthesis uses a Terra Researcher.
   Derive every pane name from the immediate goal.
 - Operations Lead decomposes the milestone into meaningful tasks. One
-  Sol-medium suborchestrator owns one multi-package task and its finish
+  OpenCode Sol-medium suborchestrator owns one multi-package task and its finish
   condition, performs no coding or experiment execution, issues only the next
-  useful packages, launches one fresh Luna-max worker per normal coding package
-  or Sol-medium worker for a harder package, absorbs compact results, integrates
+  useful packages, launches one fresh OpenCode Luna-max worker per normal coding package
+  or OpenCode Sol-medium worker for a harder package, absorbs compact results, integrates
   its task for Operations Lead, and closes when the task ends. It may not create
   another suborchestrator or add a review turn after every successful package.
 - Claudex may use relevant native workflows and short-lived helpers inside one
@@ -233,7 +233,7 @@ After either strategic answer is durably captured, close that pane immediately.
   predicted-versus-observed templates in the operating contract.
 - If a worker cannot state the observable goal delta, the orchestrator rewrites
   the card without opening another review session.
-- Give a harder or failed package to a fresh Sol-medium worker when Luna cannot choose between
+- Give a harder or failed package to a fresh OpenCode Sol-medium worker when Luna cannot choose between
   materially different approaches, its first coherent repair fails, the task
   expands beyond its bounded subsystem, tool results contradict the task
   premise, or the result cannot be reproduced. Do not open a routine verifier
@@ -245,11 +245,10 @@ After either strategic answer is durably captured, close that pane immediately.
   coherent attempt does not finish the task; after the second bounded causal
   attempt requires a materially different design, hand a fresh harder package
   to Sol medium without stopping unrelated work.
-- Use the external event service with API-key Gemini 3.6 Flash for the active
-  project batch. It wakes the orchestrator only on a real change or terminal
-  state. Luna-low is the research-oriented classifier alternative, not a polling
-  model turn. Never create one watcher per worker or spend Luna worker capacity
-  on unchanged status.
+- Use the external event service for the active project batch. It wakes one
+  native Codex Luna-low watcher only on a real change, maximum-silence event,
+  or terminal state. The model never polls. Never create one watcher per worker
+  or spend Luna worker capacity on unchanged status.
 - Before launching that watcher, validate its exact success, failure, maximum
   silence, owner, recovery action, terminal event,
   and model with:
@@ -266,7 +265,7 @@ After either strategic answer is durably captured, close that pane immediately.
   or decision. Run `herdr-costs report` for the private human-named hierarchy
   of own and aggregate time, tokens, and API-equivalent cost; create no manual
   usage artifact.
-- Claude Code and Claudex must retain the zero-context SessionStart hook
+- OpenCode usage and skill calls come from its native database. Claude Code and Claudex must retain the zero-context SessionStart hook
   `herdr-costs register-hook`; resumed native sessions then remain attributed
   to their human task. Keep Pyright LSP enabled. Keep Superpowers, Code Review,
   and Code Simplifier available but invoke them only for direct structural
@@ -287,7 +286,7 @@ After either strategic answer is durably captured, close that pane immediately.
 - Routine work self-verifies. Use one independent audit only at an expensive
   launch, release, public artifact, or accepted-result boundary.
 - Claude Opus 5 is an optional non-blocking second eye for consequential
-  results and existing human-facing artifacts. Codex or Claudex does normal
+  results and existing human-facing artifacts. OpenCode does normal
   source work and local verification. Reuse the exact existing artifact and
   canonical URL; follow the artifact-update skill before publication.
 - As soon as a worker finishes, capture its final short report and native

@@ -134,7 +134,7 @@ alone cannot complete an empirical milestone.
 
 ## Roles
 
-- The Codex Sol-high **Operations Lead** owns the frozen question,
+- The OpenCode Sol-high **Operations Lead** owns the frozen question,
   evidence-based technical state, result-level milestone, decomposition,
   dependencies, dispatch, merges, run coordination, and outcome accounting. It
   is the sole operational authority and enforces the rolling 90/10 budget. It
@@ -147,7 +147,7 @@ alone cannot complete an empirical milestone.
   Operations Lead, returns one concise recommendation only to Operations Lead,
   then returns idle. It never contacts the human side, manages workers,
   integrates Git, becomes an approval step, or duplicates daily operations.
-- The Sol-high **human orchestrator** is the project's sole normal human
+- The native Codex Sol-high **human orchestrator** is the project's sole normal human
   conversation and owns the meaning of `HUMAN_PLAN.md`. Before every plan
   brief or answer, it reloads `RESTART_HANDOFF.md`, `HUMAN_PLAN.md`, and the
   cited result evidence from disk; transcript memory is never the source of
@@ -158,20 +158,21 @@ alone cannot complete an empirical milestone.
   Operations Lead and does not contact Operations Collaborator, workers,
   suborchestrators, Plan Orchestrators, advisors, researchers, or verifiers
   directly.
-- A Sol-medium suborchestrator owns exactly one meaningful multi-package task,
+- An OpenCode Sol-medium suborchestrator owns exactly one meaningful multi-package task,
   its goal, and its observed finish condition. It does no coding or experiment
   execution. It issues only the next useful minimal packages, launches one
   fresh worker chat per package, reconciles their results, and closes when the
   task ends. It cannot create another suborchestrator. Operations sends an
   already-atomic package directly to one worker.
-- Coding workers normally use Luna max and implement or execute exactly one
+- Coding workers normally use OpenCode Luna max and implement or execute exactly one
   clear package. A Luna-sized package has one deliverable, one reproduction or
   run, one done check, and normally no more than three tightly coupled files or
   one experiment stage. Workers reproduce first, make the change or run,
   compare expected versus observed state, report only to Operations Lead or
   their one owning suborchestrator, commit, sync, and stop.
-- Sol medium is the default harder coding worker. Opus 5 and OpenCode GLM 5.2
-  remain explicit alternatives when a separate context clearly helps. Bounded
+- OpenCode Sol medium is the default harder coding worker. Native Codex, Opus 5,
+  and OpenCode GLM 5.2 remain explicit alternatives when a separate context
+  clearly helps. Bounded
   research and data crunching use Sol at the lowest sufficient effort, from
   low through max; open-ended synthesis defaults to one Terra-medium
   Researcher. Luna support or supervision never exceeds low.
@@ -291,12 +292,12 @@ work, or cancel a remote job without explicit permission.
 
 Use separate bounded roles. None is a standing review committee.
 
-### Event service and Flash watcher
+### Event service and Codex watcher
 
 - One external service watches Herdr, long processes, schedulers, inactivity,
   and capacity. It may run indefinitely; a model turn may not.
-- Prefer API-key `opencode/gemini-3.6-flash`. Luna low is an allowed
-  research-oriented alternative. Never use Vertex.
+- Use native Codex Luna low. The external service does all waiting and wakes
+  the model only for a changed event or the task's maximum-silence event.
 - The watcher sees only bounded redacted event data and has no shell, code,
   filesystem, credential, project-write, or direct Herdr-control access. It
   returns one structured choice: silent, message candidate, or verify.
@@ -304,10 +305,10 @@ Use separate bounded roles. None is a standing review committee.
   only when a previously active goal has produced no new relevant result by
   its expected window, and carries the next recovery action to the owner.
 
-### Optional minimal Sol-medium verifier
+### Optional minimal native-Codex Sol-medium verifier
 
 - On `verify`, trusted service code may open one fresh named visible Herdr
-  Codex or Claudex session using Sol medium only for a consequential anomaly
+  Codex session using Sol medium only for a consequential anomaly
   routine self-verification cannot resolve. The watcher cannot open it directly.
 - The verifier checks only the relevant task card, event, bounded transcript,
   and durable evidence. It returns one concrete next action, one human
@@ -335,7 +336,7 @@ Use separate bounded roles. None is a standing review committee.
 - Claude Opus 5 may provide one non-blocking second eye for a consequential
   result, public claim, or human-facing artifact. It identifies concrete
   mismatches and useful repairs; it never becomes an approval dependency.
-- Codex or Claudex performs normal implementation and local artifact
+- OpenCode performs normal implementation and local artifact
   verification. Use Opus only for independent interpretation, visual critique,
   artifact-native work, or an authenticated same-URL publication step.
 - Within a named Claudex pane, relevant Claude-side workflows and short-lived

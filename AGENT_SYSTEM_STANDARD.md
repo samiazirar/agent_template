@@ -81,34 +81,35 @@ orchestration contracts provide the detailed rules.
 
 | Work | Session | Model |
 | --- | --- | --- |
-| Human orchestration | Claudex | Sol, high |
-| Operations Lead | Codex | Sol, high |
+| Human orchestration | Native Codex | Sol, high |
+| Operations Lead | OpenCode | Sol, high |
 | Background operations collaboration | Native Claude | Opus 5, medium |
-| Normal bounded implementation or execution | Codex | Luna, max |
-| Ambiguous repair or cross-task integration | Codex or Claudex | Sol, medium |
-| Bounded difficult implementation or decision | Codex or Claudex | Sol, high |
-| One bounded strategic question | Codex or Claudex | Sol, xhigh |
-| Temporary Plan Orchestrator | Codex or Claudex | Sol, medium |
+| Normal bounded implementation or execution | OpenCode | Luna, max |
+| Ambiguous repair or cross-task integration | OpenCode | Sol, medium |
+| Bounded difficult implementation or decision | OpenCode | Sol, high |
+| One bounded strategic question | Native Codex | Sol, xhigh |
+| Temporary Plan Orchestrator | OpenCode | Sol, medium |
 | Independent alternative productive worker | Native Claude | Opus 5 |
 | Mechanical or context-heavy alternative worker | OpenCode | GLM 5.2 |
-| Open-ended researcher | Codex or Claudex | Terra, medium |
+| Open-ended researcher | Native Codex | Terra, medium |
 | Human-selected bounded productive worker | Codex | Terra, high |
 | Routine research or data crunching | Codex | Sol, low; raise only when the task needs it |
 | Cheap bounded support or supervision | Codex | Luna, low maximum |
-| Permanent event classification | OpenCode API key | Gemini 3.6 Flash |
-| Optional minimal verification | Visible Codex or Claudex | Sol, medium |
-| Human message drafting | OpenCode API key | Gemini 3.6 Flash |
+| Event-triggered watcher classification | Native Codex | Luna, low maximum |
+| Optional minimal verification | Native Codex | Sol, medium |
+| Human message drafting, if needed | Native Codex | Luna, low maximum |
 
 Claudex is the Claude Code interface backed by the local Codex gateway. It is
 not native Anthropic Claude. Launch it through `claudex` with an explicit Codex
 model. Native Claude is selected separately when Opus 5 is wanted.
 
-Luna-max is the default coding worker when the task has one concrete
+OpenCode Luna-max is the default coding worker when the task has one concrete
 deliverable, one reproducible done check, and a narrow action boundary. Use Sol
 medium for a harder package that needs materially more judgment. Select Sol
 low through max for bounded research or data crunching according to actual
 difficulty; do not inherit a high effort merely because the parent task is
-important. Luna support or supervision never exceeds low. Terra remains the
+important. Luna support, watcher classification, or supervision never exceeds
+low and runs only when an external event wakes it. Terra remains the
 default for open-ended research and interpretation. Terra-high may be a
 productive worker only when the human explicitly selects it for one bounded
 task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
@@ -117,15 +118,20 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
 
 - Launch every independent agent as a named visible Herdr session with
   `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
-- `luna` and `luna-max` are the normal bounded coding worker. `luna-low` is
-  restricted to cheap support or supervision. `codex` and `claudex` remain the Sol
-  medium escalation route for ambiguity, failed bounded repair, or integration.
-  `claude` selects native Claude Opus 5 at medium effort by default.
+- `opencode-luna` is the normal bounded coding worker. `opencode` is the Sol
+  medium suborchestrator and harder-worker route; `opencode-high` is the
+  Operations Lead. These profiles use OpenAI OAuth, pin the requested model
+  and effort, and deny OpenCode's hidden task-agent tool. Missing OAuth stops
+  launch instead of falling back to another provider.
+- `codex-high` is the Human Orchestrator. `terra` is the normal researcher and
+  `luna-low` is restricted to event-triggered watching, observation, or cheap
+  support. `claude` selects native Claude Opus 5 at medium effort by default.
 - Never replace these sessions with hidden subagents or ordinary background
   subprocesses. Open a separate session only for independent productive work.
-- Shared personal skills live once in `~/.agents/skills`. Claude and Claudex
-  load the same directories through `~/.claude/skills`; do not maintain
-  divergent copies.
+- Shared personal skills live once in `~/.agents/skills`. OpenCode discovers
+  that directory natively and loads only a selected skill body on demand.
+  Claude and Claudex load the same directories through `~/.claude/skills`; do
+  not maintain divergent copies.
 - Use `prompt-gpt-5p6-sol` when adapting instructions for Codex or Claudex and
   `prompt-claude-opus-5` when adapting instructions for native Opus 5.
 
@@ -153,7 +159,7 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
   explicitly asks how the system works. Use “results,” “what we know,” “the
   next useful result,” and ordinary project language instead. Do not use
   all-caps process headings or make the user read an internal checklist.
-- The Codex Sol-high Operations Lead owns decomposition, execution, worker and
+- The OpenCode Sol-high Operations Lead owns decomposition, execution, worker and
   suborchestrator lifecycle, integration, synchronization, the 90/10 budget,
   and technical state. It is the sole operational authority and normal bridge
   between the Human Orchestrator and every technical role.
@@ -234,7 +240,7 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
   helper, which may close only its own current workspace. Never stop the shared
   Herdr server or named session, and never treat inactivity as permission.
 - One worker owns exactly one minimal concrete work package, branch, worktree,
-  and fresh native chat. Luna-max
+  and fresh native chat. OpenCode Luna-max
   is the default when the task can be stated as one deliverable, one
   reproduction or run, one done check, and normally no more than three tightly
   coupled files or one experiment stage.
@@ -245,10 +251,11 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
   finished worker into the next package. Workers receive
   tasks from and report only to Operations Lead or their one owning
   suborchestrator.
-- Suborchestrators use Sol medium, own exactly one meaningful task, and do no
+- Suborchestrators use OpenCode Sol medium, own exactly one meaningful task, and do no
   coding or experiment execution. Each states the task goal and finish
   condition, turns only the next useful work into minimal packages, launches
-  one fresh Luna-max worker per normal coding package or Sol-medium worker for
+  one fresh OpenCode Luna-max worker per normal coding package or OpenCode
+  Sol-medium worker for
   a harder package, absorbs compact results, and closes when the task ends. An
   atomic task that is already one minimal package goes directly from Operations
   to one worker to avoid orchestration overhead. A suborchestrator may not
@@ -290,12 +297,15 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
   of worker own time/tokens/cost, suborchestrator totals, Operations totals, and
   the Human total. Dollar values are API-equivalent estimates; subscription
   sessions are not token-billed and provider billing remains authoritative.
-- Native Claude Code and Claudex also register new and resumed Herdr sessions
+- OpenCode accounting reads its native session database, including per-message
+  model, variant, token, cost, active-time, and skill-tool records. Native
+  Claude Code and Claudex also register new and resumed Herdr sessions
   through their `SessionStart` hook. Their duplicate streaming transcript rows
   are counted once by native message ID.
 - The same report lists explicit skill invocation count, associated tokens,
   and API-equivalent cost. Claude and Claudex use their native active-skill
-  attribution. Codex records the exact token delta from loading a skill through
+  attribution. OpenCode attributes a skill to the model messages in the user
+  turn that invoked it. Codex records the exact token delta from loading a skill through
   the end of that turn; when one turn loads multiple skills, those values
   overlap and are not additive. Use this observed usage to keep, narrow, or
   remove skills instead of judging them only by description size.
@@ -304,11 +314,13 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
 
 ## Harness policy
 
-- Use native Codex for Operations and Luna/Sol productive workers. It provides
-  direct model/effort selection, exact native token counters, and exact
-  model-active duration.
-- Use Claudex for the Human Orchestrator and bounded GPT work that materially
-  benefits from Claude Code's interface. Use native Claude Code for the
+- Use OpenCode with OpenAI OAuth for Operations, suborchestrators, plan
+  writers, and Luna/Sol productive workers. Each Herdr launch pins model and
+  effort and denies OpenCode's hidden task-agent tool, so independent work
+  remains visible and separately costed.
+- Use native Codex for the Human Orchestrator, researchers, event-triggered
+  watchers, strategic advisors, and optional verifiers. Use Claudex only for
+  bounded GPT work that materially benefits from Claude Code's interface. Use native Claude Code for the
   background Opus collaborator and an explicitly selected Opus worker.
 - Keep Claude's Superpowers, Code Review, and Code Simplifier available. Invoke
   them only when their result directly advances the current package:
@@ -320,9 +332,10 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
   that require tracing the actual execution path.
 - Do not use the Codex-in-Claude plugin as a second GPT harness. Claudex is the
   explicit GPT-through-Claude-Code route; hidden Claude agents remain denied.
-- OpenCode remains the GLM 5.2 mechanical/context-heavy alternative and the
-  API-key Flash watcher host; its native database already records message
-  tokens, costs, and skill tool calls. Pi is a lightweight optional harness
+- GLM 5.2 remains an explicitly selected mechanical/context-heavy OpenCode
+  alternative, never the silent fallback for the OpenAI role profiles.
+  OpenCode's native database records message tokens, costs, and skill tool
+  calls. Pi is a lightweight optional harness
   with exact per-message usage in JSONL and explicit skill commands, but it is
   not a standing ecosystem role until it offers a concrete advantage over the
   selected Codex, Claudex, Claude, or OpenCode route.
@@ -335,7 +348,8 @@ indefinitely.
 1. The service receives a Herdr, process, scheduler, silence-deadline, or
    capacity event. Each watch names its success event, failure event, owning
    task, maximum silence window, and recovery action.
-2. Tool-free API-key Gemini 3.6 Flash returns silent, message, or verify.
+2. A native Codex Luna-low watcher receives only the changed event and returns
+   silent, message, or verify. The model does not perform the waiting loop.
 3. Unchanged events stop immediately. Reaching the maximum silence window is a
    real event: wake the owning suborchestrator or Operations with the latest
    state and required recovery action.

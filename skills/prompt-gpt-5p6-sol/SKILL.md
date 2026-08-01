@@ -95,13 +95,13 @@ meaning and remove process that does not help reach the goal.
   results and `herdr-role-message collaborator "..."` for the bounded
   background collaborator. A received user confirmation must start the named
   next action, not produce another acknowledgement.
-- Make Luna-max the default coding worker for a clear, repeatable package with one
+- Make OpenCode Luna-max the default coding worker for a clear, repeatable package with one
   deliverable, one reproduction or run, one done check, and normally no more
   than three tightly coupled files or one experiment stage. Operations Lead or
-  a Sol-medium task suborchestrator defines that boundary once; Luna self-verifies and
+  an OpenCode Sol-medium task suborchestrator defines that boundary once; Luna self-verifies and
   returns a compact result. Do not spend a Sol turn supervising every tool call
   or rechecking every successful Luna result.
-- Give a harder or failed package to a fresh Sol-medium worker when Luna faces materially different
+- Give a harder or failed package to a fresh OpenCode Sol-medium worker when Luna faces materially different
   approaches, its first coherent repair fails, the work expands beyond the
   assigned subsystem, tool results contradict the task premise, or the result
   cannot be reproduced.

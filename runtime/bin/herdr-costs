@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import sqlite3
 import subprocess
 import sys
 from collections import defaultdict
@@ -130,6 +131,11 @@ def transcript_for(session: str, recorded_path: str | None = None) -> tuple[str,
             if session in candidate.name:
                 return "claude", candidate
     return None
+
+
+def opencode_database() -> Path:
+    root = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
+    return root / "opencode" / "opencode.db"
 
 
 def openai_cost(model: str, usage: dict[str, int]) -> float:
@@ -386,7 +392,133 @@ def read_claude(path: Path) -> dict[str, Any]:
     }
 
 
+def read_opencode(session: str) -> dict[str, Any] | None:
+    database = opencode_database()
+    if not database.exists():
+        return None
+    connection = sqlite3.connect(f"file:{database}?mode=ro", uri=True)
+    try:
+        session_row = connection.execute(
+            "SELECT model FROM session WHERE id = ?", (session,)
+        ).fetchone()
+        rows = connection.execute(
+            "SELECT id, time_created, data FROM message "
+            "WHERE session_id = ? ORDER BY time_created, id",
+            (session,),
+        ).fetchall()
+        part_rows = connection.execute(
+            "SELECT message_id, data FROM part WHERE session_id = ?",
+            (session,),
+        ).fetchall()
+    finally:
+        connection.close()
+    if not rows:
+        return None
+
+    model = "unknown"
+    effort = "unknown"
+    if session_row and session_row[0]:
+        try:
+            selected = json.loads(session_row[0])
+            model = str(selected.get("id") or model)
+            effort = str(selected.get("variant") or effort)
+        except json.JSONDecodeError:
+            pass
+
+    usage = empty_usage()
+    cost = 0.0
+    active_seconds = 0.0
+    first: datetime | None = None
+    last: datetime | None = None
+    current_turn = -1
+    message_turn: dict[str, int] = {}
+    turn_usage: dict[int, dict[str, int]] = defaultdict(empty_usage)
+    turn_cost: dict[int, float] = defaultdict(float)
+
+    for message_id, created_ms, raw_data in rows:
+        try:
+            data = json.loads(raw_data)
+        except json.JSONDecodeError:
+            continue
+        role_name = data.get("role")
+        if role_name == "user":
+            current_turn += 1
+        message_turn[str(message_id)] = current_turn
+        when = datetime.fromtimestamp(created_ms / 1000, tz=timezone.utc)
+        first = when if first is None or when < first else first
+        last = when if last is None or when > last else last
+        if role_name != "assistant":
+            continue
+        model = str(data.get("modelID") or model)
+        effort = str(data.get("variant") or effort)
+        counts = data.get("tokens") or {}
+        cache = counts.get("cache") or {}
+        message_usage = empty_usage()
+        message_usage["input"] = int(counts.get("input", 0))
+        message_usage["cached"] = int(cache.get("read", 0))
+        message_usage["cache_write"] = int(cache.get("write", 0))
+        message_usage["output"] = int(counts.get("output", 0)) + int(
+            counts.get("reasoning", 0)
+        )
+        message_usage["tokens"] = (
+            message_usage["input"]
+            + message_usage["cached"]
+            + message_usage["cache_write"]
+            + message_usage["output"]
+        )
+        add_usage(usage, message_usage)
+        add_usage(turn_usage[current_turn], message_usage)
+        message_cost = float(data.get("cost") or 0.0)
+        cost += message_cost
+        turn_cost[current_turn] += message_cost
+        timing = data.get("time") or {}
+        started = timing.get("created")
+        completed = timing.get("completed")
+        if isinstance(started, (int, float)) and isinstance(completed, (int, float)):
+            active_seconds += max(0.0, (completed - started) / 1000)
+            completed_when = datetime.fromtimestamp(completed / 1000, tz=timezone.utc)
+            last = completed_when if last is None or completed_when > last else last
+
+    calls: dict[tuple[int, str], int] = defaultdict(int)
+    for message_id, raw_data in part_rows:
+        try:
+            data = json.loads(raw_data)
+        except json.JSONDecodeError:
+            continue
+        if data.get("type") != "tool" or data.get("tool") != "skill":
+            continue
+        skill = (((data.get("state") or {}).get("input") or {}).get("name"))
+        turn = message_turn.get(str(message_id), -1)
+        if isinstance(skill, str) and skill and turn >= 0:
+            calls[(turn, skill)] += 1
+
+    skills: dict[str, dict[str, Any]] = {}
+    for (turn, skill), uses in calls.items():
+        entry = skills.setdefault(
+            skill, {"uses": 0, "usage": empty_usage(), "cost": 0.0}
+        )
+        entry["uses"] += uses
+        add_usage(entry["usage"], turn_usage[turn])
+        entry["cost"] += turn_cost[turn]
+
+    return {
+        "model": model,
+        "effort": effort,
+        "usage": usage,
+        "cost": cost,
+        "active_seconds": active_seconds,
+        "first": first,
+        "last": last,
+        "time_exact": True,
+        "skills": skills,
+    }
+
+
 def session_metrics(record: dict[str, Any]) -> dict[str, Any]:
+    if str(record.get("surface") or "").startswith("opencode"):
+        metrics = read_opencode(record["session"])
+        if metrics:
+            return metrics
     found = transcript_for(record["session"], record.get("transcript_path"))
     if not found:
         return {
@@ -479,7 +611,9 @@ def report(workspace: str) -> int:
         node["active"] = node["active"] or record["session"] in active
         surface = str(record.get("surface") or "unknown")
         harness = (
-            "Claudex"
+            "OpenCode"
+            if surface.startswith("opencode")
+            else "Claudex"
             if surface.startswith("claudex")
             else "Claude"
             if surface == "claude"
@@ -557,7 +691,7 @@ def report(workspace: str) -> int:
                 f'{fmt_tokens(item["tokens"]):15} ${item["cost"]:11.3f}'
             )
         print()
-        print("Claude/Claudex use native active-skill attribution. Codex counts the exact token delta after loading a skill through turn end.")
+        print("OpenCode associates each invoked skill with that user turn. Claude/Claudex use native active-skill attribution. Codex counts the exact token delta after loading a skill through turn end.")
         print("If one Codex turn loads multiple skills, associated totals overlap and must not be added together.")
     return 0
 

@@ -27,16 +27,16 @@
   Orchestration, collaborative planning, plan writing, advice, checking,
   status, review, audit, and waiting share at most 10%. Every control action
   must name the productive action it directly unlocks.
-- Luna max is the normal coding worker for one clear, repeatable package with
+- OpenCode Luna max is the normal coding worker for one clear, repeatable package with
   one deliverable and reproducible done check. Luna support or supervision may
   use low but never higher. Sol medium handles harder coding. Sol low through
   max is selected for bounded research or data crunching according to actual
   difficulty. Native Claude Opus
   5 and OpenCode GLM 5.2 remain selectable alternatives. Terra-high remains
   human-selected only.
-- Long-running observation uses an external service with read-only API-key
-  `opencode/gemini-3.6-flash`, or Luna for research observation. Never use
-  Vertex. The watcher cannot inspect or modify code and trusted service code
+- Long-running observation uses an external service that wakes native-Codex
+  Luna low only on a changed event or maximum-silence event. The watcher does
+  not poll or modify code, and trusted service code
   opens a named visible Sol-medium verifier only for a genuinely unusual event.
   Every watch names success, failure, maximum silence, owner, and its recovery
   action; it closes on the terminal event.
@@ -59,9 +59,9 @@
 - Validate worker cards with
   `/home/user/azirar/.codex/skills/restart-research-team/scripts/validate_task_card.py`
   before launching them.
-- The Claudex Sol-high Human Orchestrator owns only human conversation, goal
+- The native-Codex Sol-high Human Orchestrator owns only human conversation, goal
   meaning, human decisions, and intended plan meaning. It does not edit files,
-  manage execution, or contact technical roles other than the Codex Sol-high
+  manage execution, or contact technical roles other than the OpenCode Sol-high
   Operations Lead.
 - It contacts Operations Lead only through
   `herdr-role-message operations "..."`, never through Claude's native Agent
@@ -76,7 +76,7 @@
   lifecycle, verified, authority, blocker, or `READY FOR HUMAN`, and never
   uses all-caps process headings, unless the user explicitly asks about the
   system.
-- The Codex Sol-high Operations Lead is the sole operational authority. Every
+- The OpenCode Sol-high Operations Lead is the sole operational authority. Every
   worker, suborchestrator, Plan Orchestrator, advisor, researcher, and verifier
   reports through it. Send compact result envelopes only to the Operations
   Lead; it routes accepted human meaning to the Human Orchestrator.
@@ -86,13 +86,13 @@
   the Operations Lead, then returns idle. It never manages or contacts workers,
   integrates Git, controls Herdr, contacts the human side, or becomes an
   approval step.
-- A temporary Sol-medium Plan Orchestrator edits only `HUMAN_PLAN.md`, reports
+- A temporary OpenCode Sol-medium Plan Orchestrator edits only `HUMAN_PLAN.md`, reports
   only to the Operations Lead, and closes after one plan-only commit. Terra
   medium handles open-ended research. An
   explicitly selected Terra-high productive Worker follows the normal
   one-task, worktree, commit, and closure rules. Sol-medium Verifiers are
-  optional and minimal. One Sol-medium suborchestrator owns one meaningful
-  multi-package task, does no coding, launches a fresh Luna-max or selected Sol
+  optional and minimal. One OpenCode Sol-medium suborchestrator owns one meaningful
+  multi-package task, does no coding, launches a fresh OpenCode Luna-max or selected Sol
   worker for each package, and closes after the task; Sol-xhigh advisors answer
   one sparse bounded decision.
 - A new work package or correction always gets a fresh worker chat. Ready,

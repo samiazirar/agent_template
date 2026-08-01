@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-    printf 'Usage: herdr-agent <codex-low|codex|codex-high|codex-xhigh|codex-max|claude|claudex|claudex-high|terra|terra-high|luna-low|luna|luna-max> "Role · PersonName Goal" [working-directory]\n' >&2
+    printf 'Usage: herdr-agent <opencode|opencode-high|opencode-xhigh|opencode-max|opencode-luna-low|opencode-luna|codex-low|codex|codex-high|codex-xhigh|codex-max|claude|claudex|claudex-high|terra|terra-high|luna-low|luna|luna-max> "Role · PersonName Goal" [working-directory]\n' >&2
 }
 
 if [ "${HERDR_ENV:-}" != "1" ]; then
@@ -22,6 +22,27 @@ script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 script_dir="$(cd "$(dirname "$script_path")" && pwd)"
 launch_env=()
 
+configure_opencode() {
+    local model="$1"
+    local effort="$2"
+    local config
+    if ! command -v opencode >/dev/null 2>&1; then
+        printf 'OpenCode is unavailable.\n' >&2
+        exit 2
+    fi
+    local auth_output
+    auth_output="$(opencode auth list 2>/dev/null || true)"
+    if ! grep -q 'OpenAI.*oauth' <<<"$auth_output"; then
+        printf 'OpenCode has no OpenAI OAuth login. Run opencode, use /connect, and select OpenAI then ChatGPT Plus/Pro.\n' >&2
+        exit 2
+    fi
+    printf -v config \
+        '{"agent":{"build":{"mode":"primary","model":"%s","variant":"%s","permission":{"task":{"*":"deny"}}}}}' \
+        "$model" "$effort"
+    launch_env=(env "OPENCODE_CONFIG_CONTENT=$config")
+    launch_argv=(opencode --agent build --model "$model")
+}
+
 if [ -z "$label" ]; then
     printf 'Provide a human task name for the Herdr tab.\n' >&2
     exit 2
@@ -33,6 +54,24 @@ if [ ! -d "$launch_dir" ]; then
 fi
 
 case "$surface" in
+    opencode)
+        configure_opencode openai/gpt-5.6-sol medium
+        ;;
+    opencode-high)
+        configure_opencode openai/gpt-5.6-sol high
+        ;;
+    opencode-xhigh)
+        configure_opencode openai/gpt-5.6-sol xhigh
+        ;;
+    opencode-max)
+        configure_opencode openai/gpt-5.6-sol max
+        ;;
+    opencode-luna-low)
+        configure_opencode openai/gpt-5.6-luna low
+        ;;
+    opencode-luna)
+        configure_opencode openai/gpt-5.6-luna max
+        ;;
     codex-low)
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=low)
         ;;

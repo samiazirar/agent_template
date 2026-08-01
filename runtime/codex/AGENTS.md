@@ -36,7 +36,7 @@ complete operating context for one minimal work package.
   routing, envelope, pane, session, worker, lifecycle, verified, authority,
   blocker, or `READY FOR HUMAN`, or use all-caps process headings, unless the
   user explicitly asks about the system.
-- Standing roles are one Claudex Sol-high Human Orchestrator, one Codex
+- Standing roles are one native-Codex Sol-high Human Orchestrator, one OpenCode
   Sol-high Operations Lead with sole operational authority, and one native
   Claude Opus-5-medium Operations Collaborator. The collaborator stays in the
   background, answers one bounded collaborative-planning, decomposition, or
@@ -101,16 +101,16 @@ complete operating context for one minimal work package.
 
 # Long work and waiting
 
-- Use one external event-driven service for long work. Prefer read-only
-  API-key `opencode/gemini-3.6-flash`; Luna is the research-oriented
-  alternative. Never use Vertex.
-- The watcher has no code, filesystem, shell, credential, project-write, or
-  direct Herdr-control access. Trusted service code may wake one named visible
+- Use one external event-driven service for long work. It wakes a native-Codex
+  Luna-low watcher only on a changed event or maximum-silence event.
+- The watcher has no project-write authority and does not perform the waiting
+  loop. It receives only bounded event data. Trusted service code may wake one
+  named visible
   Sol-medium verifier when an event is genuinely unusual.
 - Do not issue repeated model turns to poll unchanged state. Every watch names
   success, failure, maximum silence, owner, and the recovery action fired when
   silence expires. A watcher closes on its terminal event.
-- Default coding workers to Luna max. Luna support or supervision may use low
+- Default coding workers to OpenCode Luna max. Luna support or supervision may use low
   but never higher. Use Sol medium for harder coding. Select Sol low through
   max for bounded research or data crunching according to actual difficulty;
   use Terra medium for open-ended research.

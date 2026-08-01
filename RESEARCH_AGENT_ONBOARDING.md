@@ -52,7 +52,8 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 
 ## 2. Leadership and model roles
 
-- `Operations Lead · PersonName Goal` uses Codex `gpt-5.6-sol` high. It is the
+- `Operations Lead · PersonName Goal` uses OpenCode with OpenAI OAuth and
+  `gpt-5.6-sol` high. It is the
   sole operational authority and owns day-to-day decomposition, dependencies,
   dispatch, runs, integration, synchronization, outcome accounting, and the
   rolling 90/10 budget.
@@ -61,7 +62,7 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   decomposition, or milestone-interpretation question only from Operations
   Lead, reports only to Operations Lead, and returns idle. It never manages
   workers, integrates Git, contacts the human side, or becomes an approval step.
-- `Human Orchestrator · PersonName Plan` uses `gpt-5.6-sol` high. It is the
+- `Human Orchestrator · PersonName Plan` uses native Codex `gpt-5.6-sol` high. It is the
   project's sole normal human conversation and owns the meaning of
   `HUMAN_PLAN.md`. It reloads the handoff, plan, and cited evidence before
   every material answer or plan brief, but does not edit the file directly or
@@ -94,16 +95,16 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 - Treat “do,” “go,” or “continue” as a real instruction when the next action
   was already discussed. Forward it and start; do not bounce it back to the
   user or respond with readiness alone.
-- A suborchestrator uses Sol medium, owns exactly one meaningful task and its
+- A suborchestrator uses OpenCode Sol medium, owns exactly one meaningful task and its
   finish condition, and does no coding or experiment execution. It launches a
   fresh temporary worker for each minimal package and closes when the task
   ends. It may not create another suborchestrator layer. An already-atomic task
   goes directly from Operations to one worker.
-- Coding workers normally use `gpt-5.6-luna` max. Give Luna one clear package
+- Coding workers normally use OpenCode `gpt-5.6-luna` max. Give Luna one clear package
   with one deliverable, one reproduction or run, and one done check. A harder
   package uses Sol medium. Luna support or supervision may use low but never
   higher. Every later package or correction gets a fresh worker chat.
-- Claude Opus 5 and OpenCode GLM 5.2 are selectable productive workers when
+- Native Codex, Claude Opus 5, and OpenCode GLM 5.2 are selectable productive workers when
   their separate context materially benefits the assigned task. Name the
   selected model in the task card; do not treat either as a hidden fallback.
 - Bounded research and data crunching use Sol at the lowest sufficient effort,
@@ -113,7 +114,8 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   one bounded named Worker with the normal one-task, worktree, commit, routing,
   and closure rules. Launch it with `herdr-agent terra-high`; do not relabel a
   Terra-medium Researcher.
-- Codex or Claudex may implement work. Launch and resume Claudex only through
+- OpenCode performs normal implementation. Codex or Claudex may be explicitly
+  selected for a bounded implementation. Launch and resume Claudex only through
   `claudex`, with the explicitly selected model. Never silently substitute
   generic Claude or a different model.
 - A Claudex pane may use relevant Claude-side workflows, skills, commands,
@@ -316,8 +318,8 @@ control-work percentage.
 
 - One external service watches long-running work indefinitely. The service,
   not a model turn, performs waiting and event detection.
-- Its default classifier is API-key `opencode/gemini-3.6-flash`; a Luna-low
-  watcher is the research-oriented alternative. The classifier receives only
+- Its classifier is a native Codex Luna-low watcher. The external event service
+  performs the waiting; the classifier receives only
   a bounded redacted event payload. It has no code, filesystem, shell, Herdr,
   credential, or project-write access.
 - Normal and unchanged events end silently. Verification is optional and

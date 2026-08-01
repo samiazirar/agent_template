@@ -11,7 +11,7 @@ from pathlib import Path
 CONTRACTS = {
     "human-orchestrator": (
         "ROLE: Human Orchestrator",
-        "MODEL: Claudex GPT-5.6 Sol high",
+        "MODEL: Native Codex GPT-5.6 Sol high",
         "RECEIVES FROM: Human; Operations Lead",
         "SENDS TO: Human; Operations Lead",
         "OWNS: Goal meaning; human questions and decisions; human-language explanation; Human Plan meaning",
@@ -24,7 +24,7 @@ CONTRACTS = {
     ),
     "operations-lead": (
         "ROLE: Operations Lead",
-        "MODEL: Codex GPT-5.6 Sol high",
+        "MODEL: OpenCode GPT-5.6 Sol high",
         "RECEIVES FROM: Human Orchestrator; Operations Collaborator; workers; suborchestrators; Plan Orchestrators; advisors; researchers; verifiers",
         "SENDS TO: Human Orchestrator; Operations Collaborator; assigned technical roles",
         "OWNS: Technical state; decomposition; execution; role lifecycle; integration; synchronization; rolling 90/10 budget",
@@ -45,7 +45,7 @@ CONTRACTS = {
     ),
     "plan-orchestrator": (
         "ROLE: Plan Orchestrator",
-        "MODEL: Codex or Claudex GPT-5.6 Sol medium",
+        "MODEL: OpenCode GPT-5.6 Sol medium",
         "RECEIVES FROM: Operations Lead",
         "SENDS TO: Operations Lead",
         "OWNS: One accepted update to HUMAN_PLAN.md",
@@ -55,7 +55,7 @@ CONTRACTS = {
     ),
     "worker": (
         "ROLE: Worker",
-        "MODEL: GPT-5.6 Luna max for normal coding; Sol medium for harder coding; selected Sol effort for bounded research or data crunching; explicitly selected Opus 5 or GLM 5.2 alternative",
+        "MODEL: OpenCode GPT-5.6 Luna max for normal coding; OpenCode Sol medium for harder coding; explicitly selected native Codex, Opus 5, or GLM 5.2 alternative",
         "RECEIVES FROM: Operations Lead or one owning suborchestrator",
         "SENDS TO: The same assigning role",
         "OWNS: One minimal work package in one fresh chat; one deliverable; one reproduction or run; one done check; one branch; one worktree; one result",
@@ -64,16 +64,16 @@ CONTRACTS = {
     ),
     "suborchestrator": (
         "ROLE: Suborchestrator",
-        "MODEL: GPT-5.6 Sol medium",
+        "MODEL: OpenCode GPT-5.6 Sol medium",
         "RECEIVES FROM: Operations Lead",
         "SENDS TO: Operations Lead; its assigned workers",
         "OWNS: One meaningful task; its goal; its observed finish condition; its sequence of minimal productive packages",
         "MUST NOT: Code; execute experiments; contact the Human or Human Orchestrator; create another suborchestrator; manage work outside its task",
-        "ROUTING RULE: Keep one current next package, launch one fresh Luna-max worker for normal coding or selected Sol worker for a harder package, close each worker after its result, absorb results without routine review turns, integrate the task, report with herdr-role-message operations, then stop.",
+        "ROUTING RULE: Keep one current next package, launch one fresh OpenCode Luna-max worker for normal coding or OpenCode Sol-medium worker for a harder package, close each worker after its result, absorb results without routine review turns, integrate the task, report with herdr-role-message operations, then stop.",
     ),
     "strategic-advisor": (
         "ROLE: Strategic Advisor",
-        "MODEL: GPT-5.6 Sol xhigh",
+        "MODEL: Native Codex GPT-5.6 Sol xhigh",
         "RECEIVES FROM: Operations Lead",
         "SENDS TO: Operations Lead",
         "OWNS: One bounded consequential question",
@@ -82,7 +82,7 @@ CONTRACTS = {
     ),
     "researcher": (
         "ROLE: Researcher",
-        "MODEL: GPT-5.6 Terra medium for open-ended synthesis; selected GPT-5.6 Sol effort for bounded research and data crunching",
+        "MODEL: Native Codex GPT-5.6 Terra medium for open-ended synthesis; selected native Codex GPT-5.6 Sol effort for bounded research and data crunching",
         "RECEIVES FROM: Operations Lead or Architect",
         "SENDS TO: The same assigning role; assigned research observers",
         "OWNS: One bounded evidence question and synthesis",
@@ -91,7 +91,7 @@ CONTRACTS = {
     ),
     "research-observer": (
         "ROLE: Research Observer",
-        "MODEL: GPT-5.6 Luna low",
+        "MODEL: Native Codex GPT-5.6 Luna low",
         "RECEIVES FROM: One Researcher",
         "SENDS TO: The same Researcher",
         "OWNS: One bounded read-only evidence task",
@@ -100,7 +100,7 @@ CONTRACTS = {
     ),
     "verifier": (
         "ROLE: Verifier",
-        "MODEL: GPT-5.6 Sol medium",
+        "MODEL: Native Codex GPT-5.6 Sol medium",
         "RECEIVES FROM: Operations Lead or trusted event service",
         "SENDS TO: Operations Lead",
         "OWNS: One optional minimal check of a consequential unusual event",
