@@ -410,9 +410,10 @@ control-work percentage.
 - Let worker messages and the emergency helper wake parent orchestrators.
   Watch scheduler/process state externally. Never occupy an orchestrator turn
   with `herdr agent wait`, `sleep`, or polling unchanged state.
-- Run `herdr-costs report` for own and aggregate time, Luna-max/control token
-  shares, and API-equivalent dollars by human task name. Run
-  `herdr-costs report --all` for every recorded Herdr workspace. The private
+- Run `herdr-costs report` for today's own and aggregate time,
+  Luna-max/control token shares, and API-equivalent dollars by human task name.
+  Run `herdr-costs report --all` for today's cross-project per-agent split and
+  add `--all-time` only when lifetime totals are requested. The private
   ledger and terminal report replace manual usage files or dashboards.
 
 ## 10. PaperPilot

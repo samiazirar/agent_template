@@ -158,6 +158,8 @@ Operations pane x-coordinate.
 Normal communication must follow:
 `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`. Operations
 Lead is the sole technical authority. No technical role may bypass it.
+The messenger adds a compact target-specific boundary reminder on every routed
+message; do not repeat the full role contract in routine communication.
 
 Before launching, require `command -v herdr-role-message`,
 `command -v herdr-emergency-wake`, `command -v herdr-project-save-close`, and
@@ -266,6 +268,15 @@ Do not launch standing advisors, watchers, reviewers, progress checkers, Plan
 Orchestrators, verifiers, or suborchestrators. Open each only for its immediate
 bounded purpose and only within the 10% control budget.
 
+When the Human explicitly asks where time or tokens went, open one temporary
+native-Codex Luna-max `Usage Analyst · PersonName Project Usage` in
+`05 Progress Checks`. It runs `herdr-costs` first, reads the relevant
+`HUMAN_PLAN.md`, and may launch fresh Luna-low Usage Readers for disjoint,
+bounded current or archived transcript batches. It reports the expensive
+agents and tasks, cache use, repetition, context growth, drift, and actual plan
+contribution, then closes every reader and itself. It creates no report file
+and never implements its recommendation.
+
 Create one compact project-root `RESTART_HANDOFF.md` at launch and keep it
 restart-ready after every material result, active-task change, external wait,
 or decision. It contains only the goal, current result/code state, running
@@ -280,9 +291,10 @@ terminal event. Never leave an active task represented only by an idle or
 waiting pane.
 
 `herdr-agent` registers every session automatically. The lightweight
-terminal command `herdr-costs report` shows the human-named hierarchy with own
-and aggregate time, Luna-max/control token shares, tokens, and API-equivalent
-cost. `herdr-costs report --all` shows the compact cross-project table. Do not
+terminal command `herdr-costs report` shows today's human-named hierarchy with
+own and aggregate time, Luna-max/control token shares, tokens, and
+API-equivalent cost. `herdr-costs report --all` adds every used agent across
+projects; `--all-time` is the explicit lifetime view. Do not
 launch an agent to measure usage and do not create a manual dashboard.
 
 OpenCode alternate-provider usage comes from its native database. Native Codex
@@ -410,6 +422,9 @@ selected Sol effort; open-ended synthesis uses Terra. Verifier prompts are optio
 read-only, and only for one
 consequential anomaly. Advisor prompts must contain one bounded question,
 report only to Operations Lead, and forbid implementation.
+Usage Analyst prompts use Luna max and the canonical `usage-analyst` block;
+their bounded Luna-low transcript readers use `usage-reader`. Both are
+read-only, on-demand, and close after one answer.
 
 Require technical sessions to acknowledge, in one concise message, their role,
 who they receive from, who they report to, and their main forbidden boundary.

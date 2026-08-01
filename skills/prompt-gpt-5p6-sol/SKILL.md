@@ -149,8 +149,11 @@ meaning and remove process that does not help reach the goal.
   end its turn instead of running `herdr agent wait`, `sleep`, or polling. Reserve
   the external event service for genuinely long processes or schedulers.
 - Reference `herdr-costs report` for the private human-named own/aggregate
-  time, token, and API-equivalent cost tree. Do not ask a model to maintain or
-  summarize a usage dashboard.
+  time, token, cache, and API-equivalent cost tree. It defaults to today; use
+  `--all` for the per-agent cross-project split and `--all-time` only when
+  requested. On explicit Human request, one Luna-max Usage Analyst may use
+  fresh Luna-low readers for bounded transcript batches and return one compact
+  plan-contribution diagnosis. Do not maintain a usage dashboard.
 - For a strategic advisor, use Sol xhigh and ask one bounded question with only
   the context needed to answer yes/no or recommend one approach. For
   consequential strategic planning or plan validation, direct the responsible

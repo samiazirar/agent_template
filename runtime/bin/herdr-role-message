@@ -38,6 +38,18 @@ esac
 message="$*"
 [[ -n "$message" ]] || usage
 
+case "$target" in
+  "Operations Lead")
+    message="Role reminder: dispatch technical work to a Sol-medium suborchestrator or Luna worker; do not inspect, debug, implement, run experiments, or SSH. If the goal is incomplete and no productive child is active, dispatch the next package before ending. Message: $message"
+    ;;
+  "Human Orchestrator")
+    message="Role reminder: handle only Human conversation and plan meaning; route technical action to Operations and do not manage execution. Message: $message"
+    ;;
+  "Suborchestrator"\ ·\ *)
+    message="Role reminder: use this child result only to close it and choose or dispatch the next Luna package; do not inspect, debug, implement, run experiments, or SSH. Message: $message"
+    ;;
+esac
+
 pane_id="$(
   herdr pane list --workspace "$HERDR_WORKSPACE_ID" |
     python3 -c '

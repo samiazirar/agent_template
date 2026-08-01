@@ -196,6 +196,9 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   hidden. Human Orchestrator may use this messenger and the guarded
   `herdr-project-save-close --close` command after an explicit Human close
   request and a completed Operations save. It may use no other Herdr control.
+- The messenger prepends one short target-specific boundary reminder so a new
+  routed message does not pull Human, Operations, or a suborchestrator into
+  another role's work.
 - A prompt is sent with `herdr agent prompt`, never `send-text`. Initial launch
   validation uses its bounded `--wait` mode so ineffective submission returns
   `agent_prompt_stalled` instead of silently stalling. Operations and
@@ -307,6 +310,13 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   accepted goal-relevant evidence.
 - Explicitly selected Terra-high productive work uses one bounded named Worker,
   one worktree, and the normal worker completion and closure rules.
+- Only when the Human asks where usage went, Operations or the Architect opens
+  one temporary native-Codex Luna-max Usage Analyst in `05 Progress Checks`.
+  It runs the deterministic cost report first, compares only relevant chat
+  batches with `HUMAN_PLAN.md`, and may launch fresh Luna-low Usage Readers for
+  bounded current or archived transcript batches. Readers and analyst are
+  closed after one compact answer; they never edit project files or create a
+  dashboard.
 
 ## Progress, continuity, and cost
 
@@ -328,9 +338,10 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   of worker own time/tokens/cost, suborchestrator totals, Operations totals, and
   the Human total. Dollar values are API-equivalent estimates; subscription
   sessions are not token-billed and provider billing remains authoritative.
-  The report begins with Luna-max and control-role token shares. Run
-  `herdr-costs report --all` from any Herdr pane for a compact cross-project
-  table and an explicit Luna-majority result.
+  The report defaults to the current local day and uses current standard API
+  rates for uncached input, cache hits, cache writes, output, and long-context
+  requests. Run `herdr-costs report --all` for the cross-project and per-agent
+  split or add `--all-time` deliberately for lifetime totals.
 - OpenCode accounting reads its native session database, including per-message
   model, variant, token, cost, active-time, and skill-tool records. Native
   Claude Code and Claudex also register new and resumed Herdr sessions

@@ -17,9 +17,10 @@ from typing import Any
 
 
 OPENAI_PRICES = {
-    "gpt-5.6-sol": (5.00, 0.50, 6.25, 30.00),
-    "gpt-5.6-terra": (2.00, 0.20, 2.50, 12.00),
-    "gpt-5.6-luna": (0.20, 0.02, 0.25, 1.20),
+    # Standard API USD per 1M tokens: short-context rates, then long-context.
+    "gpt-5.6-sol": (5.00, 0.50, 6.25, 30.00, 10.00, 1.00, 12.50, 45.00),
+    "gpt-5.6-terra": (2.00, 0.20, 2.50, 12.00, 4.00, 0.40, 5.00, 18.00),
+    "gpt-5.6-luna": (0.20, 0.02, 0.25, 1.20, 0.40, 0.04, 0.50, 1.80),
 }
 CLAUDE_PRICES = {
     "claude-opus-5": (5.00, 0.50, 6.25, 10.00, 25.00),
@@ -38,6 +39,10 @@ def iso_now() -> str:
 def parse_time(value: str | None) -> datetime | None:
     if not value:
         return None
+
+
+def today_start() -> datetime:
+    return datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0)
     try:
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
@@ -136,7 +141,7 @@ def transcript_for(session: str, recorded_path: str | None = None) -> tuple[str,
 ROLE_NAME = re.compile(
     r"(?:Human Orchestrator|Operations Lead|Suborchestrator|Worker|"
     r"Plan Orchestrator|Researcher|Strategic Advisor|Advisor|Verifier|Watcher|"
-    r"Progress|Archive|Launcher)"
+    r"Usage Analyst|Usage Reader|Progress|Archive|Launcher)"
     r"\s*·\s*[^,:.;\n`]+"
 )
 CODEX_SESSION = re.compile(r"\b019[0-9a-f]{5}-[0-9a-f-]{27}\b", re.IGNORECASE)
@@ -362,14 +367,22 @@ def opencode_database() -> Path:
     return root / "opencode" / "opencode.db"
 
 
-def openai_cost(model: str, usage: dict[str, int]) -> float:
+def openai_cost(
+    model: str, usage: dict[str, int], *, input_includes_cache: bool = True
+) -> float:
     prices = OPENAI_PRICES.get(model)
     if not prices:
         return 0.0
-    input_rate, cached_rate, write_rate, output_rate = prices
     cached = usage["cached"]
     writes = usage["cache_write"]
-    uncached = max(0, usage["input"] - cached - writes)
+    uncached = (
+        max(0, usage["input"] - cached - writes)
+        if input_includes_cache
+        else usage["input"]
+    )
+    total_input = uncached + cached + writes
+    rates = prices[4:] if total_input > 272_000 else prices[:4]
+    input_rate, cached_rate, write_rate, output_rate = rates
     return (
         uncached * input_rate
         + cached * cached_rate
@@ -441,16 +454,15 @@ def model_cost(model: str, usage: dict[str, int]) -> float:
     if model in OPENAI_PRICES:
         priced_usage = dict(usage)
         priced_usage["cache_write"] = (
-            usage["cache_write_1h"] + usage["cache_write_5m"]
+            usage["cache_write"]
+            + usage["cache_write_1h"]
+            + usage["cache_write_5m"]
         )
-        priced_usage["input"] = (
-            usage["input"] + usage["cached"] + priced_usage["cache_write"]
-        )
-        return openai_cost(model, priced_usage)
+        return openai_cost(model, priced_usage, input_includes_cache=False)
     return claude_cost(model, usage)
 
 
-def read_codex(path: Path) -> dict[str, Any]:
+def read_codex(path: Path, since: datetime | None = None) -> dict[str, Any]:
     latest_tokens: dict[str, Any] = {}
     model = "unknown"
     effort = "unknown"
@@ -460,6 +472,7 @@ def read_codex(path: Path) -> dict[str, Any]:
     current_turn = ""
     turn_models: dict[str, str] = {}
     turn_usage: dict[str, dict[str, int]] = {}
+    turn_when: dict[str, datetime] = {}
     turn_skills: dict[str, set[str]] = defaultdict(set)
     turn_skill_baselines: dict[tuple[str, str], dict[str, int]] = {}
     skill_paths: dict[str, str] = {}
@@ -509,18 +522,37 @@ def read_codex(path: Path) -> dict[str, Any]:
                 per_turn["output"] = int(last_tokens.get("output_tokens", 0))
                 per_turn["tokens"] = per_turn["input"] + per_turn["output"]
                 turn_usage[current_turn] = per_turn
+                if when:
+                    turn_when[current_turn] = when
         if item.get("type") == "event_msg" and payload.get("type") == "task_complete":
-            durations[payload.get("turn_id", str(len(durations)))] = int(
-                payload.get("duration_ms", 0)
-            )
+            if since is None or (when and when >= since):
+                durations[payload.get("turn_id", str(len(durations)))] = int(
+                    payload.get("duration_ms", 0)
+                )
     usage = empty_usage()
-    usage["input"] = int(latest_tokens.get("input_tokens", 0))
-    usage["cached"] = int(latest_tokens.get("cached_input_tokens", 0))
-    usage["cache_write"] = int(latest_tokens.get("cache_write_input_tokens", 0))
-    usage["output"] = int(latest_tokens.get("output_tokens", 0))
-    usage["tokens"] = usage["input"] + usage["output"]
+    if since is None:
+        usage["input"] = int(latest_tokens.get("input_tokens", 0))
+        usage["cached"] = int(latest_tokens.get("cached_input_tokens", 0))
+        usage["cache_write"] = int(latest_tokens.get("cache_write_input_tokens", 0))
+        usage["output"] = int(latest_tokens.get("output_tokens", 0))
+        usage["tokens"] = usage["input"] + usage["output"]
+    else:
+        for turn_id, item_usage in turn_usage.items():
+            if turn_when.get(turn_id) and turn_when[turn_id] >= since:
+                add_usage(usage, item_usage)
     skills: dict[str, dict[str, Any]] = {}
+    cost = 0.0
+    for turn_id, item_usage in turn_usage.items():
+        if since is not None and not (
+            turn_when.get(turn_id) and turn_when[turn_id] >= since
+        ):
+            continue
+        cost += openai_cost(turn_models.get(turn_id, model), item_usage)
     for turn_id, names in turn_skills.items():
+        if since is not None and not (
+            turn_when.get(turn_id) and turn_when[turn_id] >= since
+        ):
+            continue
         turn_model = turn_models.get(turn_id, model)
         for name in names:
             associated = usage_delta(
@@ -537,7 +569,7 @@ def read_codex(path: Path) -> dict[str, Any]:
         "model": model,
         "effort": effort,
         "usage": usage,
-        "cost": openai_cost(model, usage),
+        "cost": cost,
         "active_seconds": sum(durations.values()) / 1000,
         "first": first,
         "last": last,
@@ -546,13 +578,15 @@ def read_codex(path: Path) -> dict[str, Any]:
     }
 
 
-def read_claude(path: Path) -> dict[str, Any]:
+def read_claude(path: Path, since: datetime | None = None) -> dict[str, Any]:
     usage = empty_usage()
     model = "unknown"
     effort = "unknown"
     first = None
     last = None
-    messages: dict[str, tuple[dict[str, Any], str, str, str | None]] = {}
+    messages: dict[
+        str, tuple[dict[str, Any], str, str, str | None, datetime | None]
+    ] = {}
     skill_calls: set[tuple[str, str]] = set()
     for raw in path.open(encoding="utf-8", errors="replace"):
         try:
@@ -568,7 +602,9 @@ def read_claude(path: Path) -> dict[str, Any]:
             if not isinstance(block, dict) or block.get("name") != "Skill":
                 continue
             skill = (block.get("input") or {}).get("skill")
-            if isinstance(skill, str) and skill:
+            if isinstance(skill, str) and skill and (
+                since is None or (when and when >= since)
+            ):
                 call_id = str(block.get("id") or item.get("uuid") or skill)
                 skill_calls.add((skill, call_id))
         counts = message.get("usage")
@@ -584,13 +620,19 @@ def read_claude(path: Path) -> dict[str, Any]:
             str(message.get("model") or model),
             str(item.get("effort") or effort),
             active_skill,
+            when,
         )
     skills: dict[str, dict[str, Any]] = {}
     for skill, _call_id in skill_calls:
         skills.setdefault(
             skill, {"uses": 0, "usage": empty_usage(), "cost": 0.0}
         )["uses"] += 1
-    for counts, item_model, item_effort, active_skill in messages.values():
+    included_times: list[datetime] = []
+    for counts, item_model, item_effort, active_skill, when in messages.values():
+        if since is not None and not (when and when >= since):
+            continue
+        if when:
+            included_times.append(when)
         model = item_model
         effort = item_effort
         message_usage = claude_message_usage(counts)
@@ -601,6 +643,9 @@ def read_claude(path: Path) -> dict[str, Any]:
             )
             add_usage(entry["usage"], message_usage)
             entry["cost"] += model_cost(item_model, message_usage)
+    if since is not None:
+        first = min(included_times) if included_times else None
+        last = max(included_times) if included_times else None
     elapsed = max(0.0, (last - first).total_seconds()) if first and last else 0.0
     cost = model_cost(model, usage)
     return {
@@ -616,7 +661,7 @@ def read_claude(path: Path) -> dict[str, Any]:
     }
 
 
-def read_opencode(session: str) -> dict[str, Any] | None:
+def read_opencode(session: str, since: datetime | None = None) -> dict[str, Any] | None:
     database = opencode_database()
     if not database.exists():
         return None
@@ -658,6 +703,7 @@ def read_opencode(session: str) -> dict[str, Any] | None:
     message_turn: dict[str, int] = {}
     turn_usage: dict[int, dict[str, int]] = defaultdict(empty_usage)
     turn_cost: dict[int, float] = defaultdict(float)
+    included_messages: set[str] = set()
 
     for message_id, created_ms, raw_data in rows:
         try:
@@ -669,6 +715,9 @@ def read_opencode(session: str) -> dict[str, Any] | None:
             current_turn += 1
         message_turn[str(message_id)] = current_turn
         when = datetime.fromtimestamp(created_ms / 1000, tz=timezone.utc)
+        if since is not None and when < since:
+            continue
+        included_messages.add(str(message_id))
         first = when if first is None or when < first else first
         last = when if last is None or when > last else last
         if role_name != "assistant":
@@ -692,7 +741,11 @@ def read_opencode(session: str) -> dict[str, Any] | None:
         )
         add_usage(usage, message_usage)
         add_usage(turn_usage[current_turn], message_usage)
-        message_cost = float(data.get("cost") or 0.0)
+        message_cost = (
+            model_cost(model, message_usage)
+            if model in OPENAI_PRICES
+            else float(data.get("cost") or 0.0)
+        )
         cost += message_cost
         turn_cost[current_turn] += message_cost
         timing = data.get("time") or {}
@@ -705,6 +758,8 @@ def read_opencode(session: str) -> dict[str, Any] | None:
 
     calls: dict[tuple[int, str], int] = defaultdict(int)
     for message_id, raw_data in part_rows:
+        if str(message_id) not in included_messages:
+            continue
         try:
             data = json.loads(raw_data)
         except json.JSONDecodeError:
@@ -738,9 +793,11 @@ def read_opencode(session: str) -> dict[str, Any] | None:
     }
 
 
-def session_metrics(record: dict[str, Any]) -> dict[str, Any]:
+def session_metrics(
+    record: dict[str, Any], since: datetime | None = None
+) -> dict[str, Any]:
     if str(record.get("surface") or "").startswith("opencode"):
-        metrics = read_opencode(record["session"])
+        metrics = read_opencode(record["session"], since)
         if metrics:
             return metrics
     found = transcript_for(record["session"], record.get("transcript_path"))
@@ -757,7 +814,7 @@ def session_metrics(record: dict[str, Any]) -> dict[str, Any]:
             "skills": {},
         }
     kind, path = found
-    return read_codex(path) if kind == "codex" else read_claude(path)
+    return read_codex(path, since) if kind == "codex" else read_claude(path, since)
 
 
 def fmt_tokens(value: int) -> str:
@@ -808,6 +865,7 @@ CONTROL_ROLES = {
     "Human Orchestrator",
     "Operations Lead",
     "Operations Orchestrator",
+    "Orchestrator",
     "Operations Collaborator",
     "Suborchestrator",
     "Plan Orchestrator",
@@ -818,26 +876,50 @@ CONTROL_ROLES = {
     "Progress",
     "Archive",
     "Launcher",
+    "Usage Analyst",
+    "Usage Reader",
 }
 
 
-def usage_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
+def usage_summary(
+    records: list[dict[str, Any]],
+    since: datetime | None = None,
+    metrics_by_session: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     by_model: dict[str, int] = defaultdict(int)
     by_role: dict[str, int] = defaultdict(int)
     total_cost = 0.0
+    total_cached = 0
+    luna_worker_tokens = 0
+    total_seconds = 0.0
+    time_exact = True
     for record in records:
-        metrics = session_metrics(record)
+        metrics = (
+            metrics_by_session[record["session"]]
+            if metrics_by_session is not None
+            else session_metrics(record, since)
+        )
         tokens = int(metrics["usage"]["tokens"])
         model_key = f'{metrics["model"]}/{metrics["effort"]}'
         by_model[model_key] += tokens
-        by_role[role(record["label"])] += tokens
+        role_name = role(record["label"])
+        by_role[role_name] += tokens
+        if model_key == "gpt-5.6-luna/max" and role_name == "Worker":
+            luna_worker_tokens += tokens
         total_cost += float(metrics["cost"])
+        total_cached += int(metrics["usage"]["cached"])
+        total_seconds += float(metrics["active_seconds"])
+        if tokens or metrics["active_seconds"]:
+            time_exact = time_exact and bool(metrics["time_exact"])
     total_tokens = sum(by_model.values())
-    luna_max = by_model.get("gpt-5.6-luna/max", 0)
+    luna_max = luna_worker_tokens
     control = sum(tokens for name, tokens in by_role.items() if name in CONTROL_ROLES)
     return {
         "tokens": total_tokens,
         "cost": total_cost,
+        "cached_tokens": total_cached,
+        "active_seconds": total_seconds,
+        "time_exact": time_exact,
         "luna_max_tokens": luna_max,
         "luna_max_pct": 100.0 * luna_max / total_tokens if total_tokens else 0.0,
         "control_tokens": control,
@@ -846,7 +928,7 @@ def usage_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def report_all() -> int:
+def report_all(since: datetime | None) -> int:
     try:
         result = subprocess.run(
             ["herdr", "workspace", "list"],
@@ -881,35 +963,84 @@ def report_all() -> int:
         records = load_records(workspace_id)
         if not records:
             continue
-        summary = usage_summary(records)
-        rows.append((workspace.get("label") or workspace_id, summary))
-    print("Cost summary · all recorded Herdr workspaces")
-    print("API-equivalent USD; lifetime recorded usage; subscription billing is not included.")
+        metrics_by_session = {
+            record["session"]: session_metrics(record, since) for record in records
+        }
+        summary = usage_summary(records, since, metrics_by_session)
+        if not summary["tokens"]:
+            continue
+        agents: dict[str, dict[str, Any]] = {}
+        for record in records:
+            metrics = metrics_by_session[record["session"]]
+            tokens = int(metrics["usage"]["tokens"])
+            if not tokens:
+                continue
+            item = agents.setdefault(
+                record["label"],
+                {
+                    "seconds": 0.0,
+                    "time_exact": True,
+                    "tokens": 0,
+                    "cached": 0,
+                    "cost": 0.0,
+                    "models": set(),
+                },
+            )
+            item["seconds"] += float(metrics["active_seconds"])
+            item["time_exact"] = item["time_exact"] and bool(metrics["time_exact"])
+            item["tokens"] += tokens
+            item["cached"] += int(metrics["usage"]["cached"])
+            item["cost"] += float(metrics["cost"])
+            item["models"].add(f'{metrics["model"]}/{metrics["effort"]}')
+        rows.append((workspace.get("label") or workspace_id, summary, agents))
+    period = since.astimezone().date().isoformat() if since else "all time"
+    print(f"Cost summary · all recorded Herdr workspaces · {period}")
+    print("Standard API-equivalent USD with cache and long-context rates; subscription billing is not included.")
     print()
-    print(f'{"Project":36} {"Tokens":10} {"Luna max":10} {"Control":10} {"Cost":10} {"Luna majority":13}')
-    print("-" * 96)
-    for label, summary in rows:
+    print(f'{"Project / agent":48} {"Model / effort":24} {"Time":9} {"Tokens":10} {"Cached":10} {"Luna":8} {"Control":8} {"Cost":10}')
+    print("-" * 136)
+    for label, summary, agents in rows:
         majority = "yes" if summary["luna_max_pct"] > 50.0 else "NO"
         print(
-            f'{label[:36]:36} {fmt_tokens(summary["tokens"]):10} '
-            f'{summary["luna_max_pct"]:9.1f}% {summary["control_pct"]:9.1f}% '
-            f'${summary["cost"]:9.3f} {majority:13}'
+            f'{label[:48]:48} {"project total":24} '
+            f'{fmt_duration(summary["active_seconds"], summary["time_exact"]):9} '
+            f'{fmt_tokens(summary["tokens"]):10} '
+            f'{fmt_tokens(summary["cached_tokens"]):10} '
+            f'{summary["luna_max_pct"]:6.1f}% {summary["control_pct"]:6.1f}% '
+            f'${summary["cost"]:9.3f} {majority}'
         )
+        for agent_label, item in sorted(
+            agents.items(), key=lambda pair: pair[1]["tokens"], reverse=True
+        ):
+            models = ",".join(sorted(item["models"]))[:24]
+            print(
+                f'{("  " + agent_label)[:48]:48} {models:24} '
+                f'{fmt_duration(item["seconds"], item["time_exact"]):9} '
+                f'{fmt_tokens(item["tokens"]):10} {fmt_tokens(item["cached"]):10} '
+                f'{"":8} {"":8} ${item["cost"]:9.3f}'
+            )
+    if since is not None:
+        print("\nProjects and agents with no recorded usage today are omitted.")
     return 0
 
 
-def report(workspace: str) -> int:
+def report(workspace: str, since: datetime | None) -> int:
     reconcile_workspace(workspace)
     records = load_records(workspace)
     if not records:
         print("No registered sessions for this workspace yet.")
         return 0
     active = current_sessions(workspace)
-    summary = usage_summary(records)
+    metrics_by_session = {
+        record["session"]: session_metrics(record, since) for record in records
+    }
+    summary = usage_summary(records, since, metrics_by_session)
     grouped: dict[str, dict[str, Any]] = {}
     skill_totals: dict[tuple[str, str], dict[str, Any]] = {}
     for record in records:
-        metrics = session_metrics(record)
+        metrics = metrics_by_session[record["session"]]
+        if not metrics["usage"]["tokens"] and not metrics["active_seconds"]:
+            continue
         label = record["label"]
         node = grouped.setdefault(
             label,
@@ -979,8 +1110,9 @@ def report(workspace: str) -> int:
     for root in sorted(roots):
         walk(root, 0)
 
-    print(f"Cost and time · workspace {workspace}")
-    print("API-equivalent USD; subscription billing and non-token tool charges are not included.")
+    period = since.astimezone().date().isoformat() if since else "all time"
+    print(f"Cost and time · workspace {workspace} · {period}")
+    print("Standard API-equivalent USD with cache and long-context rates; subscription billing and non-token tool charges are not included.")
     print(
         f'Token mix: Luna max {fmt_tokens(summary["luna_max_tokens"])} '
         f'({summary["luna_max_pct"]:.1f}%); control roles '
@@ -1107,6 +1239,11 @@ def main() -> int:
         action="store_true",
         help="show a compact cost and token-mix table for all workspaces",
     )
+    report_parser.add_argument(
+        "--all-time",
+        action="store_true",
+        help="include lifetime recorded usage instead of today only",
+    )
     args = parser.parse_args()
     if args.command == "register":
         return register(args)
@@ -1116,13 +1253,14 @@ def main() -> int:
         count = reconcile_workspace(args.workspace, args.project_dir)
         print(f"Registered {count} previously missing sessions.")
         return 0
+    since = None if getattr(args, "all_time", False) else today_start()
     if args.command == "report" and args.all:
-        return report_all()
+        return report_all(since)
     workspace = getattr(args, "workspace", None) or os.environ.get("HERDR_WORKSPACE_ID")
     if not workspace:
         print("Use --workspace or run inside Herdr.", file=sys.stderr)
         return 2
-    return report(workspace)
+    return report(workspace, since)
 
 
 if __name__ == "__main__":

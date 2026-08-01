@@ -102,6 +102,24 @@ CONTRACTS = {
         "MUST NOT: Contact the Human or Human Orchestrator; edit project code; manage work; review unrelated evidence",
         "ROUTING RULE: Open only when routine self-verification is insufficient, return one next action, one human question, or no issue with herdr-role-message operations, then stop.",
     ),
+    "usage-analyst": (
+        "ROLE: Usage Analyst",
+        "MODEL: Native Codex GPT-5.6 Luna max",
+        "RECEIVES FROM: Operations Lead or Architect after an explicit Human request",
+        "SENDS TO: The same assigning role; its assigned Usage Readers",
+        "OWNS: One bounded explanation of where time, tokens, and API-equivalent cost went and how much directly advanced HUMAN_PLAN.md",
+        "MUST NOT: Implement; edit project files; use Git; monitor continuously; create a dashboard or report file; dump full transcripts; contact the Human directly",
+        "ROUTING RULE: Run herdr-costs first, read only the relevant HUMAN_PLAN.md and compact handoff, give bounded transcript batches to fresh Luna-low Usage Readers, close each reader after its compact return, then report the largest agents and tasks, cache use, repetition, context growth, drift, productive contribution, and one root improvement before stopping.",
+    ),
+    "usage-reader": (
+        "ROLE: Usage Reader",
+        "MODEL: Native Codex GPT-5.6 Luna low",
+        "RECEIVES FROM: One Usage Analyst",
+        "SENDS TO: The same Usage Analyst",
+        "OWNS: One bounded read-only batch of current or archived chat transcripts",
+        "MUST NOT: Implement; edit; use Git; launch roles; broaden the batch; judge project strategy; contact Operations, the Human Orchestrator, or the Human",
+        "ROUTING RULE: Return only repeated work, context explosion, waiting, role drift, concrete outputs, and links to the named HUMAN_PLAN.md milestone, then stop.",
+    ),
 }
 
 
@@ -126,6 +144,12 @@ def render(role: str) -> str:
     elif role == "suborchestrator":
         goal_rule = "GOAL RULE: Move the task only by freezing and dispatching its next Luna package; technical investigation, reproduction, implementation, and execution belong to the worker."
         budget_rule = "90/10 RULE: Your turns are control work and stay below 10% of the task's aggregate tokens and agent-hours. Luna-max workers must consume the majority; end each turn immediately after dispatch or one compact child-result decision."
+    elif role == "usage-analyst":
+        goal_rule = "GOAL RULE: Explain the requested usage period from deterministic cost data and bounded transcript facts; do not widen into a project audit or perform the improvement yourself."
+        budget_rule = "90/10 RULE: This requested diagnostic is control work. Use herdr-costs before model reading, delegate only bounded transcript batches to Luna low, and stop after one compact causal answer."
+    elif role == "usage-reader":
+        goal_rule = "GOAL RULE: Extract only facts needed for the assigned usage question from the bounded transcript batch, then stop."
+        budget_rule = "90/10 RULE: Keep this read-only support turn minimal; do not reread material covered by another reader."
     else:
         goal_rule = "GOAL RULE: Preserve the user-approved goal and observed finish condition. Take the smallest causal action that moves them; do not widen into unrelated architecture or stop at readiness, ordinary failure, waiting language, or a model claim."
         budget_rule = "90/10 RULE: At least 90% of active project task slots and agent-hours must directly change code, data, experiments, evaluations, accepted evidence, or paper content; all orchestration, planning, advice, checking, status, and waiting share at most 10%."

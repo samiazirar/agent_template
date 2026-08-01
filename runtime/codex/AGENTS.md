@@ -166,9 +166,11 @@ complete operating context for one minimal work package.
   active task always has a current package and next action; external waiting
   states name independent work that continues.
 - `herdr-costs report` shows the human-named hierarchy, Luna-max and control
-  token shares, time, tokens, and API-equivalent dollars. Run
-  `herdr-costs report --all` for the compact cross-project table. Do not create
-  a manual dashboard.
+  token shares, time, tokens, cache use, and API-equivalent dollars for today.
+  Run `herdr-costs report --all` for the cross-project per-agent split and add
+  `--all-time` only for lifetime totals. A Usage Analyst is a temporary
+  Luna-max diagnostic opened only on explicit Human request; it may use fresh
+  Luna-low readers for bounded transcript batches and creates no dashboard.
 - For an explicit project save-and-close, Operations Lead closes every
   temporary role, records continuing external work, synchronizes Git, updates
   `OLD_HISTORY.md`, and commits `RESTART_HANDOFF.md` last. It then tells Human

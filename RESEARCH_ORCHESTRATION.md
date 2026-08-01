@@ -522,9 +522,9 @@ periodic status turns.
   ledger. `herdr-costs report` shows human task names only, with worker own
   usage, task totals under each suborchestrator, Operations totals, and the
   Human total.
-- The first report line shows Luna-max and control-role token shares. Run
-  `herdr-costs report --all` for a compact cross-project table with an explicit
-  Luna-majority result.
+- The report defaults to the current local day and shows Luna-max and
+  control-role token shares. Run `herdr-costs report --all` for the
+  cross-project per-agent split or add `--all-time` for lifetime totals.
 - Report recorded tokens and model-active time where the harness exposes it;
   mark transcript-span time as approximate. Dollar values are API-equivalent
   estimates from the selected model's public token rates. Subscription usage

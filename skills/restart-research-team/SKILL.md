@@ -269,8 +269,9 @@ After either strategic answer is durably captured, close that pane immediately.
   restart-ready after every material result, active-task change, external wait,
   or decision. Run `herdr-costs report` for the private human-named hierarchy
   of own and aggregate time, Luna-max/control token shares, tokens, and
-  API-equivalent cost. Run `herdr-costs report --all` for the compact
-  cross-project table; create no manual usage artifact.
+  API-equivalent cost for today. Run `herdr-costs report --all` for today's
+  cross-project per-agent split or add `--all-time` deliberately; create no
+  manual usage artifact.
 - OpenCode usage and skill calls come from its native database. Claude Code and Claudex must retain the zero-context SessionStart hook
   `herdr-costs register-hook`; resumed native sessions then remain attributed
   to their human task. Keep Pyright LSP enabled. Keep Superpowers, Code Review,
