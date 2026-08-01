@@ -83,8 +83,9 @@ orchestration contracts provide the detailed rules.
 | --- | --- | --- |
 | Human orchestration | Native Codex | Sol, high |
 | Operations Lead | Native Codex | Sol, high |
-| Atomic implementation sent directly by Operations | Native Codex | Sol, medium |
-| Bounded implementation below a task suborchestrator | Native Codex | Luna, max |
+| Default task owner and decomposer | Native Codex | Sol, medium |
+| Default atomic implementation below that owner | Native Codex | Luna, max |
+| Explicit direct or harder-worker exception | Native Codex | Sol, medium |
 | Ambiguous repair or cross-task integration | Native Codex | Sol, medium |
 | Bounded difficult implementation or decision | Native Codex | Sol, high |
 | One bounded strategic question | Native Codex | Sol, xhigh |
@@ -103,10 +104,12 @@ Claudex is the Claude Code interface backed by the local Codex gateway. It is
 not native Anthropic Claude. Launch it through `claudex` with an explicit Codex
 model. Native Claude is selected separately when Opus 5 is wanted.
 
-Native Codex Luna-max is used only for a bounded package owned by a native-Codex
-Sol-medium suborchestrator. If Operations sends an already-atomic package
-directly to a worker, that worker uses native Codex Sol medium. Use Sol medium
-also for a harder package that needs materially more judgment. Select Sol
+The default productive path is Operations to one native-Codex Sol-medium
+suborchestrator, then one fresh native-Codex Luna-max worker per frozen atomic
+package. The suborchestrator never edits code or executes the package itself.
+A direct Sol-medium worker is an explicit exception for a tiny immediate task
+where creating a task owner would cost more than the work, or for a harder
+package after Luna cannot complete one coherent attempt. Select Sol
 low through max for bounded research or data crunching according to actual
 difficulty; do not inherit a high effort merely because the parent task is
 important. Luna support, watcher classification, or supervision never exceeds
@@ -122,8 +125,8 @@ Vertex; Gemini routes use the OpenCode API-key provider.
 
 - Launch every independent agent as a named visible Herdr session with
   `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
-- `luna-max` is a bounded coding worker only below a Sol-medium
-  suborchestrator. `codex` is the direct atomic worker, Sol-medium
+- `luna-max` is the default bounded coding worker below a Sol-medium
+  suborchestrator. `codex` is the Sol-medium
   suborchestrator, Plan Orchestrator, and harder-worker route. `codex-high` is
   used for both standing orchestrators.
 - `opencode` is an explicitly selected alternate-provider route, primarily for
@@ -172,6 +175,8 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`.
   Workers, suborchestrators, Plan Orchestrators, advisors, researchers, and
   verifiers do not bypass Operations Lead.
+- In `01 Orchestrators`, the Human Orchestrator is always the left pane and
+  Operations Lead is always the right pane.
 - That path must work mechanically, not only in prose. Roles send cross-pane
   messages with `herdr-role-message`: Human Orchestrator uses
   `herdr-role-message operations`, Operations Lead uses
@@ -246,7 +251,7 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   After Operations confirms readiness, the Human Orchestrator runs the guarded
   helper, which may close only its own current workspace. Never stop the shared
   Herdr server or named session, and never treat inactivity as permission.
-- One worker owns exactly one minimal concrete work package, branch, worktree,
+- One worker owns exactly one frozen minimal concrete work package, branch, worktree,
   and fresh native chat. Native Codex Luna-max is allowed only when a
   Sol-medium suborchestrator owns the task and the package can be stated as one deliverable, one
   reproduction or run, one done check, and normally no more than three tightly
@@ -258,14 +263,15 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   finished worker into the next package. Workers receive
   tasks from and report only to Operations Lead or their one owning
   suborchestrator.
-- Suborchestrators use native Codex Sol medium, own exactly one meaningful task, and do no
-  coding or experiment execution. Each states the task goal and finish
-  condition, turns only the next useful work into minimal packages, launches
-  one fresh native-Codex Luna-max worker per normal coding package or native
+- Suborchestrators are the default task owners. They use native Codex Sol
+  medium, own exactly one meaningful task, and do no coding, file editing, or
+  experiment execution. Each states the task goal and finish condition, turns
+  only the next useful work into a frozen atomic card, launches a new fresh
+  native-Codex Luna-max session for every normal package or native
   Codex Sol-medium worker for
   a harder package, absorbs compact results, and closes when the task ends. An
-  atomic task that is already one minimal package goes directly from Operations
-  to one native-Codex Sol-medium worker to avoid orchestration overhead. A suborchestrator may not
+  atomic task goes directly from Operations to one native-Codex Sol-medium
+  worker only as an explicit tiny-task exception. A suborchestrator may not
   create another suborchestrator or add a review turn after every successful
   package.
 - Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor

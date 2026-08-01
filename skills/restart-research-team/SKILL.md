@@ -1,6 +1,6 @@
 ---
 name: restart-research-team
-description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and one native-Codex Sol-high Operations Lead, reconstruct the lightweight standard layout with direct Sol-medium workers, Luna-max coding workers only below native-Codex Sol-medium task suborchestrators, and non-blocking child wake-ups under the 90/10 budget, and wait for user plan discussion without resuming research.
+description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and one native-Codex Sol-high Operations Lead, reconstruct the lightweight standard layout with default non-coding Sol-medium task suborchestrators, fresh Luna-max sessions for frozen atomic worker packages, and non-blocking child wake-ups under the 90/10 budget, and wait for user plan discussion without resuming research.
 ---
 
 # Restart Research Team
@@ -61,7 +61,9 @@ IDs remain dormant in the file.
 Create:
 
 - one fresh native Codex GPT-5.6 Sol-high Human Orchestrator and one fresh
-  native-Codex GPT-5.6 Sol-high Operations Lead in `01 Orchestrators`;
+  native-Codex GPT-5.6 Sol-high Operations Lead in `01 Orchestrators`, with
+  the Human Orchestrator physically on the left and Operations Lead on the
+  right;
 - one empty named shell bay in `02 Strategic Council`;
 - empty named shell bays in `03 Suborchestrators`, `04 Workers`, and
   `05 Progress Checks`.
@@ -117,13 +119,14 @@ only the raw evidence needed to verify current reality. Ask it to:
    contract;
 3. make the first milestone end in an observable project result rather than
    enabling infrastructure;
-4. assign each meaningful multi-package task to one named native-Codex Sol-medium
+4. assign each meaningful productive task to one named native-Codex Sol-medium
    suborchestrator that does no coding and later emits only the next useful
-   minimal worker cards; send an atomic package directly to one worker;
+   frozen atomic worker cards and fresh Luna-max sessions; use direct workers
+   only as an explicit exception;
 5. keep at least 90% of task slots and agent-hours directly productive and
    classify every control-role turn honestly;
-6. use native-Codex Sol-medium for direct atomic coding, Luna-max only below a
-   Sol-medium suborchestrator, selected Sol
+6. use a native-Codex Sol-medium suborchestrator by default, Luna-max for each
+   fresh atomic worker session below it, selected Sol
    effort for bounded research/data crunching, Terra-medium for open-ended
    synthesis, and keep verification optional and minimal;
 7. emit a compact current-state envelope for the human orchestrator;
@@ -188,21 +191,21 @@ After either strategic answer is durably captured, close that pane immediately.
 
 - Use as many concurrent productive worker sessions as independent subtasks
   justify.
-- Native Codex Sol-medium is the direct coding worker. Luna-max is allowed only
-  below a Sol-medium suborchestrator. One fresh worker chat owns exactly one
+- Native Codex Sol-medium is the default non-coding task owner. Luna-max is the
+  default worker below it. One fresh worker chat owns exactly one frozen
   clear, repeatable package, one deliverable, one reproduction or run, one done check,
   normally no more than three tightly coupled files or one experiment stage,
   one task branch, and one Git worktree. Never combine unrelated subtasks.
 - Standing leaders and suborchestrators read the onboarding and operating
   contracts. Minimal workers read only the concise standard and their task card.
-- Put workers and subworkers in `04 Workers`; put only multi-task track owners
+- Put workers and subworkers in `04 Workers`; put only productive task owners
   in `03 Suborchestrators`.
 - Put optional minimal verifiers and watchers in `05 Progress Checks`. Put
   productive workers in `04 Workers`. Bounded research and data crunching use
   the lowest sufficient Sol effort; open-ended synthesis uses a Terra Researcher.
   Derive every pane name from the immediate goal.
 - Operations Lead decomposes the milestone into meaningful tasks. One
-  native-Codex Sol-medium suborchestrator owns one multi-package task and its finish
+  native-Codex Sol-medium suborchestrator owns one task and its finish
   condition, performs no coding or experiment execution, issues only the next
   useful packages, launches one fresh native-Codex Luna-max worker per normal coding package
   or native-Codex Sol-medium worker for a harder package, absorbs compact results, integrates

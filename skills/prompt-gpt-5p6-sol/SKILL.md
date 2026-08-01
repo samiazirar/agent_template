@@ -97,9 +97,8 @@ meaning and remove process that does not help reach the goal.
   Forbid `herdr wait`, `sleep`, and polling for child roles. Require one
   `herdr-emergency-wake` fallback after dispatch and let the child's
   `herdr-role-message` wake or steer the parent.
-- Use native-Codex Sol-medium when Operations directly dispatches a clear,
-  repeatable atomic package. Use Luna-max only when a Sol-medium
-  suborchestrator dispatches a clear, repeatable package with one
+- Default a meaningful productive task to one native-Codex Sol-medium
+  suborchestrator. It dispatches Luna-max for a clear, repeatable package with one
   deliverable, one reproduction or run, one done check, and normally no more
   than three tightly coupled files or one experiment stage. The owning
   native-Codex Sol-medium task suborchestrator defines that boundary once; Luna self-verifies and
@@ -117,10 +116,13 @@ meaning and remove process that does not help reach the goal.
   suborchestrator, one result back to that owner, and no contact with the Human
   Orchestrator or user.
 - For a suborchestrator, use Sol medium and assign one meaningful task with an
-  observed finish condition. Forbid coding and experiment execution. It issues
-  only the next useful minimal packages to fresh workers, absorbs compact
+  observed finish condition. Forbid coding, file editing, and experiment
+  execution. It freezes only the next atomic card, launches a new Luna-max
+  session for it, closes that worker after its result, and then issues the next
+  card to another fresh Luna session. It absorbs compact
   results, reports only to Operations Lead, and creates no further
-  orchestration layer. Send an atomic package directly to a worker.
+  orchestration layer. Direct Sol-medium workers are explicit tiny-task or
+  harder-worker exceptions.
 - Use Sol at the lowest sufficient effort, from low through max, for bounded
   research or data crunching. Select Terra-medium by default for open-ended
   research requiring synthesis or interpretation. Luna support or supervision

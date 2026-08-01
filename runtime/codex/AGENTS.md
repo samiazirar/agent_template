@@ -16,10 +16,11 @@ complete operating context for one minimal work package.
   independent tasks.
 - One worker owns one minimal work package and one worktree. Close it after the
   package report; a later package or correction gets a fresh chat.
-- Create one Sol-medium suborchestrator for one meaningful multi-package task.
+- Create one Sol-medium suborchestrator by default for one meaningful task.
   It owns the task goal and finish condition, does no coding, issues only the
   next useful package, launches fresh workers, and may not spawn another
-  suborchestrator. Send an already-atomic package directly to one worker.
+  suborchestrator. Use a direct worker only for an explicit tiny-task or
+  harder-worker exception.
 - More sessions are welcome when they perform independent productive work.
   Never create sessions merely for status, waiting, routine review, or advice.
 - Keep `HUMAN_PLAN.md` at milestone/workstream level. Exact worker tasks and
@@ -111,8 +112,9 @@ complete operating context for one minimal work package.
 - Do not issue repeated model turns to poll unchanged state. Every watch names
   success, failure, maximum silence, owner, and the recovery action fired when
   silence expires. A watcher closes on its terminal event.
-- Operations sends an atomic package directly to a native Codex Sol-medium
-  worker. Only a Sol-medium suborchestrator launches Luna-max coding workers.
+- Operations normally sends a task to a native Codex Sol-medium
+  suborchestrator. Only that owner launches a fresh Luna-max session for each
+  frozen atomic package. A direct Sol-medium worker is an explicit exception.
   Luna support or supervision may use low but never higher. Use Sol medium for harder coding. Select Sol low through
   max for bounded research or data crunching according to actual difficulty;
   use Terra medium for open-ended research.

@@ -102,11 +102,13 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 - Treat “do,” “go,” or “continue” as a real instruction when the next action
   was already discussed. Forward it and start; do not bounce it back to the
   user or respond with readiness alone.
-- A suborchestrator uses native Codex Sol medium, owns exactly one meaningful task and its
-  finish condition, and does no coding or experiment execution. It launches a
-  fresh temporary worker for each minimal package and closes when the task
-  ends. It may not create another suborchestrator layer. An already-atomic task
-  goes directly from Operations to one native-Codex Sol-medium worker.
+- A suborchestrator is the default productive task owner. It uses native Codex
+  Sol medium, owns exactly one meaningful task and its finish condition, and
+  does no coding, file editing, or experiment execution. It freezes one atomic
+  task card, launches a fresh Luna-max session for it, absorbs the result, then
+  launches a new Luna-max session for the next atomic card until the task ends.
+  It may not create another suborchestrator layer. A direct Sol-medium worker is
+  allowed only as an explicit tiny-task or harder-worker exception.
 - Only a Sol-medium suborchestrator may launch native Codex `gpt-5.6-luna` max.
   Give Luna one clear package
   with one deliverable, one reproduction or run, and one done check. A harder

@@ -152,12 +152,13 @@ alone cannot complete an empirical milestone.
   Operations Lead and does not contact workers,
   suborchestrators, Plan Orchestrators, advisors, researchers, or verifiers
   directly.
-- A native-Codex Sol-medium suborchestrator owns exactly one meaningful multi-package task,
-  its goal, and its observed finish condition. It does no coding or experiment
-  execution. It issues only the next useful minimal packages, launches one
-  fresh worker chat per package, reconciles their results, and closes when the
-  task ends. It cannot create another suborchestrator. Operations sends an
-  already-atomic package directly to one native-Codex Sol-medium worker.
+- A native-Codex Sol-medium suborchestrator is the default productive task
+  owner. It owns exactly one meaningful task, its goal, and its observed finish
+  condition. It does no coding, file editing, or experiment execution. It
+  freezes only the next useful atomic card, launches one fresh Luna-max chat
+  for that card, reconciles the result, and repeats with a new chat until the
+  task ends. It cannot create another suborchestrator. Operations uses a direct
+  Sol-medium worker only as an explicit tiny-task or harder-worker exception.
 - Native Codex Luna max is used only below a Sol-medium suborchestrator and implements or executes exactly one
   clear package. A Luna-sized package has one deliverable, one reproduction or
   run, one done check, and normally no more than three tightly coupled files or

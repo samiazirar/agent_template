@@ -317,6 +317,15 @@ def main() -> None:
             fail(f"standing leadership is not waiting: {pane['label']}")
     require_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
     require_model(liaisons[0], "Human Orchestrator", "gpt-5.6-sol", "high")
+    layout = herdr("pane", "layout", "--pane", liaisons[0]["pane_id"])
+    rectangles = {
+        pane["pane_id"]: pane["rect"]
+        for pane in layout["result"]["layout"]["panes"]
+    }
+    human_x = rectangles[liaisons[0]["pane_id"]]["x"]
+    operations_x = rectangles[operations[0]["pane_id"]]["x"]
+    if human_x >= operations_x:
+        fail("Human Orchestrator must be left of Operations Lead")
 
     transient_tabs = (
         "02 Strategic Council",

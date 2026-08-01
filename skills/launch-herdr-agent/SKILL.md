@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, a native-Codex Sol-high Operations Lead, Markdown-only Human Plan pane, direct Sol-medium workers, Luna-max coding workers only below Sol-medium task suborchestrators, direct child-to-parent wake-ups, fresh worker chats, compact restart continuity, and sparse researchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
+description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, a native-Codex Sol-high Operations Lead, Markdown-only Human Plan pane, default Sol-medium task suborchestrators that never code, fresh Luna-max sessions for frozen atomic worker packages, direct child-to-parent wake-ups, compact restart continuity, and sparse researchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
 ---
 
 # Launch Herdr sessions
@@ -117,6 +117,11 @@ OpenCode is an explicit alternate-provider choice for one productive task.
 
 Create these standing roles in `01 Orchestrators`:
 
+Place the Human Orchestrator physically in the left pane and Operations Lead
+in the right pane. After any move, read the returned layout and correct it with
+`herdr pane swap` if the Human pane x-coordinate is not smaller than the
+Operations pane x-coordinate.
+
 1. `Human Orchestrator · PersonName Goal` — native Codex Sol high. This is the
    project's only normal conversation with the human. Confirm the goal and its
    meaning, ask or answer necessary human questions, explain material results,
@@ -208,10 +213,11 @@ The plan writer uses the same natural human voice: “what we know,” “result
 “verified,” “lifecycle,” completion-envelope language, pane/session/worker
 language, and all-caps readiness labels.
 
-For productive work, Operations Lead launches a fresh named native-Codex
-Sol-medium worker when the task is already one atomic package. For a
-multi-package task, one owning Sol-medium suborchestrator launches one fresh
-named native-Codex Luna-max worker for each clear coding package. One worker owns one deliverable, one
+For productive work, Operations Lead normally launches one owning Sol-medium
+suborchestrator. That owner freezes one atomic card and launches one fresh
+named native-Codex Luna-max session for it, then closes it before launching a
+new Luna session for the next atomic card. The suborchestrator never codes,
+edits project files, or executes experiments. One worker owns one deliverable, one
 reproduction or run, one done check, normally no more than three tightly
 coupled files or one experiment stage, one branch, and one worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
@@ -237,14 +243,14 @@ subsystem, tool results contradict the task premise, or the result cannot be
 reproduced. Do not open a verifier or spend a Sol turn after every successful
 Luna task.
 
-For one meaningful multi-package task, Operations Lead launches one native-Codex Sol-medium
+For one meaningful task, Operations Lead launches one native-Codex Sol-medium
 named suborchestrator in `03 Suborchestrators`. Give it one measurable task goal
 and observed finish condition. It does no coding or experiment execution. It
-turns only the next useful work into minimal task cards, launches one fresh
+turns only the next useful work into a frozen atomic task card, launches one fresh
 native-Codex Luna-max worker per normal coding package or native-Codex Sol-medium worker for a harder
 package, absorbs compact results, integrates the task for Operations Lead, and
-closes when the task ends. An already-atomic package goes directly to one
-worker to avoid overhead. It communicates only with Operations
+closes when the task ends. A direct Sol-medium worker is allowed only as an
+explicit tiny-task or harder-worker exception. It communicates only with Operations
 Lead and its own workers. It may not contact the Human Orchestrator, create
 another suborchestrator, or add a review turn after every successful task.
 
@@ -375,8 +381,8 @@ the only valid technical route, name `save-close-herdr-project` and
 `herdr-project-save-close --close` as the sole explicit project-closing
 exception, require a continuously current compact `RESTART_HANDOFF.md`, and
 forbid native Agent lookup. The Operations Lead prompt must
-require native-Codex Sol-medium for a directly dispatched atomic worker and
-Luna-max only below a Sol-medium suborchestrator, one fresh worker per minimal package, concurrent
+require a Sol-medium suborchestrator by default, Luna-max only below that
+owner, and one new fresh Luna session per frozen atomic package, concurrent
 independent workers, closure immediately after a transient final report is
 captured and before integration, sole-bridge routing, and active enforcement of
 the 90/10 budget. It must forbid `herdr wait`, `sleep`, and polling for child

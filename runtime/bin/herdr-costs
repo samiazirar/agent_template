@@ -133,6 +133,230 @@ def transcript_for(session: str, recorded_path: str | None = None) -> tuple[str,
     return None
 
 
+ROLE_NAME = re.compile(
+    r"(?:Human Orchestrator|Operations Lead|Suborchestrator|Worker|"
+    r"Plan Orchestrator|Researcher|Strategic Advisor|Advisor|Verifier|Watcher|"
+    r"Progress|Archive|Launcher)"
+    r"\s*·\s*[^,:.;\n`]+"
+)
+CODEX_SESSION = re.compile(r"\b019[0-9a-f]{5}-[0-9a-f-]{27}\b", re.IGNORECASE)
+
+
+def prompt_identity(path: Path) -> tuple[str | None, str | None]:
+    """Read the human task name and recipient from the first native task."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None, None
+    for raw in lines:
+        try:
+            item = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        payload = item.get("payload") or {}
+        if item.get("type") != "response_item" or payload.get("role") != "user":
+            continue
+        text = "\n".join(
+            part.get("text", "")
+            for part in payload.get("content", [])
+            if isinstance(part, dict) and part.get("type") == "input_text"
+        )
+        # Some archived prompts contain escaped line breaks inside input text.
+        text = text.replace("\\n", "\n")
+        name_match = re.search(r"^ROLE AND NAME:\s*(.+)$", text, re.MULTILINE)
+        if name_match:
+            candidate = name_match.group(1).split(",", 1)[0].strip()
+            label_match = ROLE_NAME.search(candidate)
+            label = label_match.group(0).strip(" .") if label_match else None
+        else:
+            label_match = re.search(
+                rf"^(?:You are|Act as)\s+(?:the\s+)?({ROLE_NAME.pattern})",
+                text,
+                re.MULTILINE,
+            )
+            label = label_match.group(1).strip(" .") if label_match else None
+        recipient_match = re.search(r"^REPORT RECIPIENTS?:\s*(.+)$", text, re.MULTILINE)
+        recipient = None
+        if recipient_match:
+            parent_match = ROLE_NAME.search(recipient_match.group(1))
+            if parent_match:
+                recipient = parent_match.group(0).strip(" .")
+        if label or recipient:
+            return label, recipient
+    return None, None
+
+
+def history_identity(text: str, session: str) -> str | None:
+    position = text.find(session)
+    if position < 0:
+        return None
+    line_start = text.rfind("\n", 0, position) + 1
+    line_end = text.find("\n", position)
+    line = text[line_start:line_end if line_end >= 0 else len(text)]
+    direct = ROLE_NAME.search(line)
+    if direct:
+        return direct.group(0).strip(" .")
+    completed = re.search(r"Completed\s+([^:`]+)", line, re.IGNORECASE)
+    if completed:
+        phrase = completed.group(1).strip(" .-")
+        role = "Worker"
+        for word, candidate in (
+            ("suborchestrator", "Suborchestrator"),
+            ("watcher", "Watcher"),
+            ("advisor", "Advisor"),
+            ("researcher", "Researcher"),
+            ("publisher", "Worker"),
+            ("worker", "Worker"),
+        ):
+            if word in phrase.lower():
+                role = candidate
+                phrase = re.sub(rf"\b{word}\b", "", phrase, flags=re.IGNORECASE)
+                break
+        task = " ".join(part.capitalize() for part in re.split(r"[-_\s]+", phrase) if part)
+        if task:
+            return f"{role} · {task}"
+    nearby = text[max(0, position - 320):position]
+    matches = list(ROLE_NAME.finditer(nearby))
+    return matches[-1].group(0).strip(" .") if matches else None
+
+
+def malformed_label(label: str | None) -> bool:
+    if not label:
+        return True
+    return (
+        len(label) > 100
+        or "\\n" in label
+        or "\n" in label
+        or label.startswith("PROJECT GOAL")
+        or " pane w" in label
+    )
+
+
+def project_dir_for_workspace(workspace: str) -> Path | None:
+    try:
+        result = subprocess.run(
+            ["herdr", "pane", "list", "--workspace", workspace],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        panes = json.loads(result.stdout)["result"]["panes"]
+    except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
+        return None
+    preferred = sorted(
+        panes,
+        key=lambda pane: 0
+        if "history" in str(pane.get("label", "")).lower()
+        else 1,
+    )
+    for pane in preferred:
+        root = Path(pane.get("foreground_cwd") or pane.get("cwd") or "")
+        if (root / "OLD_HISTORY.md").is_file():
+            return root
+    return None
+
+
+def reconcile_workspace(workspace: str, project_dir: Path | None = None) -> int:
+    """Register live and archived native Codex sessions without model work."""
+    root = project_dir or project_dir_for_workspace(workspace)
+    history_path = root / "OLD_HISTORY.md" if root else None
+    history = ""
+    if history_path and history_path.is_file():
+        history = history_path.read_text(encoding="utf-8")
+    existing = load_records(workspace)
+    existing_by_session = {item["session"]: item for item in existing}
+    known = {item["session"] for item in existing}
+    active_sessions = current_sessions(workspace)
+    discovered: list[dict[str, Any]] = []
+    for record in existing:
+        if record["session"] in active_sessions:
+            continue
+        if not str(record.get("surface") or "").startswith("codex"):
+            continue
+        found = transcript_for(record["session"], record.get("transcript_path"))
+        if not found or found[0] != "codex":
+            continue
+        label, parent = prompt_identity(found[1])
+        label = label or history_identity(history, record["session"])
+        previous_label = record.get("label")
+        replacement_label = label if malformed_label(previous_label) else previous_label
+        if replacement_label and (
+            replacement_label != previous_label
+            or (parent and parent != record.get("parent_label"))
+        ):
+            discovered.append({
+                **record,
+                "label": replacement_label,
+                "parent_label": parent,
+            })
+    try:
+        result = subprocess.run(
+            ["herdr", "pane", "list", "--workspace", workspace],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        panes = json.loads(result.stdout)["result"]["panes"]
+    except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
+        panes = []
+    human = next(
+        (pane.get("label") for pane in panes
+         if str(pane.get("label", "")).startswith("Human Orchestrator · ")),
+        None,
+    )
+    operations = next(
+        (pane.get("label") for pane in panes
+         if str(pane.get("label", "")).startswith("Operations Lead · ")),
+        None,
+    )
+    for pane in panes:
+        session = (pane.get("agent_session") or {}).get("value")
+        if not session:
+            continue
+        label = pane.get("label") or "Unlabelled agent"
+        previous = existing_by_session.get(session)
+        if previous and previous.get("label") == label:
+            continue
+        parent = human if label.startswith("Operations Lead · ") else None
+        discovered.append({**(previous or {}),
+            "workspace": workspace,
+            "session": session,
+            "label": label,
+            "parent_label": parent,
+            "surface": pane.get("agent") or "unknown",
+            "registered_at": iso_now(),
+        })
+        known.add(session)
+    for session in dict.fromkeys(CODEX_SESSION.findall(history)):
+        if session in known:
+            continue
+        found = transcript_for(session)
+        if not found or found[0] != "codex":
+            continue
+        label, parent = prompt_identity(found[1])
+        label = label or history_identity(history, session)
+        if not label:
+            continue
+        if not parent:
+            if label.startswith("Operations Lead · "):
+                parent = human
+            elif label.startswith(("Suborchestrator · ", "Plan Orchestrator · ")):
+                parent = operations
+        discovered.append({
+            "workspace": workspace,
+            "session": session,
+            "label": label,
+            "parent_label": parent,
+            "surface": "codex",
+            "transcript_path": str(found[1]),
+            "registered_at": iso_now(),
+        })
+        known.add(session)
+    for record in discovered:
+        append_record(record)
+    return len(discovered)
+
+
 def opencode_database() -> Path:
     root = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
     return root / "opencode" / "opencode.db"
@@ -581,6 +805,7 @@ def normalized_parent(record: dict[str, Any], records: list[dict[str, Any]]) -> 
 
 
 def report(workspace: str) -> int:
+    reconcile_workspace(workspace)
     records = load_records(workspace)
     if not records:
         print("No registered sessions for this workspace yet.")
@@ -768,6 +993,12 @@ def main() -> int:
     register_parser.add_argument("--surface", required=True)
     register_parser.add_argument("--wait-seconds", type=int, default=0)
     subparsers.add_parser("register-hook", help=argparse.SUPPRESS)
+    reconcile_parser = subparsers.add_parser(
+        "reconcile",
+        help="discover unregistered live and archived native sessions",
+    )
+    reconcile_parser.add_argument("--workspace", required=True)
+    reconcile_parser.add_argument("--project-dir", type=Path)
     report_parser = subparsers.add_parser("report")
     report_parser.add_argument("--workspace")
     args = parser.parse_args()
@@ -775,6 +1006,10 @@ def main() -> int:
         return register(args)
     if args.command == "register-hook":
         return register_hook()
+    if args.command == "reconcile":
+        count = reconcile_workspace(args.workspace, args.project_dir)
+        print(f"Registered {count} previously missing sessions.")
+        return 0
     workspace = getattr(args, "workspace", None) or os.environ.get("HERDR_WORKSPACE_ID")
     if not workspace:
         print("Use --workspace or run inside Herdr.", file=sys.stderr)
