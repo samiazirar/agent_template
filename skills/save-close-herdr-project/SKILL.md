@@ -38,8 +38,9 @@ Lead to:
    human-level current state or next useful result materially changed;
 7. update `OLD_HISTORY.md` with the standing native session references and the
    close date;
-8. write project-root `RESTART_HANDOFF.md` last, using the exact structure
-   below, commit it as the final save commit, and synchronize it;
+8. finalize the already-current project-root `RESTART_HANDOFF.md` using the
+   exact close markers below, commit it as the final save commit, and
+   synchronize it; do not reconstruct project history from transcripts;
 9. run the normal pane-lifecycle check and tell the Human Orchestrator that the
    project is ready to close.
 
@@ -48,9 +49,9 @@ choice and answer naturally while Operations saves.
 
 ## Require this handoff
 
-`RESTART_HANDOFF.md` is the one required technical restart record. It is an
-explicit exception to the no-side-artifact default. Keep it concise and
-factual, and use these exact markers and headings:
+`RESTART_HANDOFF.md` is the one required technical restart record and remains
+current during normal work. Keep it concise and factual. On close, add these
+exact markers and preserve these headings:
 
 ```markdown
 Status: CAN RESTART

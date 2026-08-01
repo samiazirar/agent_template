@@ -1,10 +1,9 @@
 # Mandatory onboarding for every research agent
 
-This is the concise master contract for every new Codex, Claudex, Claude,
-orchestrator, suborchestrator, worker, subworker, watcher, checker,
-auditor, second eye, and PaperPilot maintainer. Read it before the first prompt
-is accepted. Detailed execution rules remain in
-`RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
+This is the leadership contract for every Human Orchestrator, Operations Lead,
+Operations Collaborator, and suborchestrator. Minimal workers read only
+`AGENT_SYSTEM_STANDARD.md` and their validated task card. Detailed execution
+rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 `PAPERPILOT_PROJECT_STANDARD.md`.
 
 ## 1. Goal and evidence
@@ -42,10 +41,10 @@ is accepted. Detailed execution rules remain in
 - Default to no side artifacts. Do not create plans, reports, manifests,
   review files, dashboards, project hubs, duplicate READMEs, or status
   documents. Keep only requested code/configuration, files required to run it,
-  actual outputs, and the existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`
-  required by the fixed Herdr layout. Project-root `RESTART_HANDOFF.md` is the
-  one additional required record when the Human explicitly asks to save and
-  close the project.
+  actual outputs, and the existing `HUMAN_PLAN.md`, `RESTART_HANDOFF.md`, and
+  `OLD_HISTORY.md` required by the fixed Herdr layout. Keep the restart handoff
+  short and current after material results, task changes, external waits, and
+  decisions.
 
 ## 2. Leadership and model roles
 
@@ -91,22 +90,21 @@ is accepted. Detailed execution rules remain in
 - Treat “do,” “go,” or “continue” as a real instruction when the next action
   was already discussed. Forward it and start; do not bounce it back to the
   user or respond with readiness alone.
-- A suborchestrator uses Sol high only for an independent workstream containing
-  at least three productive tasks. It decomposes that one stream and closes
-  when the stream ends. It launches one temporary worker per subtask and may
-  not create another suborchestrator layer.
-- Workers and subworkers normally use `gpt-5.6-luna` low. Give Luna one clear,
-  repeatable piece with one deliverable, one reproduction or run, one done
-  check, and normally no more than three tightly coupled files or one
-  experiment stage. Use Sol medium when ambiguity, cross-task integration, or
-  a failed bounded repair requires more judgment; use Sol high only for a
-  difficult decision or decomposition boundary.
+- A suborchestrator uses Sol medium, owns exactly one meaningful task and its
+  finish condition, and does no coding or experiment execution. It launches a
+  fresh temporary worker for each minimal package and closes when the task
+  ends. It may not create another suborchestrator layer. An already-atomic task
+  goes directly from Operations to one worker.
+- Coding workers normally use `gpt-5.6-luna` max. Give Luna one clear package
+  with one deliverable, one reproduction or run, and one done check. A harder
+  package uses Sol medium. Luna support or supervision may use low but never
+  higher. Every later package or correction gets a fresh worker chat.
 - Claude Opus 5 and OpenCode GLM 5.2 are selectable productive workers when
   their separate context materially benefits the assigned task. Name the
   selected model in the task card; do not treat either as a hidden fallback.
-- Luna-low also handles routine source finding, extraction, classification,
-  transformation, and structured summaries. Use Terra-medium for open-ended
-  research that needs synthesis or interpretation.
+- Bounded research and data crunching use Sol at the lowest sufficient effort,
+  from low through max. Use Terra-medium by default for open-ended research
+  that needs synthesis or interpretation.
 - When the human explicitly selects Terra-high for productive work, it may be
   one bounded named Worker with the normal one-task, worktree, commit, routing,
   and closure rules. Launch it with `herdr-agent terra-high`; do not relabel a
@@ -120,9 +118,10 @@ is accepted. Detailed execution rules remain in
   outputs, validates them against its done check, and includes them in its
   evidence report.
 - A Luna worker self-verifies against its task's attached done check and stops.
-  Escalate the same task to Sol medium when Luna cannot choose between two
-  materially different approaches, the first coherent repair fails, the work
-  expands beyond its bounded subsystem, or the result cannot be reproduced.
+  Give a harder or failed package to a fresh Sol-medium worker when Luna cannot
+  choose between two materially different approaches, the first coherent
+  repair fails, the work expands beyond its bounded subsystem, or the result
+  cannot be reproduced.
   Do not add a separate verifier or Sol turn after every successful Luna task.
 - Sol xhigh is a short-lived advisor for one consequential scientific,
   architecture, budget, or irreversible decision.
@@ -322,6 +321,10 @@ control-work percentage.
   cannot resolve opens one fresh Sol-medium Verifier. It reads only the
   relevant task card, event, and bounded evidence, returns one direct next
   action or no issue to Operations Lead, then closes.
+- Every watch names success, failure, maximum silence, owning task, and the
+  concrete recovery action. Maximum silence is itself an event; it wakes the
+  owner instead of leaving the task stalled. The watcher closes on terminal
+  state or ownership change.
 - A read-only API-key Gemini 3.6 Flash messenger produces human text only after
   the human orchestrator approves a message or an automatic important-event
   rule fires. Trusted service code performs the Herdr post.
@@ -369,6 +372,9 @@ control-work percentage.
   Fresh sessions reconstruct from `HUMAN_PLAN.md`, handoffs, and cited evidence.
 - Watch scheduler/process state externally. Do not burn turns polling unchanged
   state.
+- Run `herdr-costs report` for own and aggregate time, tokens, and
+  API-equivalent dollars by human task name. The private ledger and terminal
+  report replace manual usage files or dashboards.
 
 ## 10. PaperPilot
 
@@ -393,7 +399,8 @@ control-work percentage.
 - A restart rebuilds context and team structure only. It does not resume
   coding, experiments, schedulers, monitoring, PaperPilot publication, or
   workers.
-- On an explicit Human request to save and close, use
+- Keep `RESTART_HANDOFF.md` restart-ready throughout active work. On an
+  explicit Human request to save and close, use
   `save-close-herdr-project`. Operations Lead stops new admission, closes all
   temporary roles, records any continuing external job or service, integrates
   and synchronizes accepted work, updates `OLD_HISTORY.md`, and commits

@@ -3,23 +3,24 @@
 Read `/home/user/azirar/.agents/AGENT_SYSTEM_STANDARD.md` for the concise
 system structure and model-selection map.
 
-Read and follow `/home/user/azirar/.agents/RESEARCH_AGENT_ONBOARDING.md` and
-`/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md` for every
-multi-session research project. Its 90/10 productive-work budget, visible
-Herdr-only delegation, task naming, worktree isolation, failure isolation,
-human-language status, and session-rollover rules are mandatory.
+Human Orchestrator, Operations Lead, Operations Collaborator, and each
+suborchestrator also read
+`/home/user/azirar/.agents/RESEARCH_AGENT_ONBOARDING.md` and
+`/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md`. Workers do not load
+those long manuals: the concise standard and their validated task card are the
+complete operating context for one minimal work package.
 
 # Delegation
 
 - Delegate only work that materially benefits from a separate context.
 - Native Codex subagents are disabled. Create named Herdr sessions for approved
   independent tasks.
-- One worker owns one task and one worktree. Reuse that session while the same
-  task is being corrected; close it when the task is verified.
-- Create a Sol-high suborchestrator only for an independent track expected to
-  need at least three Luna-sized productive pieces. Give it one measurable
-  workstream; it issues only the next useful bounded pieces and may not spawn a
-  further suborchestrator.
+- One worker owns one minimal work package and one worktree. Close it after the
+  package report; a later package or correction gets a fresh chat.
+- Create one Sol-medium suborchestrator for one meaningful multi-package task.
+  It owns the task goal and finish condition, does no coding, issues only the
+  next useful package, launches fresh workers, and may not spawn another
+  suborchestrator. Send an already-atomic package directly to one worker.
 - More sessions are welcome when they perform independent productive work.
   Never create sessions merely for status, waiting, routine review, or advice.
 - Keep `HUMAN_PLAN.md` at milestone/workstream level. Exact worker tasks and
@@ -68,11 +69,11 @@ human-language status, and session-rollover rules are mandatory.
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep the
   requested source/configuration, required run files, actual outputs, and the
-  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`. Project-root
-  `RESTART_HANDOFF.md` is required only for an explicit save-and-close.
-- Before work, run the semantic grounding loop in
-  `/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md`: ground, predict, act,
-  compare, integrate.
+  existing `HUMAN_PLAN.md`, `RESTART_HANDOFF.md`, and `OLD_HISTORY.md`. Keep
+  the compact restart handoff current after material results, task changes,
+  external waits, and decisions.
+- Before work: state the current and expected result, act, compare observed to
+  expected, and return the saved result. Do not open another planning turn.
 - Preserve the user-approved project question. Reconstruct current reality from
   evidence, not inherited agent prose.
 - Every task must state differing current and expected states, a causal link,
@@ -103,10 +104,13 @@ human-language status, and session-rollover rules are mandatory.
 - The watcher has no code, filesystem, shell, credential, project-write, or
   direct Herdr-control access. Trusted service code may wake one named visible
   Sol-medium verifier when an event is genuinely unusual.
-- Do not issue repeated model turns to poll unchanged state.
-- Default bounded productive workers to Luna low. Use Sol medium for ambiguity,
-  a failed bounded repair, or cross-task integration; use high or xhigh only
-  for decomposition, a difficult decision, or a milestone review.
+- Do not issue repeated model turns to poll unchanged state. Every watch names
+  success, failure, maximum silence, owner, and the recovery action fired when
+  silence expires. A watcher closes on its terminal event.
+- Default coding workers to Luna max. Luna support or supervision may use low
+  but never higher. Use Sol medium for harder coding. Select Sol low through
+  max for bounded research or data crunching according to actual difficulty;
+  use Terra medium for open-ended research.
 - Roll over leadership before automatic context compaction. Preserve the live
   state in `HUMAN_PLAN.md`, archive the native session ID, and continue fresh.
 - Replace leadership immediately when compaction already occurred, its
@@ -123,20 +127,26 @@ human-language status, and session-rollover rules are mandatory.
 
 - Reproduce first, implement or run, verify, then compare the expected and
   observed state.
-- Normal workers use Luna low for one clear, repeatable task with one
+- Normal coding workers use Luna max for one clear, repeatable package with one
   deliverable and reproducible done check, normally within three tightly
   coupled files or one experiment stage. Escalate the same task to Sol medium
   after one failed coherent repair, material ambiguity, scope expansion, or a
   non-reproducible result. Opus 5 and OpenCode GLM 5.2 remain selectable
   alternatives. Terra-high remains human-selected only.
-- Routine source finding and transformation also use Luna low; open-ended
-  research uses one Terra-medium Researcher. A Verifier is optional, Sol medium, minimal, and opened
+- Bounded research and data crunching use Sol at the lowest sufficient effort;
+  open-ended research uses one Terra-medium Researcher. A Verifier is optional, Sol medium, minimal, and opened
   only for one consequential anomaly that routine self-verification cannot
-  settle. Suborchestrators use Sol high for independent workstreams expected to
-  need at least three Luna-sized productive pieces; advisors use Sol xhigh for one sparse bounded
+  settle. Suborchestrators use Sol medium for one meaningful task and never
+  code; advisors use Sol xhigh for one sparse bounded
   decision.
 - Commit every coherent completed chunk, integrate it in dependency order, and
   push the canonical branch immediately so accepted code matches GitHub.
+- Completion requires observed output that meets the task card. Ready, idle,
+  waiting, submitted, or an agent's completion claim is not completion. Every
+  active task always has a current package and next action; external waiting
+  states name independent work that continues.
+- `herdr-costs report` shows the human-named hierarchy with own and aggregate
+  time, tokens, and API-equivalent dollars. Do not create a manual dashboard.
 - For an explicit project save-and-close, Operations Lead closes every
   temporary role, records continuing external work, synchronizes Git, updates
   `OLD_HISTORY.md`, and commits `RESTART_HANDOFF.md` last. It then tells Human

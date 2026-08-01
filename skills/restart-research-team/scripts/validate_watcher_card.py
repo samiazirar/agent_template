@@ -10,12 +10,15 @@ FIELDS = (
     "SESSION NAME",
     "PROJECT GOAL",
     "WATCHED CONDITION",
+    "SUCCESS EVENT",
+    "FAILURE EVENT",
     "OWNER",
     "MODEL",
     "EFFORT",
     "EVENT DRIVEN",
     "POLL SECONDS",
-    "DUE CHECK MINUTES",
+    "MAXIMUM SILENCE",
+    "RECOVERY ACTION",
     "TIMEOUT",
     "TERMINAL EVENT",
     "ONE WATCHER VERIFIED",
@@ -76,10 +79,16 @@ def validate(text: str) -> list[str]:
     except ValueError:
         errors.append("POLL SECONDS must be an integer")
 
-    if values["DUE CHECK MINUTES"].lower() != "none":
-        errors.append("DUE CHECK MINUTES must be none; unchanged state stays silent")
     if len(values["WATCHED CONDITION"].split()) < 5:
         errors.append("WATCHED CONDITION is too short to identify one exact event")
+    if len(values["SUCCESS EVENT"].split()) < 4:
+        errors.append("SUCCESS EVENT is too short")
+    if len(values["FAILURE EVENT"].split()) < 4:
+        errors.append("FAILURE EVENT is too short")
+    if len(values["MAXIMUM SILENCE"].split()) < 2:
+        errors.append("MAXIMUM SILENCE must state one bounded duration")
+    if len(values["RECOVERY ACTION"].split()) < 5:
+        errors.append("RECOVERY ACTION must name the concrete action on silence")
     if len(values["TERMINAL EVENT"].split()) < 4:
         errors.append("TERMINAL EVENT is too short")
 
@@ -96,12 +105,15 @@ def self_test() -> int:
 SESSION NAME: Watcher · Wanda Training-Resume
 PROJECT GOAL: Resume one saved training run and verify new training evidence.
 WATCHED CONDITION: Worker completion, process state change, or due evidence check.
+SUCCESS EVENT: The resumed run writes a newer checkpoint.
+FAILURE EVENT: The process exits without a newer checkpoint.
 OWNER: Orchestrator · Clara ContactFlow Results
 MODEL: opencode/gemini-3.6-flash
 EFFORT: none
 EVENT DRIVEN: true
 POLL SECONDS: 0
-DUE CHECK MINUTES: none
+MAXIMUM SILENCE: 30 minutes
+RECOVERY ACTION: Wake the owner to inspect the latest process state and choose repair or replacement.
 TIMEOUT: 90 minutes
 TERMINAL EVENT: Active project batch ends.
 ONE WATCHER VERIFIED: true

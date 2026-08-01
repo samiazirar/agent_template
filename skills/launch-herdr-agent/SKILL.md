@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief a visible Herdr project team with one human-only Human Orchestrator, a Codex Sol-high Operations Lead, a background native-Claude Opus-medium Operations Collaborator, Markdown-only Human Plan pane, Luna-low default workers, Sol-high workstream suborchestrators, temporary Plan Orchestrators, and sparse advisors or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
+description: "Launch and brief a lightweight visible Herdr project team with one human-only Human Orchestrator, a Codex Sol-high Operations Lead, a background native-Claude Opus-medium Operations Collaborator, Markdown-only Human Plan pane, Luna-max coding workers, Sol-medium task suborchestrators, fresh worker chats, compact restart continuity, and sparse advisors or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
 ---
 
 # Launch Herdr sessions
@@ -51,13 +51,15 @@ Run:
 
 ```bash
 herdr-agent \
-  <codex|codex-high|codex-xhigh|claude|claudex|claudex-high|terra|terra-high|luna> \
+  <codex-low|codex|codex-high|codex-xhigh|codex-max|claude|claudex|claudex-high|terra|terra-high|luna-low|luna|luna-max> \
   "Role · PersonName Goal" [working-directory]
 ```
 
 The launcher opens only the native interactive executable:
 
 - `codex` uses the configured GPT-5.6 Sol model and medium reasoning.
+- `codex-low` uses GPT-5.6 Sol at low reasoning for bounded research or data
+  crunching; `codex-max` is reserved for a task that explicitly needs max.
 - `codex-high` uses GPT-5.6 Sol at high reasoning for project leadership.
 - `codex-xhigh` uses GPT-5.6 Sol at xhigh reasoning for one strategic question.
 - `claudex` uses the Codex-synchronized GPT-5.6 Sol model through the local
@@ -69,8 +71,9 @@ The launcher opens only the native interactive executable:
 - `terra` uses GPT-5.6 Terra at medium reasoning for research interpretation.
 - `terra-high` uses GPT-5.6 Terra at high reasoning for one bounded productive
   task only when the human explicitly selects Terra as a worker.
-- `luna` uses GPT-5.6 Luna at low reasoning for normal clear, repeatable,
-  bounded implementation, execution, or routine research tasks.
+- `luna` and `luna-max` use GPT-5.6 Luna at max reasoning for normal clear,
+  repeatable coding or execution packages. `luna-low` is limited to cheap
+  support or supervision and is never a coding default.
 
 The launcher pins Claudex sessions to the matching Sol profile without changing
 the user's current global Codex model. A main Codex session may therefore use
@@ -143,8 +146,8 @@ Normal communication must follow:
 Collaborator is a bounded side input to Operations Lead, never a second
 authority. No technical role may bypass Operations Lead.
 
-Before launching, require `command -v herdr-role-message` and
-`command -v herdr-project-save-close`. After launch,
+Before launching, require `command -v herdr-role-message`,
+`command -v herdr-project-save-close`, and `command -v herdr-costs`. After launch,
 perform one real round trip: ask Human Orchestrator to send a short route-check
 message to Operations Lead through the helper; Operations Lead replies through
 the helper; Human Orchestrator confirms naturally. If either leg fails, repair
@@ -199,32 +202,33 @@ The plan writer uses the same natural human voice: “what we know,” “result
 “verified,” “lifecycle,” completion-envelope language, pane/session/worker
 language, and all-caps readiness labels.
 
-For productive work, Operations Lead launches one named Luna-low worker for
-each clear, repeatable subtask. One worker owns one deliverable, one
+For productive work, Operations Lead or one owning suborchestrator launches one
+fresh named Luna-max worker for each clear coding package. One worker owns one deliverable, one
 reproduction or run, one done check, normally no more than three tightly
 coupled files or one experiment stage, one branch, and one worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
 worker several unrelated subtasks. When it finishes, capture its final short
 report and native session reference, close its pane immediately, and then
 integrate or reject the saved result. Retire its worktree after merge or
-rejection. Resume the same task in a new pane only when a concrete correction
-is needed. A worker receives its task from and
+rejection. Every later package or correction uses a fresh worker chat. A worker receives its task from and
 reports only to Operations Lead or its one owning suborchestrator; it never contacts
 the Human Orchestrator or user.
 
-Luna self-verifies against the attached done check. Escalate the same task to
-Sol medium when Luna cannot choose between materially different approaches,
+Luna self-verifies against the attached done check. Give a harder package to a
+fresh Sol-medium worker when Luna cannot choose between materially different approaches,
 its first coherent repair fails, the work expands beyond its bounded
 subsystem, tool results contradict the task premise, or the result cannot be
 reproduced. Do not open a verifier or spend a Sol turn after every successful
 Luna task.
 
-For a genuinely independent multi-step workstream expected to need at least
-three Luna-sized pieces, Operations Lead launches one Sol-high named
-suborchestrator in `03 Suborchestrators`. Give it one measurable workstream. It
-turns only the next useful pieces into bounded task cards, launches one Luna
-worker per piece, absorbs compact results, integrates the stream for Operations
-Lead, and closes when the workstream ends. It communicates only with Operations
+For one meaningful multi-package task, Operations Lead launches one Sol-medium
+named suborchestrator in `03 Suborchestrators`. Give it one measurable task goal
+and observed finish condition. It does no coding or experiment execution. It
+turns only the next useful work into minimal task cards, launches one fresh
+Luna-max worker per normal coding package or Sol-medium worker for a harder
+package, absorbs compact results, integrates the task for Operations Lead, and
+closes when the task ends. An already-atomic package goes directly to one
+worker to avoid overhead. It communicates only with Operations
 Lead and its own workers. It may not contact the Human Orchestrator, create
 another suborchestrator, or add a review turn after every successful task.
 
@@ -232,9 +236,26 @@ Do not launch standing advisors, watchers, reviewers, progress checkers, Plan
 Orchestrators, verifiers, or suborchestrators. Open each only for its immediate
 bounded purpose and only within the 10% control budget.
 
-Routine source finding, extraction, classification, transformation, and
-structured summaries use one named Luna-low research task. Use a named
-Terra-medium `Researcher` only for an open-ended question requiring synthesis
+Create one compact project-root `RESTART_HANDOFF.md` at launch and keep it
+restart-ready after every material result, active-task change, external wait,
+or decision. It contains only the goal, current result/code state, running
+external work, exact next action, and Git state. `HUMAN_PLAN.md` remains the
+only human-facing plan. Do not create further status artifacts.
+
+Each watcher card must name success, failure, maximum silence, owner, recovery
+action, and terminal event. The trusted external service stays silent on
+unchanged state, but maximum silence wakes the owner with the recovery action;
+the watcher then ends when its condition or owner ends. Never leave an active
+task represented only by an idle or waiting pane.
+
+`herdr-agent` registers every native session automatically. The lightweight
+terminal command `herdr-costs report` shows the human-named hierarchy with own
+and aggregate time, tokens, and API-equivalent cost. Do not launch an agent to
+measure usage and do not create a manual dashboard.
+
+Bounded research and data crunching use Sol at the lowest sufficient effort,
+from low through max. Use a named Terra-medium `Researcher` by default for an
+open-ended question requiring synthesis
 or interpretation. Both report to Operations Lead for project research or the
 Architect for agent-system research. Research is productive only when it
 creates accepted goal-relevant evidence; otherwise charge it to the 10%
@@ -299,10 +320,12 @@ Every task-bearing prompt must include:
 - the preserved project goal in plain language;
 - the role's differing current and expected states;
 - one role-appropriate outcome;
-- the explicitly selected model and effort, using Luna-low by default for a
-  bounded worker;
+- the explicitly selected model and effort, using Luna-max by default for a
+  bounded coding worker;
 - the working directory or worktree;
-- the relevant shared standards and project `AGENTS.md`;
+- the concise `AGENT_SYSTEM_STANDARD.md` and project `AGENTS.md`; only standing
+  leaders and suborchestrators load the long onboarding and orchestration
+  manuals;
 - the instruction to coordinate through visible Herdr sessions;
 - the instruction to stop and report its completion envelope when done.
 - the existing implementation to reuse or the concrete reason no suitable one
@@ -317,20 +340,22 @@ must include the human-voice rules above and request a natural opening sentence,
 not a role-contract recital. It must name `herdr-role-message operations` as
 the only valid technical route, name `save-close-herdr-project` and
 `herdr-project-save-close --close` as the sole explicit project-closing
-exception, and forbid native Agent lookup. The Operations Lead prompt must
-require Luna-low as the default bounded worker, one worker per subtask, concurrent
+exception, require a continuously current compact `RESTART_HANDOFF.md`, and
+forbid native Agent lookup. The Operations Lead prompt must
+require Luna-max as the default coding worker, one fresh worker per minimal package, concurrent
 independent workers, closure immediately after a transient final report is
 captured and before integration, sole-bridge routing, and active enforcement of
 the 90/10 budget. The Operations Collaborator prompt must keep native Claude
 at medium effort, background-only, one bounded planning question at a time,
 reporting only to Operations Lead, with no operational authority.
 Worker prompts must give one Luna-sized result and forbid hidden delegation,
-unrelated work, and direct human-side contact. Suborchestrator prompts must
-define one multi-step workstream, issue bounded Luna pieces, report only to
-Operations Lead, and forbid another orchestration layer.
+unrelated work, and direct human-side contact. Suborchestrator prompts use Sol
+medium, define one task and finish condition, forbid coding, issue minimal
+packages to fresh workers, report only to Operations Lead, and forbid another
+orchestration layer.
 Plan Orchestrator prompts must limit writes to `HUMAN_PLAN.md`, report only to
-Operations Lead, and stop after one commit. Routine research prompts use Luna;
-open-ended synthesis uses Terra. Verifier prompts are optional, minimal,
+Operations Lead, and stop after one commit. Bounded research/data prompts use
+selected Sol effort; open-ended synthesis uses Terra. Verifier prompts are optional, minimal,
 read-only, and only for one
 consequential anomaly. Advisor prompts must contain one bounded question,
 report only to Operations Lead, and forbid implementation.

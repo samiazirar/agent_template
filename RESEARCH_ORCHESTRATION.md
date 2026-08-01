@@ -153,29 +153,29 @@ alone cannot complete an empirical milestone.
   Operations Lead and does not contact Operations Collaborator, workers,
   suborchestrators, Plan Orchestrators, advisors, researchers, or verifiers
   directly.
-- A suborchestrator exists only for an independent track containing at least
-  three productive tasks. The high orchestrator assigns it one measurable
-  workstream outcome; the suborchestrator then decomposes that stream into as
-  many approximately one-hour worker tasks as the evidence requires. It
-  preserves the parent question and milestone, reconciles
-  predicted-versus-observed differences within its track, and closes when the
-  track ends.
-- Workers normally use Luna low and implement or execute exactly one clear,
-  repeatable task. A Luna-sized task has one deliverable, one reproduction or
+- A Sol-medium suborchestrator owns exactly one meaningful multi-package task,
+  its goal, and its observed finish condition. It does no coding or experiment
+  execution. It issues only the next useful minimal packages, launches one
+  fresh worker chat per package, reconciles their results, and closes when the
+  task ends. It cannot create another suborchestrator. Operations sends an
+  already-atomic package directly to one worker.
+- Coding workers normally use Luna max and implement or execute exactly one
+  clear package. A Luna-sized package has one deliverable, one reproduction or
   run, one done check, and normally no more than three tightly coupled files or
   one experiment stage. Workers reproduce first, make the change or run,
   compare expected versus observed state, report only to Operations Lead or
   their one owning suborchestrator, commit, sync, and stop.
-- Sol medium, Opus 5, and OpenCode GLM 5.2 are alternative productive workers
-  selected when a separate context clearly helps. Research defaults to one
-  Terra-medium Researcher for open-ended synthesis; Luna-low handles routine
-  source finding, extraction, classification, transformation, and structured
-  summaries.
-- Escalate a Luna task to Sol medium when it cannot choose between two
+- Sol medium is the default harder coding worker. Opus 5 and OpenCode GLM 5.2
+  remain explicit alternatives when a separate context clearly helps. Bounded
+  research and data crunching use Sol at the lowest sufficient effort, from
+  low through max; open-ended synthesis defaults to one Terra-medium
+  Researcher. Luna support or supervision never exceeds low.
+- Give a harder or failed Luna package to a fresh Sol-medium worker when it
+  cannot choose between two
   materially different approaches, its first coherent repair fails, the task
   expands beyond its bounded subsystem, tool results contradict the task's
   premise, or the promised result cannot be reproduced. Keep the correction
-  inside the same task. Do not create routine Sol supervision or a verifier for
+  inside the same parent task but use a fresh worker chat. Do not create routine Sol supervision or a verifier for
   every successful Luna result.
 - Terra-high is also an allowed productive Worker when the human explicitly
   selects it. It owns one bounded task and worktree under the normal worker
@@ -231,8 +231,9 @@ Use `save-close-herdr-project` only when the Human explicitly asks to save and
 close, park, archive, stop, or end the current project. Inactivity is not
 permission.
 
-Operations Lead stops new admission, reaches or records a coherent state for
-in-flight work, captures and closes every temporary role, stops or relocates
+Operations Lead starts from the already-current handoff, stops new admission,
+reaches or records a coherent state for in-flight work, captures and closes
+every temporary role, stops or relocates
 local watchers, records intentionally continuing remote jobs, integrates
 accepted work, retires finished worktrees, updates `OLD_HISTORY.md`, and
 synchronizes the canonical repository. It writes project-root
@@ -274,6 +275,10 @@ work, or cancel a remote job without explicit permission.
 - The watcher remains silent for unchanged state. A trusted service may route
   an important automatic event to the human orchestrator's messenger; the
   classifier itself cannot post, spawn sessions, or use tools.
+- Every watch specifies success, failure, maximum silence, owning task, and a
+  concrete recovery action. Maximum silence is an event that wakes the owner;
+  it is not an excuse to leave a task stalled. The watcher ends on terminal
+  state, ownership change, or process replacement.
 - Never forward full transcripts between roles. Never make the user reconstruct
   the answer from a worker pane or receive it only through Operations Lead.
 
@@ -290,9 +295,9 @@ Use separate bounded roles. None is a standing review committee.
 - The watcher sees only bounded redacted event data and has no shell, code,
   filesystem, credential, project-write, or direct Herdr-control access. It
   returns one structured choice: silent, message candidate, or verify.
-- Heartbeats do not create messages. A long-silence event is important only
-  when a previously active goal has produced no new relevant evidence beyond
-  its task-specific expectation.
+- Heartbeats do not create messages. A task-specific silence deadline fires
+  only when a previously active goal has produced no new relevant result by
+  its expected window, and carries the next recovery action to the owner.
 
 ### Optional minimal Sol-medium verifier
 
@@ -429,6 +434,10 @@ periodic status turns.
   what a successful result means, and the current reality. Only then show the
   next result-level milestone, its independent workstreams, one user decision,
   and the 90/10 meter.
+- `RESTART_HANDOFF.md` is the compact technical restart source. Update it in
+  place after a material result, active-task change, external wait, or decision
+  with the goal, current result/code state, what is running, exact next action,
+  and Git state. It is never a second plan or a transcript.
 - Include a `What we know and use` section at human depth. For every
   scientifically relevant dataset or result source, state its human name, what
   it contains and why it matters, what is ready or measured, and the next
@@ -489,3 +498,17 @@ periodic status turns.
 - Project topology is fixed: `00 Human Plan`, `01 Orchestrators`,
   `02 Strategic Council`, `03 Suborchestrators`, `04 Workers`,
   `05 Progress Checks`, `99 Old History`.
+
+## Time, tokens, and cost
+
+- `herdr-agent` registers each fresh native session in the private local usage
+  ledger. `herdr-costs report` shows human task names only, with worker own
+  usage, task totals under each suborchestrator, Operations totals, and the
+  Human total.
+- Report recorded tokens and model-active time where the harness exposes it;
+  mark transcript-span time as approximate. Dollar values are API-equivalent
+  estimates from the selected model's public token rates. Subscription usage
+  is not a marginal token bill, and provider billing is authoritative.
+- Do not build a model-driven watcher, manual spreadsheet, dashboard, or prose
+  usage report. A fresh chat per minimal package limits stale context and makes
+  attribution meaningful.

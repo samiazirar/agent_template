@@ -44,6 +44,9 @@ performs.
 - Create no side artifacts unless they are the requested deliverable: no
   reports, manifests, dashboards, project hubs, review files, duplicate
   documentation, or status files.
+- Keep the existing compact `RESTART_HANDOFF.md` current after material
+  results, active-task changes, external waits, and decisions. Do not turn it
+  into a transcript or second plan.
 
 ## Tune for Claude Opus 5
 
@@ -75,7 +78,8 @@ performs.
   managing or contacting workers, integrating Git, inspecting broadly,
   becoming an approval step, or duplicating daily operations. Every wake counts
   against the shared 10% control budget.
-- A productive Opus worker receives one task from Operations Lead or one owning
+- A productive Opus worker exists only when explicitly selected. It receives
+  one minimal package in a fresh chat from Operations Lead or one owning
   suborchestrator and reports only to that assigning role.
 - Forbid direct contact with the Human Orchestrator or user, edits to
   `HUMAN_PLAN.md`, new agents, unrelated work, and scope expansion.
@@ -85,6 +89,10 @@ performs.
 - Include the canonical `worker` role block from
   `launch-herdr-agent/scripts/validate_role_card.py` in a productive-worker
   prompt.
+- Long work uses the external event service with success, failure, maximum
+  silence, owner, recovery action, and terminal event. Do not ask Opus to poll
+  or maintain a usage report; `herdr-costs report` supplies the deterministic
+  time/token/cost tree.
 
 When the user asks for current or latest guidance, check the official
 [Claude Opus 5 prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)

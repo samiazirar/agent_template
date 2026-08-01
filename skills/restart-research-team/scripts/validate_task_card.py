@@ -73,8 +73,11 @@ def validate(text: str) -> list[str]:
             + ", ".join(sorted(OUTCOME_CLASSES))
         )
 
+    model = values["MODEL"].lower()
     if len(values["MODEL"].split()) < 2:
         errors.append("MODEL must name the selected model and effort or route")
+    if "luna low" in model and outcome_class in {"build", "run", "integrate"}:
+        errors.append("Luna low is support-only; coding and execution use Luna max")
 
     current = re.sub(r"\s+", " ", values["CURRENT STATE"].lower()).strip()
     expected = re.sub(r"\s+", " ", values["EXPECTED STATE"].lower()).strip()
@@ -107,7 +110,7 @@ def self_test() -> int:
 PROJECT QUESTION: Does measured depth improve robot planning?
 MILESTONE RESULT: One resumed GPU rehearsal produces measured progress.
 OUTCOME CLASS: run
-MODEL: GPT-5.6 Luna low
+MODEL: GPT-5.6 Luna max
 TASK: Resume one short training run from its saved checkpoint.
 CURRENT STATE: The program has no verified resumed GPU step.
 EXPECTED STATE: The program advances at least one step after checkpoint reload.

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-    printf 'Usage: herdr-agent <codex|codex-high|codex-xhigh|claude|claudex|claudex-high|terra|terra-high|luna> "Role · PersonName Goal" [working-directory]\n' >&2
+    printf 'Usage: herdr-agent <codex-low|codex|codex-high|codex-xhigh|codex-max|claude|claudex|claudex-high|terra|terra-high|luna-low|luna|luna-max> "Role · PersonName Goal" [working-directory]\n' >&2
 }
 
 if [ "${HERDR_ENV:-}" != "1" ]; then
@@ -33,8 +33,11 @@ if [ ! -d "$launch_dir" ]; then
 fi
 
 case "$surface" in
+    codex-low)
+        launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=low)
+        ;;
     codex)
-        launch_argv=(codex)
+        launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=medium)
         ;;
     codex-high)
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=high)
@@ -42,14 +45,20 @@ case "$surface" in
     codex-xhigh)
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=xhigh)
         ;;
+    codex-max)
+        launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=max)
+        ;;
     terra)
         launch_argv=(codex -m gpt-5.6-terra -c model_reasoning_effort=medium)
         ;;
     terra-high)
         launch_argv=(codex -m gpt-5.6-terra -c model_reasoning_effort=high)
         ;;
-    luna)
+    luna-low)
         launch_argv=(codex -m gpt-5.6-luna -c model_reasoning_effort=low)
+        ;;
+    luna|luna-max)
+        launch_argv=(codex -m gpt-5.6-luna -c model_reasoning_effort=max)
         ;;
     claudex|claudex-high)
         claudex_profile="medium"
@@ -129,6 +138,15 @@ herdr pane rename "$pane_id" "$label" >/dev/null
 printf -v launch_command '%q ' "${launch_env[@]}" "${launch_argv[@]}"
 herdr pane run "$pane_id" "${launch_command% }" >/dev/null
 herdr wait agent-status "$pane_id" --status idle --timeout 30000 >/dev/null
+
+cost_script="$(readlink -f "$script_dir/../../../runtime/bin/herdr-costs")"
+if [ -x "$cost_script" ]; then
+    "$cost_script" register \
+        --workspace "$HERDR_WORKSPACE_ID" \
+        --pane "$pane_id" \
+        --parent-pane "$HERDR_PANE_ID" \
+        --surface "$surface" >/dev/null
+fi
 
 trap - ERR
 printf 'Ready: %s using %s.\n' "$label" "$surface"

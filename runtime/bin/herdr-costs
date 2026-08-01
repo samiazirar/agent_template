@@ -1,0 +1,454 @@
+#!/usr/bin/env python3
+"""Show human-named Herdr session time, token, and API-equivalent cost totals."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+from collections import defaultdict
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+
+OPENAI_PRICES = {
+    "gpt-5.6-sol": (5.00, 0.50, 6.25, 30.00),
+    "gpt-5.6-terra": (2.00, 0.20, 2.50, 12.00),
+    "gpt-5.6-luna": (0.20, 0.02, 0.25, 1.20),
+}
+CLAUDE_PRICES = {
+    "claude-opus-5": (5.00, 0.50, 6.25, 10.00, 25.00),
+}
+
+
+def state_file() -> Path:
+    root = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state"))
+    return root / "herdr-costs" / "sessions.jsonl"
+
+
+def iso_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def parse_time(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def herdr_pane(pane_id: str) -> dict[str, Any]:
+    result = subprocess.run(
+        ["herdr", "pane", "get", pane_id],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return json.loads(result.stdout)["result"]["pane"]
+
+
+def append_record(record: dict[str, Any]) -> None:
+    path = state_file()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.touch(mode=0o600, exist_ok=True)
+    os.chmod(path, 0o600)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True) + "\n")
+
+
+def load_records(workspace: str) -> list[dict[str, Any]]:
+    path = state_file()
+    if not path.exists():
+        return []
+    latest: dict[str, dict[str, Any]] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if item.get("workspace") == workspace and item.get("session"):
+            latest[item["session"]] = item
+    return list(latest.values())
+
+
+def current_sessions(workspace: str) -> set[str]:
+    try:
+        result = subprocess.run(
+            ["herdr", "api", "snapshot"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        data = json.loads(result.stdout)["result"]["snapshot"]
+    except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
+        return set()
+    active = set()
+    for pane in data.get("agents", []):
+        if pane.get("workspace_id") != workspace:
+            continue
+        session = (pane.get("agent_session") or {}).get("value")
+        if session:
+            active.add(session)
+    return active
+
+
+def transcript_for(session: str) -> tuple[str, Path] | None:
+    codex_root = Path.home() / ".codex/sessions"
+    if codex_root.exists():
+        matches = list(codex_root.rglob(f"*{session}*.jsonl"))
+        if matches:
+            return "codex", matches[0]
+    claude_root = Path.home() / ".claude/projects"
+    if claude_root.exists():
+        direct = list(claude_root.rglob(f"{session}.jsonl"))
+        if direct:
+            return "claude", direct[0]
+        for candidate in claude_root.rglob("*.jsonl"):
+            if session in candidate.name:
+                return "claude", candidate
+    return None
+
+
+def openai_cost(model: str, usage: dict[str, int]) -> float:
+    prices = OPENAI_PRICES.get(model)
+    if not prices:
+        return 0.0
+    input_rate, cached_rate, write_rate, output_rate = prices
+    cached = usage["cached"]
+    writes = usage["cache_write"]
+    uncached = max(0, usage["input"] - cached - writes)
+    return (
+        uncached * input_rate
+        + cached * cached_rate
+        + writes * write_rate
+        + usage["output"] * output_rate
+    ) / 1_000_000
+
+
+def claude_cost(model: str, usage: dict[str, int]) -> float:
+    prices = CLAUDE_PRICES.get(model)
+    if not prices:
+        return 0.0
+    input_rate, read_rate, write_5m_rate, write_1h_rate, output_rate = prices
+    return (
+        usage["input"] * input_rate
+        + usage["cached"] * read_rate
+        + usage["cache_write_5m"] * write_5m_rate
+        + usage["cache_write_1h"] * write_1h_rate
+        + usage["output"] * output_rate
+    ) / 1_000_000
+
+
+def empty_usage() -> dict[str, int]:
+    return {
+        "input": 0,
+        "cached": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "output": 0,
+        "tokens": 0,
+    }
+
+
+def read_codex(path: Path) -> dict[str, Any]:
+    latest_tokens: dict[str, Any] = {}
+    model = "unknown"
+    effort = "unknown"
+    first = None
+    last = None
+    durations: dict[str, int] = {}
+    for raw in path.open(encoding="utf-8", errors="replace"):
+        try:
+            item = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        when = parse_time(item.get("timestamp"))
+        if when:
+            first = when if first is None or when < first else first
+            last = when if last is None or when > last else last
+        if item.get("type") == "turn_context":
+            model = item.get("payload", {}).get("model", model)
+            effort = item.get("payload", {}).get("effort", effort)
+        payload = item.get("payload", {})
+        if item.get("type") == "event_msg" and payload.get("type") == "token_count":
+            latest_tokens = payload.get("info", {}).get("total_token_usage", {})
+        if item.get("type") == "event_msg" and payload.get("type") == "task_complete":
+            durations[payload.get("turn_id", str(len(durations)))] = int(
+                payload.get("duration_ms", 0)
+            )
+    usage = empty_usage()
+    usage["input"] = int(latest_tokens.get("input_tokens", 0))
+    usage["cached"] = int(latest_tokens.get("cached_input_tokens", 0))
+    usage["cache_write"] = int(latest_tokens.get("cache_write_input_tokens", 0))
+    usage["output"] = int(latest_tokens.get("output_tokens", 0))
+    usage["tokens"] = usage["input"] + usage["output"]
+    return {
+        "model": model,
+        "effort": effort,
+        "usage": usage,
+        "cost": openai_cost(model, usage),
+        "active_seconds": sum(durations.values()) / 1000,
+        "first": first,
+        "last": last,
+        "time_exact": True,
+    }
+
+
+def read_claude(path: Path) -> dict[str, Any]:
+    usage = empty_usage()
+    model = "unknown"
+    effort = "unknown"
+    first = None
+    last = None
+    for raw in path.open(encoding="utf-8", errors="replace"):
+        try:
+            item = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        when = parse_time(item.get("timestamp"))
+        if when:
+            first = when if first is None or when < first else first
+            last = when if last is None or when > last else last
+        message = item.get("message") or {}
+        counts = message.get("usage")
+        if not counts or item.get("isSidechain"):
+            continue
+        model = message.get("model", model)
+        effort = item.get("effort", effort)
+        usage["input"] += int(counts.get("input_tokens", 0))
+        usage["cached"] += int(counts.get("cache_read_input_tokens", 0))
+        creation = counts.get("cache_creation", {})
+        write_1h = int(creation.get("ephemeral_1h_input_tokens", 0))
+        write_5m = int(creation.get("ephemeral_5m_input_tokens", 0))
+        untyped_write = max(
+            0,
+            int(counts.get("cache_creation_input_tokens", 0)) - write_1h - write_5m,
+        )
+        usage["cache_write_1h"] += write_1h
+        usage["cache_write_5m"] += write_5m + untyped_write
+        usage["output"] += int(counts.get("output_tokens", 0))
+    usage["tokens"] = (
+        usage["input"]
+        + usage["cached"]
+        + usage["cache_write_1h"]
+        + usage["cache_write_5m"]
+        + usage["output"]
+    )
+    elapsed = max(0.0, (last - first).total_seconds()) if first and last else 0.0
+    if model in OPENAI_PRICES:
+        priced_usage = dict(usage)
+        priced_usage["cache_write"] = (
+            usage["cache_write_1h"] + usage["cache_write_5m"]
+        )
+        priced_usage["input"] = (
+            usage["input"] + usage["cached"] + priced_usage["cache_write"]
+        )
+        cost = openai_cost(model, priced_usage)
+    else:
+        cost = claude_cost(model, usage)
+    return {
+        "model": model,
+        "effort": effort,
+        "usage": usage,
+        "cost": cost,
+        "active_seconds": elapsed,
+        "first": first,
+        "last": last,
+        "time_exact": False,
+    }
+
+
+def session_metrics(record: dict[str, Any]) -> dict[str, Any]:
+    found = transcript_for(record["session"])
+    if not found:
+        return {
+            "model": record.get("surface", "unknown"),
+            "effort": "unknown",
+            "usage": empty_usage(),
+            "cost": 0.0,
+            "active_seconds": 0.0,
+            "first": parse_time(record.get("registered_at")),
+            "last": parse_time(record.get("registered_at")),
+            "time_exact": False,
+        }
+    kind, path = found
+    return read_codex(path) if kind == "codex" else read_claude(path)
+
+
+def fmt_tokens(value: int) -> str:
+    if value >= 1_000_000:
+        return f"{value / 1_000_000:.1f}M"
+    if value >= 1_000:
+        return f"{value / 1_000:.1f}k"
+    return str(value)
+
+
+def fmt_duration(seconds: float, exact: bool = True) -> str:
+    prefix = "" if exact else "~"
+    total = int(seconds)
+    hours, rem = divmod(total, 3600)
+    minutes, secs = divmod(rem, 60)
+    if hours:
+        return f"{prefix}{hours}h{minutes:02d}m"
+    if minutes:
+        return f"{prefix}{minutes}m{secs:02d}s"
+    return f"{prefix}{secs}s"
+
+
+def role(label: str) -> str:
+    return label.split(" · ", 1)[0]
+
+
+def normalized_parent(record: dict[str, Any], records: list[dict[str, Any]]) -> str | None:
+    label = record["label"]
+    workspace_records = [item for item in records if item["workspace"] == record["workspace"]]
+    if label.startswith("Human Orchestrator · "):
+        return None
+    if label.startswith("Operations Lead · "):
+        human = next((item["label"] for item in workspace_records if item["label"].startswith("Human Orchestrator · ")), None)
+        return human
+    if label.startswith("Operations Collaborator · ") or label.startswith("Plan Orchestrator · "):
+        operations = next((item["label"] for item in workspace_records if item["label"].startswith("Operations Lead · ")), None)
+        return operations
+    parent = record.get("parent_label")
+    if parent == label:
+        return None
+    if parent and not parent.startswith("Launcher · "):
+        return parent
+    operations = next((item["label"] for item in workspace_records if item["label"].startswith("Operations Lead · ")), None)
+    return operations
+
+
+def report(workspace: str) -> int:
+    records = load_records(workspace)
+    if not records:
+        print("No registered sessions for this workspace yet.")
+        return 0
+    active = current_sessions(workspace)
+    grouped: dict[str, dict[str, Any]] = {}
+    for record in records:
+        metrics = session_metrics(record)
+        label = record["label"]
+        node = grouped.setdefault(
+            label,
+            {
+                "own_seconds": 0.0,
+                "time_exact": True,
+                "own_tokens": 0,
+                "own_cost": 0.0,
+                "models": set(),
+                "active": False,
+                "parent": normalized_parent(record, records),
+            },
+        )
+        node["own_seconds"] += metrics["active_seconds"]
+        node["time_exact"] = node["time_exact"] and metrics["time_exact"]
+        node["own_tokens"] += metrics["usage"]["tokens"]
+        node["own_cost"] += metrics["cost"]
+        node["models"].add(f'{metrics["model"]}/{metrics["effort"]}')
+        node["active"] = node["active"] or record["session"] in active
+
+    children: dict[str, list[str]] = defaultdict(list)
+    for label, node in grouped.items():
+        if node["parent"] in grouped and node["parent"] != label:
+            children[node["parent"]].append(label)
+
+    def totals(label: str, seen: set[str] | None = None) -> tuple[float, int, float, bool]:
+        seen = set() if seen is None else seen
+        if label in seen:
+            return 0.0, 0, 0.0, True
+        seen.add(label)
+        node = grouped[label]
+        seconds = node["own_seconds"]
+        tokens = node["own_tokens"]
+        cost = node["own_cost"]
+        exact = node["time_exact"]
+        for child in children.get(label, []):
+            child_seconds, child_tokens, child_cost, child_exact = totals(child, seen)
+            seconds += child_seconds
+            tokens += child_tokens
+            cost += child_cost
+            exact = exact and child_exact
+        return seconds, tokens, cost, exact
+
+    order: list[tuple[int, str]] = []
+    def walk(label: str, depth: int) -> None:
+        order.append((depth, label))
+        for child in sorted(children.get(label, [])):
+            walk(child, depth + 1)
+    roots = [label for label, node in grouped.items() if node["parent"] not in grouped]
+    for root in sorted(roots):
+        walk(root, 0)
+
+    print(f"Cost and time · workspace {workspace}")
+    print("API-equivalent USD; subscription billing and non-token tool charges are not included.")
+    print()
+    print(f'{"Task":45} {"Model / effort":28} {"State":7} {"Own time":10} {"Total time":10} {"Own tok":9} {"Total tok":9} {"Own $":9} {"Total $":9}')
+    print("-" * 146)
+    for depth, label in order:
+        node = grouped[label]
+        total_seconds, total_tokens, total_cost, total_exact = totals(label)
+        name = ("  " * depth + label)[:45]
+        models = ",".join(sorted(node["models"]))[:28]
+        state = "active" if node["active"] else "closed"
+        print(
+            f'{name:45} {models:28} {state:7} '
+            f'{fmt_duration(node["own_seconds"], node["time_exact"]):10} '
+            f'{fmt_duration(total_seconds, total_exact):10} '
+            f'{fmt_tokens(node["own_tokens"]):9} {fmt_tokens(total_tokens):9} '
+            f'${node["own_cost"]:8.3f} ${total_cost:8.3f}'
+        )
+    print()
+    print("~ time is transcript span because that harness does not record exact model-active duration locally.")
+    print("Fresh short task sessions keep both context cost and attribution accurate.")
+    return 0
+
+
+def register(args: argparse.Namespace) -> int:
+    pane = herdr_pane(args.pane)
+    parent = herdr_pane(args.parent_pane)
+    session = (pane.get("agent_session") or {}).get("value")
+    if not session:
+        print("launched pane has no native session", file=sys.stderr)
+        return 1
+    append_record(
+        {
+            "workspace": args.workspace,
+            "session": session,
+            "label": pane.get("label") or args.pane,
+            "parent_label": parent.get("label"),
+            "surface": args.surface,
+            "registered_at": iso_now(),
+        }
+    )
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    subparsers = parser.add_subparsers(dest="command")
+    register_parser = subparsers.add_parser("register", help=argparse.SUPPRESS)
+    register_parser.add_argument("--workspace", required=True)
+    register_parser.add_argument("--pane", required=True)
+    register_parser.add_argument("--parent-pane", required=True)
+    register_parser.add_argument("--surface", required=True)
+    report_parser = subparsers.add_parser("report")
+    report_parser.add_argument("--workspace")
+    args = parser.parse_args()
+    if args.command == "register":
+        return register(args)
+    workspace = getattr(args, "workspace", None) or os.environ.get("HERDR_WORKSPACE_ID")
+    if not workspace:
+        print("Use --workspace or run inside Herdr.", file=sys.stderr)
+        return 2
+    return report(workspace)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

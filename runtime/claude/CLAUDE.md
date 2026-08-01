@@ -1,6 +1,4 @@
 @/home/user/azirar/.agents/AGENT_SYSTEM_STANDARD.md
-@/home/user/azirar/.agents/RESEARCH_AGENT_ONBOARDING.md
-@/home/user/azirar/.agents/RESEARCH_ORCHESTRATION.md
 
 # Claude and Claudex enforcement
 
@@ -15,23 +13,27 @@
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep only
   requested code/configuration, required run files, actual outputs, and the
-  existing `HUMAN_PLAN.md` and `OLD_HISTORY.md`. Project-root
-  `RESTART_HANDOFF.md` is required only for an explicit save-and-close.
+  existing `HUMAN_PLAN.md`, `RESTART_HANDOFF.md`, and `OLD_HISTORY.md`. Keep
+  the compact handoff current after material results, task changes, external
+  waits, and decisions.
 - At least 90% of active task slots and agent-hours must directly change code,
   data, experiments, evaluations, accepted evidence, or paper content.
   Orchestration, collaborative planning, plan writing, advice, checking,
   status, review, audit, and waiting share at most 10%. Every control action
   must name the productive action it directly unlocks.
-- Luna low is the normal worker for one clear, repeatable task with one
-  deliverable and reproducible done check, normally within three tightly
-  coupled files or one experiment stage. Sol medium handles material ambiguity,
-  a failed coherent Luna repair, or cross-task integration. Native Claude Opus
+- Luna max is the normal coding worker for one clear, repeatable package with
+  one deliverable and reproducible done check. Luna support or supervision may
+  use low but never higher. Sol medium handles harder coding. Sol low through
+  max is selected for bounded research or data crunching according to actual
+  difficulty. Native Claude Opus
   5 and OpenCode GLM 5.2 remain selectable alternatives. Terra-high remains
   human-selected only.
 - Long-running observation uses an external service with read-only API-key
   `opencode/gemini-3.6-flash`, or Luna for research observation. Never use
   Vertex. The watcher cannot inspect or modify code and trusted service code
   opens a named visible Sol-medium verifier only for a genuinely unusual event.
+  Every watch names success, failure, maximum silence, owner, and its recovery
+  action; it closes on the terminal event.
 - Claudex may use relevant Claude-side workflows, skills, commands, hooks, and
   short-lived native helpers inside its one assigned task and worktree when
   they directly reduce that task's done check. The owning visible pane remains
@@ -80,13 +82,19 @@
   approval step.
 - A temporary Sol-medium Plan Orchestrator edits only `HUMAN_PLAN.md`, reports
   only to the Operations Lead, and closes after one plan-only commit. Terra
-  medium handles open-ended research; Luna-low handles routine source finding
-  and transformation as well as bounded productive work. An
+  medium handles open-ended research. An
   explicitly selected Terra-high productive Worker follows the normal
   one-task, worktree, commit, and closure rules. Sol-medium Verifiers are
-  optional and minimal. Sol-high suborchestrators exist only for independent
-  workstreams with at least three productive tasks; Sol-xhigh advisors answer
+  optional and minimal. One Sol-medium suborchestrator owns one meaningful
+  multi-package task, does no coding, launches a fresh Luna-max or selected Sol
+  worker for each package, and closes after the task; Sol-xhigh advisors answer
   one sparse bounded decision.
+- A new work package or correction always gets a fresh worker chat. Ready,
+  idle, waiting, submitted work, or an agent claim is not completion; observed
+  output must meet the finish condition and every active task keeps a concrete
+  next action.
+- Use `herdr-costs report` for the private human-named time/token/cost tree.
+  Do not create manual usage artifacts.
 - On an explicit save-and-close request, use `save-close-herdr-project`.
   Operations performs the final save, closes temporary roles, records
   continuing external work, updates history, and commits and synchronizes

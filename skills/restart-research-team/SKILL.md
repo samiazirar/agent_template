@@ -1,6 +1,6 @@
 ---
 name: restart-research-team
-description: Restore paused Herdr research projects from RESTART_HANDOFF.md files, onboard one Human Orchestrator, a Codex Sol-high Operations Lead, and a background Claude Opus-medium Operations Collaborator, reconstruct the standard layout with Luna-low default workers and Sol-high workstream suborchestrators under the 90/10 budget, and wait for user plan discussion without resuming research.
+description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one Human Orchestrator, a Codex Sol-high Operations Lead, and a background Claude Opus-medium Operations Collaborator, reconstruct the lightweight standard layout with Luna-max coding workers and Sol-medium task suborchestrators under the 90/10 budget, and wait for user plan discussion without resuming research.
 ---
 
 # Restart Research Team
@@ -80,8 +80,8 @@ Orchestrator is the sole normal human conversation and owns the meaning of
 Operations Lead. A temporary Plan Orchestrator receives its brief from and
 reports only to Operations Lead; it is an orchestrator, not a worker.
 
-Require `command -v herdr-role-message` and
-`command -v herdr-project-save-close` before launch. Human Orchestrator sends
+Require `command -v herdr-role-message`, `command -v herdr-project-save-close`,
+and `command -v herdr-costs` before launch. Human Orchestrator sends
 technical intent only with `herdr-role-message operations`; Operations Lead
 uses `herdr-role-message human` and `herdr-role-message collaborator`;
 technical roles return with `herdr-role-message operations` or the exact
@@ -121,13 +121,14 @@ only the raw evidence needed to verify current reality. Ask it to:
    contract;
 3. make the first milestone end in an observable project result rather than
    enabling infrastructure;
-4. assign any workstream containing at least three productive tasks to one
-   named Sol-high suborchestrator, which later emits only the next useful
-   Luna-sized semantic worker cards;
+4. assign each meaningful multi-package task to one named Sol-medium
+   suborchestrator that does no coding and later emits only the next useful
+   minimal worker cards; send an atomic package directly to one worker;
 5. keep at least 90% of task slots and agent-hours directly productive and
    classify every control-role turn honestly;
-6. use Luna-low for routine source work, Terra-medium for open-ended synthesis,
-   and keep verification optional and minimal;
+6. use Luna-max for normal coding, Sol-medium for harder coding, selected Sol
+   effort for bounded research/data crunching, Terra-medium for open-ended
+   synthesis, and keep verification optional and minimal;
 7. emit a compact current-state envelope for the human orchestrator;
 8. emit `OPERATIONS_READY` and wait without executing.
 
@@ -195,24 +196,25 @@ After either strategic answer is durably captured, close that pane immediately.
 
 - Use as many concurrent productive worker sessions as independent subtasks
   justify.
-- Luna-low is the default productive worker. One worker owns exactly one clear,
-  repeatable subtask, one deliverable, one reproduction or run, one done check,
+- Luna-max is the default coding worker. One fresh worker chat owns exactly one
+  clear, repeatable package, one deliverable, one reproduction or run, one done check,
   normally no more than three tightly coupled files or one experiment stage,
   one task branch, and one Git worktree. Never combine unrelated subtasks.
-- Every new role reads the mandatory onboarding contract before its task card.
+- Standing leaders and suborchestrators read the onboarding and operating
+  contracts. Minimal workers read only the concise standard and their task card.
 - Put workers and subworkers in `04 Workers`; put only multi-task track owners
   in `03 Suborchestrators`.
 - Put optional minimal verifiers and watchers in `05 Progress Checks`. Put
-  productive Luna workers in `04 Workers`. Routine source finding and
-  transformation also use Luna; open-ended synthesis uses a Terra Researcher.
+  productive workers in `04 Workers`. Bounded research and data crunching use
+  the lowest sufficient Sol effort; open-ended synthesis uses a Terra Researcher.
   Derive every pane name from the immediate goal.
-- Operations Lead decomposes the milestone into independent workstreams. A
-  Sol-high suborchestrator owns only a substantial independent multi-step stream
-  expected to need at least three Luna-sized productive pieces. It issues only
-  the next useful pieces, launches one Luna worker per piece, absorbs compact
-  results, integrates its stream for Operations Lead, and closes when the stream
-  ends. It may not create another suborchestrator or add a review turn after
-  every successful task.
+- Operations Lead decomposes the milestone into meaningful tasks. One
+  Sol-medium suborchestrator owns one multi-package task and its finish
+  condition, performs no coding or experiment execution, issues only the next
+  useful packages, launches one fresh Luna-max worker per normal coding package
+  or Sol-medium worker for a harder package, absorbs compact results, integrates
+  its task for Operations Lead, and closes when the task ends. It may not create
+  another suborchestrator or add a review turn after every successful package.
 - Claudex may use relevant native workflows and short-lived helpers inside one
   named pane's assigned task and worktree. Independent work with its own task
   card, workspace, durable result, or reporting route must be opened as a named
@@ -231,7 +233,7 @@ After either strategic answer is durably captured, close that pane immediately.
   predicted-versus-observed templates in the operating contract.
 - If a worker cannot state the observable goal delta, the orchestrator rewrites
   the card without opening another review session.
-- Escalate the same task to Sol medium when Luna cannot choose between
+- Give a harder or failed package to a fresh Sol-medium worker when Luna cannot choose between
   materially different approaches, its first coherent repair fails, the task
   expands beyond its bounded subsystem, tool results contradict the task
   premise, or the result cannot be reproduced. Do not open a routine verifier
@@ -240,15 +242,25 @@ After either strategic answer is durably captured, close that pane immediately.
   unrelated work continues.
 - Use the external event service with API-key Gemini 3.6 Flash for the active
   project batch. It wakes the orchestrator only on a real change or terminal
-  state. Luna is the research-oriented classifier alternative, not a polling
+  state. Luna-low is the research-oriented classifier alternative, not a polling
   model turn. Never create one watcher per worker or spend Luna worker capacity
   on unchanged status.
-- Before launching that watcher, validate its exact condition, owner, cadence,
+- Before launching that watcher, validate its exact success, failure, maximum
+  silence, owner, recovery action, terminal event,
   and model with:
 
   ```bash
   python3 /home/user/azirar/.codex/skills/restart-research-team/scripts/validate_watcher_card.py WATCHER_CARD_FILE
   ```
+
+- Maximum silence is a real event that wakes the task owner with the recovery
+  action; it may not leave the task silently stalled. Close the watcher when
+  its terminal event or ownership change occurs.
+- Keep `HUMAN_PLAN.md` human-readable and `RESTART_HANDOFF.md` compact and
+  restart-ready after every material result, active-task change, external wait,
+  or decision. Run `herdr-costs report` for the private human-named hierarchy
+  of own and aggregate time, tokens, and API-equivalent cost; create no manual
+  usage artifact.
 
 - At a due check, the orchestrator may create a fresh read-only
   `gpt-5.6-terra` medium checker. Require a task-specific observable delta,

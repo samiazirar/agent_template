@@ -32,9 +32,9 @@ orchestration contracts provide the detailed rules.
   review files, dashboards, project hubs, duplicate READMEs, status documents,
   or prose records merely to describe work. Allowed outputs are the requested
   source/configuration, files required to run it, actual experiment outputs,
-  and the existing `HUMAN_PLAN.md` and `OLD_HISTORY.md` required by the fixed
-  Herdr layout. Project-root `RESTART_HANDOFF.md` is the one additional
-  required record when the Human explicitly asks to save and close a project.
+  and the existing `HUMAN_PLAN.md`, `RESTART_HANDOFF.md`, and `OLD_HISTORY.md`
+  required by the fixed Herdr layout. Keep the handoff compact and current so
+  closing the workspace never depends on another model turn.
 
 ### Enforce 90/10 at admission
 
@@ -75,7 +75,7 @@ orchestration contracts provide the detailed rules.
 | Human orchestration | Claudex | Sol, high |
 | Operations Lead | Codex | Sol, high |
 | Background operations collaboration | Native Claude | Opus 5, medium |
-| Normal bounded implementation or execution | Codex | Luna, low |
+| Normal bounded implementation or execution | Codex | Luna, max |
 | Ambiguous repair or cross-task integration | Codex or Claudex | Sol, medium |
 | Bounded difficult implementation or decision | Codex or Claudex | Sol, high |
 | One bounded strategic question | Codex or Claudex | Sol, xhigh |
@@ -84,7 +84,8 @@ orchestration contracts provide the detailed rules.
 | Mechanical or context-heavy alternative worker | OpenCode | GLM 5.2 |
 | Open-ended researcher | Codex or Claudex | Terra, medium |
 | Human-selected bounded productive worker | Codex | Terra, high |
-| Routine source finding or extraction | Codex | Luna, low |
+| Routine research or data crunching | Codex | Sol, low; raise only when the task needs it |
+| Cheap bounded support or supervision | Codex | Luna, low maximum |
 | Permanent event classification | OpenCode API key | Gemini 3.6 Flash |
 | Optional minimal verification | Visible Codex or Claudex | Sol, medium |
 | Human message drafting | OpenCode API key | Gemini 3.6 Flash |
@@ -93,17 +94,22 @@ Claudex is the Claude Code interface backed by the local Codex gateway. It is
 not native Anthropic Claude. Launch it through `claudex` with an explicit Codex
 model. Native Claude is selected separately when Opus 5 is wanted.
 
-Luna-low is the default productive worker when the task has one concrete
-deliverable, one reproducible done check, and a narrow action boundary. Terra
-handles open-ended research and interpretation. Terra-high may be a productive
-worker only when the human explicitly selects it for one bounded task. Never
-use Vertex; Gemini routes use the OpenCode API-key provider.
+Luna-max is the default coding worker when the task has one concrete
+deliverable, one reproducible done check, and a narrow action boundary. Use Sol
+medium for a harder package that needs materially more judgment. Select Sol
+low through max for bounded research or data crunching according to actual
+difficulty; do not inherit a high effort merely because the parent task is
+important. Luna support or supervision never exceeds low. Terra remains the
+default for open-ended research and interpretation. Terra-high may be a
+productive worker only when the human explicitly selects it for one bounded
+task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
 
 ## Native Herdr launch
 
 - Launch every independent agent as a named visible Herdr session with
   `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
-- `luna` is the normal bounded worker. `codex` and `claudex` remain the Sol
+- `luna` and `luna-max` are the normal bounded coding worker. `luna-low` is
+  restricted to cheap support or supervision. `codex` and `claudex` remain the Sol
   medium escalation route for ambiguity, failed bounded repair, or integration.
   `claude` selects native Claude Opus 5 at medium effort by default.
 - Never replace these sessions with hidden subagents or ordinary background
@@ -193,6 +199,10 @@ use Vertex; Gemini routes use the OpenCode API-key provider.
 - Update it in place after each material result, accepted decision, or real
   change in direction. Do not update it for unchanged status, polling, routine
   commits, or agent activity.
+- Keep `RESTART_HANDOFF.md` equally current after each material technical
+  result, changed active task, new external wait, or accepted decision. It is a
+  compact restart record: goal, current code/result, what is running, exact
+  next action, and repository state. It is not a second plan or a transcript.
 - Omit workers, sessions, branches, paths, hashes, job identifiers, task cards,
   PaperPilot mechanics, and operational transcripts unless one is essential to
   a user decision. Those remain behind the human orchestrator.
@@ -214,22 +224,27 @@ use Vertex; Gemini routes use the OpenCode API-key provider.
   After Operations confirms readiness, the Human Orchestrator runs the guarded
   helper, which may close only its own current workspace. Never stop the shared
   Herdr server or named session, and never treat inactivity as permission.
-- One worker owns exactly one concrete subtask, branch, and worktree. Luna-low
+- One worker owns exactly one minimal concrete work package, branch, worktree,
+  and fresh native chat. Luna-max
   is the default when the task can be stated as one deliverable, one
   reproduction or run, one done check, and normally no more than three tightly
   coupled files or one experiment stage.
-  Independent subtasks use concurrent workers. When a worker finishes,
+  Independent packages use concurrent workers. When a worker finishes,
   Operations Lead captures its short result and native session reference,
   closes the pane immediately, and then integrates or rejects the saved work.
-  Workers receive
+  A later package or correction starts in a new worker chat; do not carry a
+  finished worker into the next package. Workers receive
   tasks from and report only to Operations Lead or their one owning
   suborchestrator.
-- Suborchestrators use Sol high for independent multi-step workstreams expected
-  to contain at least three Luna-sized productive pieces. Each owns one
-  measurable workstream, turns only the next useful pieces into bounded cards,
-  launches one Luna worker per piece, absorbs compact results, and closes when
-  the stream ends. It may not create another suborchestrator or add a review
-  turn after every successful Luna task.
+- Suborchestrators use Sol medium, own exactly one meaningful task, and do no
+  coding or experiment execution. Each states the task goal and finish
+  condition, turns only the next useful work into minimal packages, launches
+  one fresh Luna-max worker per normal coding package or Sol-medium worker for
+  a harder package, absorbs compact results, and closes when the task ends. An
+  atomic task that is already one minimal package goes directly from Operations
+  to one worker to avoid orchestration overhead. A suborchestrator may not
+  create another suborchestrator or add a review turn after every successful
+  package.
 - Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor
   only the context for one bounded question, preferably yes/no or one concrete
   recommendation. Operations Lead launches it and receives its answer; it never
@@ -237,24 +252,50 @@ use Vertex; Gemini routes use the OpenCode API-key provider.
 - For consequential strategic planning or plan validation, the responsible
   orchestrator uses `consult-chatgpt-pro` with one compact question, then
   reconciles the advice against project evidence.
-- Routine source finding, extraction, classification, transformation, and
-  structured summaries default to Luna-low. Use a Terra-medium Researcher only
-  when the question is open-ended or requires synthesis and interpretation.
+- Bounded research and data crunching use Sol at the lowest effort that can do
+  the work, from low through max. Use a Terra-medium Researcher by default when
+  the question is open-ended or requires synthesis and interpretation.
   Research reports to Operations Lead for project work or the Architect for
   agent-system research. Research counts as productive only when it creates
   accepted goal-relevant evidence.
 - Explicitly selected Terra-high productive work uses one bounded named Worker,
   one worktree, and the normal worker completion and closure rules.
 
+## Progress, continuity, and cost
+
+- Every active task always has one current minimal package, an owner, a finish
+  condition based on observed output, and a next action. “Ready,” “waiting,”
+  “looks complete,” an idle pane, submitted work, or an agent claim never
+  counts as completion.
+- A suborchestrator closes a successful worker immediately and launches the
+  next package without a planning round. If a package fails, it issues one
+  bounded repair package in a fresh worker chat. If that cannot settle the
+  same issue, it reports the exact technical choice to Operations; unrelated
+  packages continue.
+- Waiting is permitted only for a named external event with a responsible
+  owner, a deadline or expected change window, and independent work that
+  continues meanwhile. If none exists, the task is stalled and Operations must
+  choose a concrete recovery action, not describe the stall.
+- `herdr-agent` records each launched native session in the private local usage
+  ledger. Run `herdr-costs report` inside the workspace for a human-named tree
+  of worker own time/tokens/cost, suborchestrator totals, Operations totals, and
+  the Human total. Dollar values are API-equivalent estimates; subscription
+  sessions are not token-billed and provider billing remains authoritative.
+- The ledger and generated terminal table are the only cost records. Do not
+  create task reports, dashboards, or manual token spreadsheets.
+
 ## Watcher, verifier, messenger, and limits
 
 The long-running system service performs waiting. A model turn never polls
 indefinitely.
 
-1. The service receives a Herdr, process, scheduler, silence, or capacity
-   event.
+1. The service receives a Herdr, process, scheduler, silence-deadline, or
+   capacity event. Each watch names its success event, failure event, owning
+   task, maximum silence window, and recovery action.
 2. Tool-free API-key Gemini 3.6 Flash returns silent, message, or verify.
-3. Silent events stop immediately.
+3. Unchanged events stop immediately. Reaching the maximum silence window is a
+   real event: wake the owning suborchestrator or Operations with the latest
+   state and required recovery action.
 4. Only an unusual, consequential event may open one optional fresh
    Sol-medium Verifier with bounded redacted evidence and no project-write
    access. Routine work self-verifies.
@@ -262,7 +303,9 @@ indefinitely.
    sleep. It then closes.
 6. Tool-free Flash drafts an important human message only when the human
    orchestrator approved it or an automatic important-event rule fired.
-7. Trusted service code performs Herdr control and posting; Flash cannot.
+7. Trusted service code performs Herdr control and posting; Flash cannot. A
+   watcher ends when the watched process ends, the task changes owner, or the
+   terminal event fires; it may not remain as an idle pane.
 
 Automatic important events are limited to a required user decision, accepted
 goal-relevant result, confirmed unusual lack of progress, failed long-running

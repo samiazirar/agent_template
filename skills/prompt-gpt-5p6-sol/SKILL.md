@@ -43,8 +43,9 @@ meaning and remove process that does not help reach the goal.
   duplicated, misleading, or superseded code.
 - Forbid side artifacts unless they are the requested result: no reports,
   manifests, dashboards, project hubs, review files, duplicate documentation,
-  or status files. Allow project-root `RESTART_HANDOFF.md` only for an explicit
-  save-and-close.
+  or status files. Require one compact project-root `RESTART_HANDOFF.md` kept
+  current after material results, active-task changes, external waits, and
+  decisions so restart never needs a final reconstruction turn.
 
 ## Tune for GPT-5.6 Sol
 
@@ -81,7 +82,7 @@ meaning and remove process that does not help reach the goal.
   envelope,” “pane,” “session,” “worker,” “lifecycle,” “verified,”
   “authority,” “blocker,” and `READY FOR HUMAN` unless the user asks about the
   system itself.
-- For Operations Lead, require one temporary worker per concrete subtask,
+- For Operations Lead, require one fresh temporary worker chat per minimal work package,
   concurrent workers for independent subtasks, integration, synchronization,
   closure immediately after each transient final report is captured and before
   integration, and active enforcement of the rolling 90/10 budget. Make it the
@@ -90,13 +91,13 @@ meaning and remove process that does not help reach the goal.
   results and `herdr-role-message collaborator "..."` for the bounded
   background collaborator. A received user confirmation must start the named
   next action, not produce another acknowledgement.
-- Make Luna-low the default worker for a clear, repeatable piece with one
+- Make Luna-max the default coding worker for a clear, repeatable package with one
   deliverable, one reproduction or run, one done check, and normally no more
   than three tightly coupled files or one experiment stage. Operations Lead or
-  a Sol-high suborchestrator defines that boundary once; Luna self-verifies and
+  a Sol-medium task suborchestrator defines that boundary once; Luna self-verifies and
   returns a compact result. Do not spend a Sol turn supervising every tool call
   or rechecking every successful Luna result.
-- Escalate the same task to Sol medium when Luna faces materially different
+- Give a harder or failed package to a fresh Sol-medium worker when Luna faces materially different
   approaches, its first coherent repair fails, the work expands beyond the
   assigned subsystem, tool results contradict the task premise, or the result
   cannot be reproduced.
@@ -107,18 +108,30 @@ meaning and remove process that does not help reach the goal.
 - For a worker, require one task from Operations Lead or its owning
   suborchestrator, one result back to that owner, and no contact with the Human
   Orchestrator or user.
-- For a suborchestrator, assign one independent multi-step workstream expected
-  to need at least three Luna-sized pieces. It issues only the next useful
-  bounded pieces, absorbs compact results, reports only to Operations Lead,
-  and creates no further orchestration layer.
-- Use Luna-low for routine source finding, extraction, classification,
-  transformation, and structured summaries. Select Terra-medium only for
-  open-ended research requiring synthesis or interpretation.
+- For a suborchestrator, use Sol medium and assign one meaningful task with an
+  observed finish condition. Forbid coding and experiment execution. It issues
+  only the next useful minimal packages to fresh workers, absorbs compact
+  results, reports only to Operations Lead, and creates no further
+  orchestration layer. Send an atomic package directly to a worker.
+- Use Sol at the lowest sufficient effort, from low through max, for bounded
+  research or data crunching. Select Terra-medium by default for open-ended
+  research requiring synthesis or interpretation. Luna support or supervision
+  never exceeds low.
 - If the human explicitly selects Terra-high as a productive worker, preserve
   that choice and give it one bounded deliverable and the normal worker
   worktree, commit, reporting, and closure rules.
 - Make a Verifier optional, minimal, read-only, and limited to one
   consequential anomaly that routine self-verification cannot resolve.
+- Require every active task to retain one current package and concrete next
+  action. Ready, idle, submitted, waiting, or a model's claim is not complete;
+  only the observed finish condition is. External waiting names independent
+  work that continues.
+- For long work, require one event service with success, failure, maximum
+  silence, owner, recovery action, and terminal event. Maximum silence wakes
+  the owner; unchanged state consumes no model turn.
+- Reference `herdr-costs report` for the private human-named own/aggregate
+  time, token, and API-equivalent cost tree. Do not ask a model to maintain or
+  summarize a usage dashboard.
 - For a strategic advisor, use Sol xhigh and ask one bounded question with only
   the context needed to answer yes/no or recommend one approach. For
   consequential strategic planning or plan validation, direct the responsible
