@@ -337,8 +337,8 @@ Every task-bearing prompt must include:
 - the preserved project goal in plain language;
 - the role's differing current and expected states;
 - one role-appropriate outcome;
-- the explicitly selected model and effort, using native-Codex Luna-max by
-  only below a Sol-medium suborchestrator; use native-Codex Sol-medium for a
+- the explicitly selected model and effort, using native-Codex Luna-max only
+  below a Sol-medium suborchestrator and native-Codex Sol-medium for a
   worker dispatched directly by Operations;
 - the working directory or worktree;
 - the concise `AGENT_SYSTEM_STANDARD.md` and project `AGENTS.md`; only standing
