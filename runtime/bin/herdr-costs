@@ -967,8 +967,6 @@ def report_all(since: datetime | None) -> int:
             record["session"]: session_metrics(record, since) for record in records
         }
         summary = usage_summary(records, since, metrics_by_session)
-        if not summary["tokens"]:
-            continue
         agents: dict[str, dict[str, Any]] = {}
         for record in records:
             metrics = metrics_by_session[record["session"]]
@@ -1000,7 +998,13 @@ def report_all(since: datetime | None) -> int:
     print(f'{"Project / agent":48} {"Model / effort":24} {"Time":9} {"Tokens":10} {"Cached":10} {"Luna":8} {"Control":8} {"Cost":10}')
     print("-" * 136)
     for label, summary, agents in rows:
-        majority = "yes" if summary["luna_max_pct"] > 50.0 else "NO"
+        majority = (
+            "-"
+            if not summary["tokens"]
+            else "yes"
+            if summary["luna_max_pct"] > 50.0
+            else "NO"
+        )
         print(
             f'{label[:48]:48} {"project total":24} '
             f'{fmt_duration(summary["active_seconds"], summary["time_exact"]):9} '
@@ -1020,7 +1024,7 @@ def report_all(since: datetime | None) -> int:
                 f'{"":8} {"":8} ${item["cost"]:9.3f}'
             )
     if since is not None:
-        print("\nProjects and agents with no recorded usage today are omitted.")
+        print("\nAll project totals are shown; agent rows with no recorded usage today are omitted.")
     return 0
 
 
