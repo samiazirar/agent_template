@@ -24,10 +24,10 @@ REQUIRED_HANDOFF_TEXT = (
     "## Human choices",
 )
 TRANSIENT_TABS = {
-    "02 Strategic Council",
-    "03 Suborchestrators",
-    "04 Workers",
-    "05 Progress Checks",
+    "03 Strategic Council",
+    "04 Suborchestrators",
+    "05 Workers",
+    "06 Progress Checks",
 }
 TRANSIENT_PREFIXES = {
     "Plan Orchestrator",
@@ -160,14 +160,17 @@ def check_workspace(workspace_id: str) -> None:
 
     remaining: list[str] = []
     busy_shells: list[str] = []
-    standing: list[str] = []
+    human_roles: list[str] = []
+    operations_roles: list[str] = []
     for pane in panes:
         label = pane.get("label", "")
         prefix = label.split(" · ", 1)[0]
         tab_name = tab_names.get(pane.get("tab_id"), "")
         if pane.get("agent") or pane.get("agent_session"):
-            if tab_name == "01 Orchestrators":
-                standing.append(prefix)
+            if tab_name == "01 Human":
+                human_roles.append(prefix)
+            if tab_name == "02 Operations":
+                operations_roles.append(prefix)
             if tab_name in TRANSIENT_TABS or prefix in TRANSIENT_PREFIXES:
                 remaining.append(label or f"unnamed role in {tab_name}")
             continue
@@ -192,17 +195,25 @@ def check_workspace(workspace_id: str) -> None:
             + "; ".join(busy_shells)
         )
 
-    unexpected = [prefix for prefix in standing if prefix not in STANDING_PREFIXES]
+    unexpected = [
+        prefix
+        for prefix in human_roles + operations_roles
+        if prefix not in STANDING_PREFIXES
+    ]
     if (
-        standing.count("Human Orchestrator") != 1
-        or standing.count("Operations Lead") != 1
-        or standing.count("Operations Collaborator") > 1
+        human_roles != ["Human Orchestrator"]
+        or operations_roles.count("Operations Lead") != 1
+        or operations_roles.count("Operations Collaborator") > 1
+        or any(prefix == "Human Orchestrator" for prefix in operations_roles)
+        or any(prefix != "Human Orchestrator" for prefix in human_roles)
         or unexpected
     ):
         raise CloseError(
-            "The standing project roles are ambiguous; require one Human "
-            "Orchestrator, one Operations Lead, and at most one Operations "
-            f"Collaborator. Found: {', '.join(standing) or 'none'}."
+            "The standing project roles are ambiguous; require only one Human "
+            "Orchestrator in 01 Human, and one Operations Lead with at most one "
+            "Operations Collaborator in 02 Operations. Found Human: "
+            f"{', '.join(human_roles) or 'none'}; Operations: "
+            f"{', '.join(operations_roles) or 'none'}."
         )
 
 

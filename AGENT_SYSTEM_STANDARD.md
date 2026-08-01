@@ -200,10 +200,10 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`.
   Workers, suborchestrators, Plan Orchestrators, advisors, researchers, and
   verifiers do not bypass Operations Lead.
-- In `01 Orchestrators`, exactly two standing panes share one tab by default:
-  the Human Orchestrator in its own left pane and Operations Lead in its own
-  right pane, normally at a 50/50 split for easy phone monitoring. A standing
-  Operations Collaborator exists only when the Human explicitly requests one.
+- Keep standing leadership in two full-width tabs for phone use: `01 Human`
+  contains only the Human Orchestrator, and `02 Operations` contains the
+  Operations Lead. A standing Operations Collaborator exists only when the
+  Human explicitly requests one and belongs in Operations, never the Human tab.
 - That path must work mechanically, not only in prose. Roles send cross-pane
   messages with `herdr-role-message`: Human Orchestrator uses
   `herdr-role-message operations`, Operations Lead uses
@@ -242,7 +242,7 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   state. `done` on a standing pane means its latest turn is complete, not that
   the standing role should close.
 - `00 Human Plan` is a non-agent Frogmouth view of `HUMAN_PLAN.md`. Keep the
-  Human Orchestrator in `01 Orchestrators`, never in the plan pane.
+  Human Orchestrator alone in `01 Human`, never in the plan pane.
 - The Human Orchestrator owns plan meaning but does not edit it directly.
   It tells Operations Lead what the user wants. Operations Lead launches one
   temporary `Plan Orchestrator` only after a material change. This is an
@@ -328,7 +328,7 @@ Vertex; Gemini routes use the OpenCode API-key provider.
 - Explicitly selected Terra-high productive work uses one bounded named Worker,
   one worktree, and the normal worker completion and closure rules.
 - Only when the Human asks where usage went, Operations or the Architect opens
-  one temporary native-Codex Luna-max Usage Analyst in `05 Progress Checks`.
+  one temporary native-Codex Luna-max Usage Analyst in `06 Progress Checks`.
   It runs the deterministic cost report first, compares only relevant chat
   batches with `HUMAN_PLAN.md`, and may launch fresh Luna-low Usage Readers for
   bounded current or archived transcript batches. Readers and analyst are

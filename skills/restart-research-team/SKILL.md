@@ -45,12 +45,13 @@ is missing.
 For every selected project, create these tabs in this physical order:
 
 1. `00 Human Plan`
-2. `01 Orchestrators`
-3. `02 Strategic Council`
-4. `03 Suborchestrators`
-5. `04 Workers`
-6. `05 Progress Checks`
-7. `99 Old History`
+2. `01 Human`
+3. `02 Operations`
+4. `03 Strategic Council`
+5. `04 Suborchestrators`
+6. `05 Workers`
+7. `06 Progress Checks`
+8. `99 Old History`
 
 Create the first tab as an empty named shell until the human orchestrator has
 updated and validated `HUMAN_PLAN.md`, then launch
@@ -60,13 +61,13 @@ IDs remain dormant in the file.
 
 Create:
 
-- one fresh native Codex GPT-5.6 Sol-high Human Orchestrator and one fresh
-  native-Codex GPT-5.6 Sol-high Operations Lead in `01 Orchestrators`, with
-  the Human Orchestrator physically on the left and Operations Lead on the
-  right;
-- one empty named shell bay in `02 Strategic Council`;
-- empty named shell bays in `03 Suborchestrators`, `04 Workers`, and
-  `05 Progress Checks`.
+- one fresh native Codex GPT-5.6 Sol-high Human Orchestrator alone in the
+  full-width `01 Human` tab;
+- one fresh native-Codex GPT-5.6 Sol-high Operations Lead in the separate
+  `02 Operations` tab;
+- one empty named shell bay in `03 Strategic Council`;
+- empty named shell bays in `04 Suborchestrators`, `05 Workers`, and
+  `06 Progress Checks`.
 
 Strategic advisors are transient. Open Sol xhigh only for one bounded question
 after the human plan is ready, capture the answer, archive the native session
@@ -171,7 +172,7 @@ and what observable result comes next. “36 locked cells” is invalid until
 translated into the systems, tasks, repetitions, and scientific purpose.
 
 After both readiness messages, Operations Lead launches one temporary
-`Plan Orchestrator · PersonName Restore Plan` in `01 Orchestrators` with an
+`Plan Orchestrator · PersonName Restore Plan` in `02 Operations` with an
 isolated worktree. It receives accepted meaning and checked evidence from
 Operations Lead, edits only `HUMAN_PLAN.md`, commits, and reports only to
 Operations Lead. Operations Lead asks Human Orchestrator to check meaning,
@@ -199,10 +200,10 @@ After either strategic answer is durably captured, close that pane immediately.
   one task branch, and one Git worktree. Never combine unrelated subtasks.
 - Standing leaders and suborchestrators read the onboarding and operating
   contracts. Minimal workers read only the concise standard and their task card.
-- Put workers and subworkers in `04 Workers`; put only productive task owners
-  in `03 Suborchestrators`.
-- Put optional minimal verifiers and watchers in `05 Progress Checks`. Put
-  productive workers in `04 Workers`. Bounded research and data crunching use
+- Put workers and subworkers in `05 Workers`; put only productive task owners
+  in `04 Suborchestrators`.
+- Put optional minimal verifiers and watchers in `06 Progress Checks`. Put
+  productive workers in `05 Workers`. Bounded research and data crunching use
   the lowest sufficient Sol effort; open-ended synthesis uses a Terra Researcher.
   Derive every pane name from the immediate goal.
 - Operations Lead decomposes the milestone into meaningful tasks. One

@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, a native-Codex Sol-high Operations Lead, Markdown-only Human Plan pane, default quiet Sol-medium task suborchestrators that never code, fresh Luna-max sessions for frozen atomic worker packages or direct tiny tasks, direct child-to-parent wake-ups, compact restart continuity, and sparse researchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
+description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator in its own phone-friendly tab, a native-Codex Sol-high Operations Lead in a separate tab, Markdown-only Human Plan pane, default quiet Sol-medium task suborchestrators that never code, fresh Luna-max sessions for frozen atomic worker packages or direct tiny tasks, direct child-to-parent wake-ups, compact restart continuity, and sparse researchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
 ---
 
 # Launch Herdr sessions
@@ -117,16 +117,11 @@ When the user requests a space, project, team, ecosystem, or the whole setup,
 launch the two standing roles below. Operational execution uses native Codex;
 OpenCode is an explicit alternate-provider choice for one productive task.
 
-Create these standing roles in `01 Orchestrators`:
-
-`01 Orchestrators` contains exactly two standing panes by default in one
-roughly 50/50 horizontal split: the Human Orchestrator in its own left pane and
-the Operations Lead in its own right pane. Create the second pane with
-`herdr pane split --direction right --ratio 0.5`; do not create separate Human
-and Operations tabs. After any move, read the returned layout and correct it
-with `herdr pane swap` if the Human pane x-coordinate is not smaller than the
-Operations pane x-coordinate. Do not add a standing Operations Collaborator
-unless the Human explicitly requests one.
+Create the standing roles in separate full-width tabs: the Human Orchestrator
+alone in `01 Human`, and the Operations Lead in `02 Operations`. Never split
+the Human tab. This keeps the normal conversation readable and controllable on
+a phone. Do not add a standing Operations Collaborator unless the Human
+explicitly requests one; place it only in Operations.
 
 1. `Human Orchestrator · PersonName Goal` — native Codex Sol high. This is the
    project's only normal conversation with the human. Confirm the goal and its
@@ -223,7 +218,7 @@ frogmouth HUMAN_PLAN.md
 If the plan is missing or its meaning changed, leave the viewer shell in place
 until the Human Orchestrator has accepted the goal. Operations Lead then launches
 one temporary `Plan Orchestrator · PersonName Update` using Sol medium in
-`01 Orchestrators`. This is an orchestrator, not a worker. The Human
+`02 Operations`. This is an orchestrator, not a worker. The Human
 Orchestrator gives accepted meaning to Operations Lead; Operations Lead gives
 the Plan Orchestrator that meaning plus checked evidence. The Plan Orchestrator
 edits only `HUMAN_PLAN.md` in an isolated worktree, commits, reports only to
@@ -275,7 +270,7 @@ reproduced. Do not open a verifier or spend a Sol turn after every successful
 Luna task.
 
 For one meaningful task, Operations Lead launches one native-Codex Sol-medium
-named suborchestrator in `03 Suborchestrators`. Give it one measurable task goal
+named suborchestrator in `04 Suborchestrators`. Give it one measurable task goal
 and observed finish condition. It does no coding or experiment execution. It
 turns only the next useful work into a frozen atomic task card, launches one fresh
 native-Codex Luna-max worker per normal coding package or native-Codex Sol-medium worker for a harder
@@ -293,7 +288,7 @@ name.
 
 When the Human explicitly asks where time or tokens went, open one temporary
 native-Codex Luna-max `Usage Analyst · PersonName Project Usage` in
-`05 Progress Checks`. It runs `herdr-costs` first, reads the relevant
+`06 Progress Checks`. It runs `herdr-costs` first, reads the relevant
 `HUMAN_PLAN.md`, and may launch fresh Luna-low Usage Readers for disjoint,
 bounded current or archived transcript batches. It reports the expensive
 agents and tasks, cache use, repetition, context growth, drift, and actual plan
@@ -359,18 +354,19 @@ Use these fixed organizational tabs when the user asks for the full research
 structure:
 
 - `00 Human Plan`
-- `01 Orchestrators`
-- `02 Strategic Council`
-- `03 Suborchestrators`
-- `04 Workers`
-- `05 Progress Checks`
+- `01 Human`
+- `02 Operations`
+- `03 Strategic Council`
+- `04 Suborchestrators`
+- `05 Workers`
+- `06 Progress Checks`
 - `99 Old History`
 
 Tabs may remain empty when no justified role exists.
 
 ## Strategic advice
 
-Keep `02 Strategic Council` empty until an orchestrator has one exact
+Keep `03 Strategic Council` empty until an orchestrator has one exact
 consequential question. Then launch one temporary `Strategic Advisor ·
 PersonName Question` using `codex-xhigh`.
 

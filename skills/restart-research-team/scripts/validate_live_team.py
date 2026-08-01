@@ -12,11 +12,12 @@ from pathlib import Path
 
 EXPECTED_TABS = [
     "00 Human Plan",
-    "01 Orchestrators",
-    "02 Strategic Council",
-    "03 Suborchestrators",
-    "04 Workers",
-    "05 Progress Checks",
+    "01 Human",
+    "02 Operations",
+    "03 Strategic Council",
+    "04 Suborchestrators",
+    "05 Workers",
+    "06 Progress Checks",
     "99 Old History",
 ]
 
@@ -263,11 +264,12 @@ def main() -> None:
     by_label = {tab["label"]: tab for tab in tabs}
     expected_counts = {
         "00 Human Plan": 1,
-        "01 Orchestrators": 2,
-        "02 Strategic Council": 1,
-        "03 Suborchestrators": 1,
-        "04 Workers": 1,
-        "05 Progress Checks": 1,
+        "01 Human": 1,
+        "02 Operations": 1,
+        "03 Strategic Council": 1,
+        "04 Suborchestrators": 1,
+        "05 Workers": 1,
+        "06 Progress Checks": 1,
         "99 Old History": 1,
     }
     for label, count in expected_counts.items():
@@ -289,22 +291,24 @@ def main() -> None:
         project_dir / "OLD_HISTORY.md",
     )
 
-    leadership = panes_by_tab[by_label["01 Orchestrators"]["tab_id"]]
+    human_tab = panes_by_tab[by_label["01 Human"]["tab_id"]]
+    operations_tab = panes_by_tab[by_label["02 Operations"]["tab_id"]]
     operations = [
         pane
-        for pane in leadership
+        for pane in operations_tab
         if pane["label"].startswith("Operations Lead · ")
     ]
     liaisons = [
         pane
-        for pane in leadership
+        for pane in human_tab
         if pane["label"].startswith("Human Orchestrator · ")
     ]
     if len(operations) != 1 or len(liaisons) != 1:
         fail(
-            "01 Orchestrators must contain one Human Orchestrator and one "
-            "Operations Lead"
+            "01 Human must contain one Human Orchestrator and 02 Operations "
+            "must contain one Operations Lead"
         )
+    leadership = human_tab + operations_tab
     for pane in leadership:
         if pane.get("agent") != "codex":
             fail(f"standing leadership pane is not an agent: {pane['label']}")
@@ -317,26 +321,12 @@ def main() -> None:
             fail(f"standing leadership is not waiting: {pane['label']}")
     require_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
     require_model(liaisons[0], "Human Orchestrator", "gpt-5.6-sol", "high")
-    layout = herdr("pane", "layout", "--pane", liaisons[0]["pane_id"])
-    rectangles = {
-        pane["pane_id"]: pane["rect"]
-        for pane in layout["result"]["layout"]["panes"]
-    }
-    human_rect = rectangles[liaisons[0]["pane_id"]]
-    operations_rect = rectangles[operations[0]["pane_id"]]
-    human_x = human_rect["x"]
-    operations_x = operations_rect["x"]
-    if human_x >= operations_x:
-        fail("Human Orchestrator must be left of Operations Lead")
-    combined_width = human_rect["width"] + operations_rect["width"]
-    if abs(human_rect["width"] - operations_rect["width"]) > max(2, combined_width * 0.1):
-        fail("Human Orchestrator and Operations Lead must use a roughly 50/50 split")
 
     transient_tabs = (
-        "02 Strategic Council",
-        "03 Suborchestrators",
-        "04 Workers",
-        "05 Progress Checks",
+        "03 Strategic Council",
+        "04 Suborchestrators",
+        "05 Workers",
+        "06 Progress Checks",
     )
     for label in transient_tabs:
         pane = panes_by_tab[by_label[label]["tab_id"]][0]

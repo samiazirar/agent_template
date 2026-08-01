@@ -6,18 +6,15 @@ import subprocess
 import sys
 
 
-STANDING_TAB = "01 Orchestrators"
+HUMAN_TAB = "01 Human"
+OPERATIONS_TAB = "02 Operations"
 TRANSIENT_TABS = {
-    "02 Strategic Council",
-    "03 Suborchestrators",
-    "04 Workers",
-    "05 Progress Checks",
+    "03 Strategic Council",
+    "04 Suborchestrators",
+    "05 Workers",
+    "06 Progress Checks",
 }
 TERMINAL_AGENT_STATES = {"done", "idle", "blocked"}
-STANDING_PREFIXES = {
-    "Human Orchestrator",
-    "Operations Lead",
-}
 TRANSIENT_PREFIXES = {
     "Plan Orchestrator",
     "Worker",
@@ -82,29 +79,44 @@ def main() -> None:
             f"session IDs and close them: {stale}"
         )
 
-    standing = [
+    human = [
         pane for pane in panes
-        if tab_labels[pane["tab_id"]] == STANDING_TAB
+        if tab_labels[pane["tab_id"]] == HUMAN_TAB
     ]
-    if standing:
-        prefixes = [pane["label"].split(" · ", 1)[0] for pane in standing]
-        standing_counts = {
-            prefix: prefixes.count(prefix)
-            for prefix in STANDING_PREFIXES
+    human_prefixes = [pane["label"].split(" · ", 1)[0] for pane in human]
+    if human_prefixes != ["Human Orchestrator"]:
+        fail(
+            "01 Human must contain only one Human Orchestrator; "
+            f"found {human_prefixes}"
+        )
+
+    operations = [
+        pane for pane in panes
+        if tab_labels[pane["tab_id"]] == OPERATIONS_TAB
+    ]
+    operations_prefixes = [
+        pane["label"].split(" · ", 1)[0] for pane in operations
+    ]
+    unexpected = [
+        prefix
+        for prefix in operations_prefixes
+        if prefix not in {
+            "Operations Lead",
+            "Operations Collaborator",
+            "Plan Orchestrator",
         }
-        unexpected = [
-            prefix
-            for prefix in prefixes
-            if prefix not in STANDING_PREFIXES
-            and prefix != "Plan Orchestrator"
-        ]
-        if any(count != 1 for count in standing_counts.values()) or unexpected:
-            fail(
-                "standing leadership must contain exactly one Human Orchestrator and "
-                "one Operations Lead; only an "
-                "active temporary Plan Orchestrator may join them; "
-                f"found {prefixes}"
-            )
+    ]
+    if (
+        operations_prefixes.count("Operations Lead") != 1
+        or operations_prefixes.count("Operations Collaborator") > 1
+        or unexpected
+    ):
+        fail(
+            "02 Operations must contain exactly one Operations Lead; only an "
+            "explicit Operations Collaborator and an active temporary Plan "
+            "Orchestrator may join it; "
+            f"found {operations_prefixes}"
+        )
 
     print(json.dumps({
         "ok": True,

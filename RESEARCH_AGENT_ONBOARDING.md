@@ -188,26 +188,27 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   `Role · PersonName ImmediateGoal`. Prefer an alliterative person/task pairing.
   Never use pane IDs, worker numbers, hashes, phases, or opaque codes as names.
 - One pane means one role and one current purpose. Workers and subworkers go in
-  `04 Workers`; multi-task track owners go in `03 Suborchestrators`; transient
+  `05 Workers`; multi-task track owners go in `04 Suborchestrators`; transient
   watchers, progress checkers, auditors, and second eyes go in
-  `05 Progress Checks`.
+  `06 Progress Checks`.
 - Fixed tab order:
 
   1. `00 Human Plan`
-  2. `01 Orchestrators`
-  3. `02 Strategic Council`
-  4. `03 Suborchestrators`
-  5. `04 Workers`
-  6. `05 Progress Checks`
-  7. `99 Old History`
+  2. `01 Human`
+  3. `02 Operations`
+  4. `03 Strategic Council`
+  5. `04 Suborchestrators`
+  6. `05 Workers`
+  7. `06 Progress Checks`
+  8. `99 Old History`
 
 - `HUMAN_PLAN.md` and `OLD_HISTORY.md` are displayed with Frogmouth. History is
   one final pane and one `OLD_HISTORY.md` file, not a collection of idle agents.
 - By default, only the Human Orchestrator and Operations Lead are standing
-  model panes. They share `01 Orchestrators` as a 50/50 horizontal split, with
-  Human in its own left pane and Operations in its own right pane for easy
-  phone monitoring. Add a standing Operations Collaborator only when the Human
-  explicitly requests one. Every other pane closes as soon as its final short
+  model panes. Human occupies the full `01 Human` tab alone and Operations
+  occupies `02 Operations`, making each easy to use from a phone. Add a
+  standing Operations Collaborator only when the Human explicitly requests
+  one, and place it in Operations. Every other pane closes as soon as its final short
   result and native session reference are captured. Integration happens
   afterward from the saved artifact or worktree. If a correction is needed,
   resume the same task in a new pane and close it again when it stops.
@@ -351,7 +352,7 @@ overhead/drift percentage only when actual actions were semantically analyzed.
   paths, hashes, pane/session/job IDs, worker manifests, or internal codes.
 - Update the plan only from material evidence or explicit decisions, never
   timer polls. Operations Lead launches one temporary `Plan Orchestrator` in
-  `01 Orchestrators`. It is not a worker. It edits only `HUMAN_PLAN.md`,
+  `02 Operations`. It is not a worker. It edits only `HUMAN_PLAN.md`,
   returns one plan-only commit to Operations Lead, and closes. Preserve good
   content and add only the depth needed.
 
@@ -440,7 +441,7 @@ overhead/drift percentage only when actual actions were semantically analyzed.
 - When enabled, follow `PAPERPILOT_PROJECT_STANDARD.md` and reuse an existing
   live project before creating one.
 - A recurring named `PaperPilot Maintainer · PersonName Project Hub` performs
-  one bounded synchronization task in `04 Workers`, using its dedicated
+  one bounded synchronization task in `05 Workers`, using its dedicated
   worktree/repository plus the bridge mount, routes its result, and closes.
 - It maintains the complete human project hub, status, evidence meaning,
   decisions, native comments, and the scientific paper when one is needed.

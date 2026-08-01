@@ -417,8 +417,9 @@ Use separate bounded roles. None is a standing review committee.
   its native session ID in `OLD_HISTORY.md` and close it. History lives in the
   file, not in an idle pane.
 - Only Human Orchestrator and Operations Lead are standing model panes by
-  default. They share one Orchestrators tab as separate left/right panes. A
-  standing Operations Collaborator is Human-selected only. Idle standing panes
+  default. Human is alone in `01 Human`; Operations uses `02 Operations`. A
+  standing Operations Collaborator is Human-selected only and stays with
+  Operations. Idle standing panes
   consume no model turns. Do not wake any on a timer, for unchanged status, or
   merely to acknowledge another agent.
 - Native internal subagents are forbidden. All delegated work must be a named,
@@ -526,9 +527,9 @@ periodic status turns.
 - Strategic advisors are opened only for a bounded question and closed after
   one answer is captured. The strategic tab otherwise contains one empty
   non-agent bay.
-- Project topology is fixed: `00 Human Plan`, `01 Orchestrators`,
-  `02 Strategic Council`, `03 Suborchestrators`, `04 Workers`,
-  `05 Progress Checks`, `99 Old History`.
+- Project topology is fixed: `00 Human Plan`, `01 Human`, `02 Operations`,
+  `03 Strategic Council`, `04 Suborchestrators`, `05 Workers`,
+  `06 Progress Checks`, `99 Old History`.
 
 ## Time, tokens, and cost
 

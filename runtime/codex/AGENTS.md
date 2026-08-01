@@ -44,9 +44,10 @@ complete operating context for one minimal work package.
   user explicitly asks about the system.
 - Standing roles are one native-Codex Sol-high Human Orchestrator and one
   native-Codex Sol-high Operations Lead with sole operational authority.
-- Keep those two roles in one `01 Orchestrators` tab as separate panes: Human
-  on the left and Operations on the right, normally split 50/50. Do not add a
-  standing Operations Collaborator unless the Human explicitly requests one.
+- Keep those roles in separate full-width tabs for phone use: Human alone in
+  `01 Human`, Operations in `02 Operations`. Do not add a standing Operations
+  Collaborator unless the Human explicitly requests one; it belongs only in
+  Operations.
 - Cross-pane requests use the installed `herdr-role-message` helper, not native
   model-agent discovery. Human Orchestrator uses
   `herdr-role-message operations`; Operations Lead uses
