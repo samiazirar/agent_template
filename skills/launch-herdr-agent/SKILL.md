@@ -253,6 +253,13 @@ terminal command `herdr-costs report` shows the human-named hierarchy with own
 and aggregate time, tokens, and API-equivalent cost. Do not launch an agent to
 measure usage and do not create a manual dashboard.
 
+Claude Code and Claudex use the zero-context `SessionStart` command hook
+`herdr-costs register-hook`, so new and resumed Herdr sessions remain attached
+to the ledger even when the native Claude harness recreates its session. Keep
+Pyright LSP enabled for automatic Python diagnostics. Keep broad automatic
+planning, review, subagent, and debugging plugins disabled; concrete failures
+load only `goal-directed-repair` on demand.
+
 Bounded research and data crunching use Sol at the lowest sufficient effort,
 from low through max. Use a named Terra-medium `Researcher` by default for an
 open-ended question requiring synthesis
@@ -333,6 +340,8 @@ Every task-bearing prompt must include:
 - permission to delete clearly bad, dead, duplicate, or superseded code; and
 - a no-side-artifact rule forbidding reports, manifests, dashboards, project
   hubs, review files, duplicate documentation, and status files.
+- for a concrete failure, the shared `goal-directed-repair` skill and its
+  smallest causal repair boundary; never a broad debugging workflow.
 
 The Human Orchestrator prompt must identify it as the sole human conversation
 and require all technical communication to pass through Operations Lead. It

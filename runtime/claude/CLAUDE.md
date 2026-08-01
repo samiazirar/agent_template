@@ -10,6 +10,12 @@
   before writing a new path. Delete clearly bad, dead, duplicated, misleading,
   or superseded code instead of preserving it behind wrappers without a named
   current consumer.
+- For a concrete failure, use `goal-directed-repair`. Find the causal source
+  and make the smallest root-level fix; do not accept a bandage, widen into an
+  audit, create a test suite, or give up after one failed coherent attempt.
+- Broad automatic planning, review, subagent, and debugging workflow plugins
+  stay disabled. Use zero-context LSP diagnostics such as Pyright and the task's
+  direct reproduction instead.
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep only
   requested code/configuration, required run files, actual outputs, and the

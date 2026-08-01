@@ -38,6 +38,10 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 - Delete clearly bad, dead, duplicated, misleading, or superseded code. Do not
   preserve it behind wrappers, parallel paths, commented blocks, or speculative
   fallbacks unless a named current consumer requires compatibility.
+- Concrete failures use `goal-directed-repair`: establish the causal source,
+  make the smallest root-level repair, and run only the direct done check. Do
+  not accept a bandage, start a broad debugging project, create compulsory new
+  tests, or give up after one failed coherent attempt.
 - Default to no side artifacts. Do not create plans, reports, manifests,
   review files, dashboards, project hubs, duplicate READMEs, or status
   documents. Keep only requested code/configuration, files required to run it,

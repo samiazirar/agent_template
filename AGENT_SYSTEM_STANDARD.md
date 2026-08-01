@@ -28,6 +28,15 @@ orchestration contracts provide the detailed rules.
   or superseded. Preserve compatibility only for a named current consumer; do
   not accumulate wrappers, parallel implementations, commented-out code, or
   speculative fallbacks around bad code.
+- For a concrete failure, use `goal-directed-repair`: reproduce once or read the
+  existing failure, identify the causal source, make the smallest source-level
+  repair, run only the direct done check, commit, and stop. Never accept a
+  symptom-only bandage, but do not turn root-cause work into a broad audit,
+  mandatory test suite, instrumentation project, or architecture redesign.
+- One failed coherent repair is information, not completion or surrender. Try
+  one new bounded causal repair. If the task then requires a materially
+  different design or subsystem, give that harder package to a fresh
+  Sol-medium worker while independent work continues.
 - Default to no side artifacts. Do not create plans, reports, manifests,
   review files, dashboards, project hubs, duplicate READMEs, status documents,
   or prose records merely to describe work. Allowed outputs are the requested
@@ -281,8 +290,26 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
   of worker own time/tokens/cost, suborchestrator totals, Operations totals, and
   the Human total. Dollar values are API-equivalent estimates; subscription
   sessions are not token-billed and provider billing remains authoritative.
+- Native Claude Code and Claudex also register new and resumed Herdr sessions
+  through their `SessionStart` hook. Their duplicate streaming transcript rows
+  are counted once by native message ID.
 - The ledger and generated terminal table are the only cost records. Do not
   create task reports, dashboards, or manual token spreadsheets.
+
+## Harness policy
+
+- Use native Codex for Operations and Luna/Sol productive workers. It provides
+  direct model/effort selection, exact native token counters, and exact
+  model-active duration.
+- Use Claudex for the Human Orchestrator and bounded GPT work that materially
+  benefits from Claude Code's interface. Use native Claude Code for the
+  background Opus collaborator and an explicitly selected Opus worker.
+- Keep broad automatic planning, review, subagent, and debugging workflow
+  plugins disabled. They add standing context and can override the direct
+  90/10 loop. Keep zero-context LSP diagnostics such as Pyright enabled; they
+  catch local errors immediately without creating a review task.
+- Do not use the Codex-in-Claude plugin as a second GPT harness. Claudex is the
+  explicit GPT-through-Claude-Code route; hidden Claude agents remain denied.
 
 ## Watcher, verifier, messenger, and limits
 

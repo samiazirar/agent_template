@@ -57,8 +57,20 @@ def append_record(record: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.touch(mode=0o600, exist_ok=True)
     os.chmod(path, 0o600)
+    previous: dict[str, Any] = {}
+    for line in reversed(path.read_text(encoding="utf-8").splitlines()):
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if item.get("session") == record.get("session"):
+            previous = item
+            break
+    merged = {**previous, **{key: value for key, value in record.items() if value is not None}}
+    if previous.get("registered_at"):
+        merged["registered_at"] = previous["registered_at"]
     with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(record, sort_keys=True) + "\n")
+        handle.write(json.dumps(merged, sort_keys=True) + "\n")
 
 
 def load_records(workspace: str) -> list[dict[str, Any]]:
@@ -97,7 +109,12 @@ def current_sessions(workspace: str) -> set[str]:
     return active
 
 
-def transcript_for(session: str) -> tuple[str, Path] | None:
+def transcript_for(session: str, recorded_path: str | None = None) -> tuple[str, Path] | None:
+    if recorded_path:
+        candidate = Path(recorded_path).expanduser()
+        if candidate.exists():
+            kind = "claude" if ".claude" in candidate.parts else "codex"
+            return kind, candidate
     codex_root = Path.home() / ".codex/sessions"
     if codex_root.exists():
         matches = list(codex_root.rglob(f"*{session}*.jsonl"))
@@ -206,6 +223,7 @@ def read_claude(path: Path) -> dict[str, Any]:
     effort = "unknown"
     first = None
     last = None
+    messages: dict[str, tuple[dict[str, Any], str, str]] = {}
     for raw in path.open(encoding="utf-8", errors="replace"):
         try:
             item = json.loads(raw)
@@ -219,8 +237,15 @@ def read_claude(path: Path) -> dict[str, Any]:
         counts = message.get("usage")
         if not counts or item.get("isSidechain"):
             continue
-        model = message.get("model", model)
-        effort = item.get("effort", effort)
+        message_key = str(message.get("id") or item.get("requestId") or item.get("uuid"))
+        messages[message_key] = (
+            counts,
+            str(message.get("model") or model),
+            str(item.get("effort") or effort),
+        )
+    for counts, item_model, item_effort in messages.values():
+        model = item_model
+        effort = item_effort
         usage["input"] += int(counts.get("input_tokens", 0))
         usage["cached"] += int(counts.get("cache_read_input_tokens", 0))
         creation = counts.get("cache_creation", {})
@@ -265,7 +290,7 @@ def read_claude(path: Path) -> dict[str, Any]:
 
 
 def session_metrics(record: dict[str, Any]) -> dict[str, Any]:
-    found = transcript_for(record["session"])
+    found = transcript_for(record["session"], record.get("transcript_path"))
     if not found:
         return {
             "model": record.get("surface", "unknown"),
@@ -430,6 +455,35 @@ def register(args: argparse.Namespace) -> int:
     return 0
 
 
+def register_hook() -> int:
+    if os.environ.get("HERDR_ENV") != "1":
+        return 0
+    workspace = os.environ.get("HERDR_WORKSPACE_ID")
+    pane_id = os.environ.get("HERDR_PANE_ID")
+    if not workspace or not pane_id:
+        return 0
+    try:
+        hook = json.load(sys.stdin)
+        pane = herdr_pane(pane_id)
+    except (json.JSONDecodeError, OSError, subprocess.CalledProcessError, KeyError):
+        return 0
+    session = hook.get("session_id")
+    if not isinstance(session, str) or not session:
+        return 0
+    surface = "claudex" if os.environ.get("CLAUDEX_ACTIVE") == "1" else "claude"
+    append_record(
+        {
+            "workspace": workspace,
+            "session": session,
+            "label": pane.get("label") or "Claude Code session",
+            "surface": surface,
+            "transcript_path": hook.get("transcript_path"),
+            "registered_at": iso_now(),
+        }
+    )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command")
@@ -438,11 +492,14 @@ def main() -> int:
     register_parser.add_argument("--pane", required=True)
     register_parser.add_argument("--parent-pane", required=True)
     register_parser.add_argument("--surface", required=True)
+    subparsers.add_parser("register-hook", help=argparse.SUPPRESS)
     report_parser = subparsers.add_parser("report")
     report_parser.add_argument("--workspace")
     args = parser.parse_args()
     if args.command == "register":
         return register(args)
+    if args.command == "register-hook":
+        return register_hook()
     workspace = getattr(args, "workspace", None) or os.environ.get("HERDR_WORKSPACE_ID")
     if not workspace:
         print("Use --workspace or run inside Herdr.", file=sys.stderr)

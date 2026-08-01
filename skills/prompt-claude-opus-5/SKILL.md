@@ -41,6 +41,10 @@ performs.
   before writing a new path. Delete clearly bad, dead, duplicated, misleading,
   or superseded code rather than preserving it behind wrappers without a named
   live consumer.
+- For concrete failures, require `goal-directed-repair`: identify the causal
+  source, make the smallest source-level change, and run only the direct done
+  check. Forbid symptom bandages, broad debugging ceremony, compulsory new
+  tests, architecture speculation, and surrender after one coherent failure.
 - Create no side artifacts unless they are the requested deliverable: no
   reports, manifests, dashboards, project hubs, review files, duplicate
   documentation, or status files.

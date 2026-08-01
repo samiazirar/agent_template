@@ -41,6 +41,10 @@ meaning and remove process that does not help reach the goal.
 - Require reuse of the strongest existing project or official-upstream code
   before new implementation. Permit decisive deletion of clearly bad, dead,
   duplicated, misleading, or superseded code.
+- For concrete failures, require `goal-directed-repair`: one causal
+  explanation, the smallest source-level repair, and only the direct done
+  check. Forbid symptom bandages, broad investigations, compulsory new tests,
+  architecture speculation, and surrender after one failed coherent attempt.
 - Forbid side artifacts unless they are the requested result: no reports,
   manifests, dashboards, project hubs, review files, duplicate documentation,
   or status files. Require one compact project-root `RESTART_HANDOFF.md` kept

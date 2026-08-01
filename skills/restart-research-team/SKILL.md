@@ -240,6 +240,11 @@ After either strategic answer is durably captured, close that pane immediately.
   or Sol review after every successful Luna task.
 - Ordinary failures remain in the owning task. Isolate external waits while
   unrelated work continues.
+- Concrete failures use `goal-directed-repair`: find the causal source, make
+  the smallest root-level change, and run only the direct done check. One failed
+  coherent attempt does not finish the task; after the second bounded causal
+  attempt requires a materially different design, hand a fresh harder package
+  to Sol medium without stopping unrelated work.
 - Use the external event service with API-key Gemini 3.6 Flash for the active
   project batch. It wakes the orchestrator only on a real change or terminal
   state. Luna-low is the research-oriented classifier alternative, not a polling
@@ -261,6 +266,10 @@ After either strategic answer is durably captured, close that pane immediately.
   or decision. Run `herdr-costs report` for the private human-named hierarchy
   of own and aggregate time, tokens, and API-equivalent cost; create no manual
   usage artifact.
+- Claude Code and Claudex must retain the zero-context SessionStart hook
+  `herdr-costs register-hook`; resumed native sessions then remain attributed
+  to their human task. Keep Pyright LSP enabled and broad automatic planning,
+  review, subagent, and debugging workflow plugins disabled.
 
 - At a due check, the orchestrator may create a fresh read-only
   `gpt-5.6-terra` medium checker. Require a task-specific observable delta,

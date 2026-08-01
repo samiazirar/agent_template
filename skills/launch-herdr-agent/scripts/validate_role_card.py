@@ -115,6 +115,7 @@ def render(role: str) -> str:
         (
             "ROLE CONTRACT",
             *CONTRACTS[role],
+            "GOAL RULE: Preserve the user-approved goal and observed finish condition. Take the smallest causal action that moves them; do not widen into unrelated architecture or stop at readiness, ordinary failure, waiting language, or a model claim.",
             "90/10 RULE: At least 90% of active project task slots and agent-hours must directly change code, data, experiments, evaluations, accepted evidence, or paper content; all orchestration, planning, advice, checking, status, and waiting share at most 10%.",
             "END ROLE CONTRACT",
         )

@@ -43,6 +43,11 @@ are mandatory; this document supplies the detailed execution contract.
 - Remove bad code aggressively when it is dead, duplicated, misleading,
   irreparably wrong, or superseded. Do not keep compatibility layers without a
   named live consumer.
+- A concrete failure uses `goal-directed-repair`. Reproduce once or consume the
+  existing failure, locate the causal source, make the smallest source-level
+  repair, and run only the direct done check. A symptom bandage is not done;
+  neither is a broad investigation, new test program, architecture discussion,
+  or surrender after one coherent attempt.
 - Create no side artifacts by default. Plans, reports, manifests, dashboards,
   project hubs, review files, duplicate documentation, and status records are
   forbidden unless the user asks for that exact deliverable. The existing

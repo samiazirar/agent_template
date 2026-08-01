@@ -66,6 +66,9 @@ complete operating context for one minimal work package.
   before writing a new path. Delete clearly bad, dead, duplicated, misleading,
   or superseded code instead of wrapping or preserving it without a named live
   consumer.
+- For a concrete failure, use `goal-directed-repair`. Find the causal source
+  and make the smallest root-level fix; do not accept a bandage, widen into an
+  audit, create a test suite, or give up after one failed coherent attempt.
 - Create no side artifacts by default: no reports, manifests, dashboards,
   project hubs, review files, duplicate READMEs, or status documents. Keep the
   requested source/configuration, required run files, actual outputs, and the
