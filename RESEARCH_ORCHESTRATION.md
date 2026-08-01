@@ -157,16 +157,16 @@ alone cannot complete an empirical milestone.
   execution. It issues only the next useful minimal packages, launches one
   fresh worker chat per package, reconciles their results, and closes when the
   task ends. It cannot create another suborchestrator. Operations sends an
-  already-atomic package directly to one worker.
-- Coding workers normally use native Codex Luna max and implement or execute exactly one
+  already-atomic package directly to one native-Codex Sol-medium worker.
+- Native Codex Luna max is used only below a Sol-medium suborchestrator and implements or executes exactly one
   clear package. A Luna-sized package has one deliverable, one reproduction or
   run, one done check, and normally no more than three tightly coupled files or
   one experiment stage. Workers reproduce first, make the change or run,
   compare expected versus observed state, report only to Operations Lead or
   their one owning suborchestrator, commit, sync, and stop.
-- Native Codex Sol medium is the default harder coding worker. OpenCode GLM
-  5.2 remains an explicit alternate-provider option when a separate context
-  clearly helps; OpenCode is not the normal OpenAI-model harness. Bounded
+- Native Codex Sol medium is the direct and harder coding worker. OpenCode GLM
+  5.2 remains an explicit worker-only alternate-provider option when a separate context
+  clearly helps; OpenCode is never a planner or orchestrator and is not the normal OpenAI-model harness. Bounded
   research and data crunching use Sol at the lowest sufficient effort, from
   low through max; open-ended synthesis defaults to one Terra-medium
   Researcher. Luna support or supervision never exceeds low.

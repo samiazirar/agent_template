@@ -97,10 +97,12 @@ meaning and remove process that does not help reach the goal.
   Forbid `herdr wait`, `sleep`, and polling for child roles. Require one
   `herdr-emergency-wake` fallback after dispatch and let the child's
   `herdr-role-message` wake or steer the parent.
-- Make native-Codex Luna-max the default coding worker for a clear, repeatable package with one
+- Use native-Codex Sol-medium when Operations directly dispatches a clear,
+  repeatable atomic package. Use Luna-max only when a Sol-medium
+  suborchestrator dispatches a clear, repeatable package with one
   deliverable, one reproduction or run, one done check, and normally no more
-  than three tightly coupled files or one experiment stage. Operations Lead or
-  a native-Codex Sol-medium task suborchestrator defines that boundary once; Luna self-verifies and
+  than three tightly coupled files or one experiment stage. The owning
+  native-Codex Sol-medium task suborchestrator defines that boundary once; Luna self-verifies and
   returns a compact result. Do not spend a Sol turn supervising every tool call
   or rechecking every successful Luna result.
 - Give a harder or failed package to a fresh native-Codex Sol-medium worker when Luna faces materially different

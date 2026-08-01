@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, a native-Codex Sol-high Operations Lead, Markdown-only Human Plan pane, native-Codex Luna-max coding workers, native-Codex Sol-medium task suborchestrators, direct child-to-parent wake-ups, fresh worker chats, compact restart continuity, and sparse researchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
+description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, a native-Codex Sol-high Operations Lead, Markdown-only Human Plan pane, direct Sol-medium workers, Luna-max coding workers only below Sol-medium task suborchestrators, direct child-to-parent wake-ups, fresh worker chats, compact restart continuity, and sparse researchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
 ---
 
 # Launch Herdr sessions
@@ -195,8 +195,10 @@ The plan writer uses the same natural human voice: “what we know,” “result
 “verified,” “lifecycle,” completion-envelope language, pane/session/worker
 language, and all-caps readiness labels.
 
-For productive work, Operations Lead or one owning suborchestrator launches one
-fresh named native-Codex Luna-max worker for each clear coding package. One worker owns one deliverable, one
+For productive work, Operations Lead launches a fresh named native-Codex
+Sol-medium worker when the task is already one atomic package. For a
+multi-package task, one owning Sol-medium suborchestrator launches one fresh
+named native-Codex Luna-max worker for each clear coding package. One worker owns one deliverable, one
 reproduction or run, one done check, normally no more than three tightly
 coupled files or one experiment stage, one branch, and one worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
@@ -336,7 +338,8 @@ Every task-bearing prompt must include:
 - the role's differing current and expected states;
 - one role-appropriate outcome;
 - the explicitly selected model and effort, using native-Codex Luna-max by
-  default for a bounded coding worker;
+  only below a Sol-medium suborchestrator; use native-Codex Sol-medium for a
+  worker dispatched directly by Operations;
 - the working directory or worktree;
 - the concise `AGENT_SYSTEM_STANDARD.md` and project `AGENTS.md`; only standing
   leaders and suborchestrators load the long onboarding and orchestration
@@ -359,7 +362,8 @@ the only valid technical route, name `save-close-herdr-project` and
 `herdr-project-save-close --close` as the sole explicit project-closing
 exception, require a continuously current compact `RESTART_HANDOFF.md`, and
 forbid native Agent lookup. The Operations Lead prompt must
-require native-Codex Luna-max as the default coding worker, one fresh worker per minimal package, concurrent
+require native-Codex Sol-medium for a directly dispatched atomic worker and
+Luna-max only below a Sol-medium suborchestrator, one fresh worker per minimal package, concurrent
 independent workers, closure immediately after a transient final report is
 captured and before integration, sole-bridge routing, and active enforcement of
 the 90/10 budget. It must forbid `herdr wait`, `sleep`, and polling for child

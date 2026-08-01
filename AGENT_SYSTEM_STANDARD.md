@@ -83,7 +83,8 @@ orchestration contracts provide the detailed rules.
 | --- | --- | --- |
 | Human orchestration | Native Codex | Sol, high |
 | Operations Lead | Native Codex | Sol, high |
-| Normal bounded implementation or execution | Native Codex | Luna, max |
+| Atomic implementation sent directly by Operations | Native Codex | Sol, medium |
+| Bounded implementation below a task suborchestrator | Native Codex | Luna, max |
 | Ambiguous repair or cross-task integration | Native Codex | Sol, medium |
 | Bounded difficult implementation or decision | Native Codex | Sol, high |
 | One bounded strategic question | Native Codex | Sol, xhigh |
@@ -102,9 +103,10 @@ Claudex is the Claude Code interface backed by the local Codex gateway. It is
 not native Anthropic Claude. Launch it through `claudex` with an explicit Codex
 model. Native Claude is selected separately when Opus 5 is wanted.
 
-Native Codex Luna-max is the default coding worker when the task has one concrete
-deliverable, one reproducible done check, and a narrow action boundary. Use Sol
-medium for a harder package that needs materially more judgment. Select Sol
+Native Codex Luna-max is used only for a bounded package owned by a native-Codex
+Sol-medium suborchestrator. If Operations sends an already-atomic package
+directly to a worker, that worker uses native Codex Sol medium. Use Sol medium
+also for a harder package that needs materially more judgment. Select Sol
 low through max for bounded research or data crunching according to actual
 difficulty; do not inherit a high effort merely because the parent task is
 important. Luna support, watcher classification, or supervision never exceeds
@@ -112,14 +114,16 @@ low and runs only when an external event wakes it. Terra remains the
 default for open-ended research and interpretation. Terra-high may be a
 productive worker only when the human explicitly selects it for one bounded
 task. OpenCode remains available for an explicitly selected non-OpenAI provider
-such as GLM 5.2, not as the default harness for OpenAI Sol or Luna. Never use
+such as GLM 5.2, as a worker only—not as Operations, a planner, or a
+suborchestrator—and not as the default harness for OpenAI Sol or Luna. Never use
 Vertex; Gemini routes use the OpenCode API-key provider.
 
 ## Native Herdr launch
 
 - Launch every independent agent as a named visible Herdr session with
   `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
-- `luna-max` is the normal bounded coding worker. `codex` is the Sol-medium
+- `luna-max` is a bounded coding worker only below a Sol-medium
+  suborchestrator. `codex` is the direct atomic worker, Sol-medium
   suborchestrator, Plan Orchestrator, and harder-worker route. `codex-high` is
   used for both standing orchestrators.
 - `opencode` is an explicitly selected alternate-provider route, primarily for
@@ -243,8 +247,8 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   helper, which may close only its own current workspace. Never stop the shared
   Herdr server or named session, and never treat inactivity as permission.
 - One worker owns exactly one minimal concrete work package, branch, worktree,
-  and fresh native chat. Native Codex Luna-max
-  is the default when the task can be stated as one deliverable, one
+  and fresh native chat. Native Codex Luna-max is allowed only when a
+  Sol-medium suborchestrator owns the task and the package can be stated as one deliverable, one
   reproduction or run, one done check, and normally no more than three tightly
   coupled files or one experiment stage.
   Independent packages use concurrent workers. When a worker finishes,
@@ -261,7 +265,7 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   Codex Sol-medium worker for
   a harder package, absorbs compact results, and closes when the task ends. An
   atomic task that is already one minimal package goes directly from Operations
-  to one worker to avoid orchestration overhead. A suborchestrator may not
+  to one native-Codex Sol-medium worker to avoid orchestration overhead. A suborchestrator may not
   create another suborchestrator or add a review turn after every successful
   package.
 - Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor

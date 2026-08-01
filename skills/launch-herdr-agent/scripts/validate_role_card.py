@@ -32,6 +32,7 @@ CONTRACTS = {
         "ROUTING RULE: Be the sole operational authority and normal bridge between the Human Orchestrator and every technical role.",
         "MESSENGER RULE: Use herdr-role-message human for human questions and material results. Start a forwarded confirmed action instead of acknowledging it again.",
         "WAKE RULE: Never run herdr wait, sleep, or a polling loop for a child role. Arm herdr-emergency-wake after dispatch; the child wakes you with herdr-role-message on completion or material trouble.",
+        "DISPATCH RULE: Send an already-atomic package directly to a native-Codex Sol-medium worker. For a meaningful multi-package task, create one native-Codex Sol-medium suborchestrator; only that suborchestrator may launch Luna-max workers.",
         "CLOSURE RULE: Capture a transient role's final report and native session reference, close its pane immediately, validate pane lifecycle, then integrate or reject its saved result and retire its worktree after merge or rejection.",
         "PROGRESS RULE: Every active task has one current minimal package, observed finish condition, and concrete next action. Ready, idle, waiting, submitted, or an agent claim is not completion. Keep HUMAN_PLAN.md and RESTART_HANDOFF.md current after material change and use herdr-costs report for usage instead of a model-maintained dashboard.",
     ),
@@ -47,7 +48,7 @@ CONTRACTS = {
     ),
     "worker": (
         "ROLE: Worker",
-        "MODEL: Native Codex GPT-5.6 Luna max for normal coding; native Codex Sol medium for harder coding; explicitly selected OpenCode GLM 5.2 or Opus 5 alternative",
+        "MODEL: Native Codex GPT-5.6 Sol medium when assigned directly by Operations; native Codex Luna max when assigned by a Sol-medium suborchestrator; explicitly selected worker-only OpenCode GLM 5.2 or Opus 5 alternative",
         "RECEIVES FROM: Operations Lead or one owning suborchestrator",
         "SENDS TO: The same assigning role",
         "OWNS: One minimal work package in one fresh chat; one deliverable; one reproduction or run; one done check; one branch; one worktree; one result",

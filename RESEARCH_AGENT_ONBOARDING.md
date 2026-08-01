@@ -106,13 +106,15 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   finish condition, and does no coding or experiment execution. It launches a
   fresh temporary worker for each minimal package and closes when the task
   ends. It may not create another suborchestrator layer. An already-atomic task
-  goes directly from Operations to one worker.
-- Coding workers normally use native Codex `gpt-5.6-luna` max. Give Luna one clear package
+  goes directly from Operations to one native-Codex Sol-medium worker.
+- Only a Sol-medium suborchestrator may launch native Codex `gpt-5.6-luna` max.
+  Give Luna one clear package
   with one deliverable, one reproduction or run, and one done check. A harder
   package uses Sol medium. Luna support or supervision may use low but never
   higher. Every later package or correction gets a fresh worker chat.
-- OpenCode GLM 5.2 is an explicitly selectable alternative when its separate
-  provider materially benefits the task. OpenCode is not the default harness
+- OpenCode GLM 5.2 is an explicitly selectable worker alternative when its separate
+  provider materially benefits the task. OpenCode is never Operations, a
+  planner, or a suborchestrator, and is not the default harness
   for OpenAI Sol or Luna. Name every selected alternative in the task card; do
   not use a hidden fallback.
 - Bounded research and data crunching use Sol at the lowest sufficient effort,
@@ -122,8 +124,9 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   one bounded named Worker with the normal one-task, worktree, commit, routing,
   and closure rules. Launch it with `herdr-agent terra-high`; do not relabel a
   Terra-medium Researcher.
-- OpenCode performs normal implementation. Codex or Claudex may be explicitly
-  selected for a bounded implementation. Launch and resume Claudex only through
+- When explicitly selected, OpenCode performs one bounded worker implementation;
+  it does not plan or manage. Codex or Claudex may also be explicitly selected
+  for a bounded implementation. Launch and resume Claudex only through
   `claudex`, with the explicitly selected model. Never silently substitute
   generic Claude or a different model.
 - A Claudex pane may use relevant Claude-side workflows, skills, commands,

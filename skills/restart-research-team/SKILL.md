@@ -1,6 +1,6 @@
 ---
 name: restart-research-team
-description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and one native-Codex Sol-high Operations Lead, reconstruct the lightweight standard layout with native-Codex Luna-max coding workers, native-Codex Sol-medium task suborchestrators, and non-blocking child wake-ups under the 90/10 budget, and wait for user plan discussion without resuming research.
+description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and one native-Codex Sol-high Operations Lead, reconstruct the lightweight standard layout with direct Sol-medium workers, Luna-max coding workers only below native-Codex Sol-medium task suborchestrators, and non-blocking child wake-ups under the 90/10 budget, and wait for user plan discussion without resuming research.
 ---
 
 # Restart Research Team
@@ -122,7 +122,8 @@ only the raw evidence needed to verify current reality. Ask it to:
    minimal worker cards; send an atomic package directly to one worker;
 5. keep at least 90% of task slots and agent-hours directly productive and
    classify every control-role turn honestly;
-6. use native-Codex Luna-max for normal coding, native-Codex Sol-medium for harder coding, selected Sol
+6. use native-Codex Sol-medium for direct atomic coding, Luna-max only below a
+   Sol-medium suborchestrator, selected Sol
    effort for bounded research/data crunching, Terra-medium for open-ended
    synthesis, and keep verification optional and minimal;
 7. emit a compact current-state envelope for the human orchestrator;
@@ -187,7 +188,8 @@ After either strategic answer is durably captured, close that pane immediately.
 
 - Use as many concurrent productive worker sessions as independent subtasks
   justify.
-- Native Codex Luna-max is the default coding worker. One fresh worker chat owns exactly one
+- Native Codex Sol-medium is the direct coding worker. Luna-max is allowed only
+  below a Sol-medium suborchestrator. One fresh worker chat owns exactly one
   clear, repeatable package, one deliverable, one reproduction or run, one done check,
   normally no more than three tightly coupled files or one experiment stage,
   one task branch, and one Git worktree. Never combine unrelated subtasks.

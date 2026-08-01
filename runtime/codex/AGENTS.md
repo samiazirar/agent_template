@@ -111,8 +111,9 @@ complete operating context for one minimal work package.
 - Do not issue repeated model turns to poll unchanged state. Every watch names
   success, failure, maximum silence, owner, and the recovery action fired when
   silence expires. A watcher closes on its terminal event.
-- Default coding workers to native Codex Luna max. Luna support or supervision may use low
-  but never higher. Use Sol medium for harder coding. Select Sol low through
+- Operations sends an atomic package directly to a native Codex Sol-medium
+  worker. Only a Sol-medium suborchestrator launches Luna-max coding workers.
+  Luna support or supervision may use low but never higher. Use Sol medium for harder coding. Select Sol low through
   max for bounded research or data crunching according to actual difficulty;
   use Terra medium for open-ended research.
 - Roll over leadership before automatic context compaction. Preserve the live
@@ -131,12 +132,13 @@ complete operating context for one minimal work package.
 
 - Reproduce first, implement or run, verify, then compare the expected and
   observed state.
-- Normal coding workers use native Codex Luna max for one clear, repeatable package with one
+- Below a Sol-medium suborchestrator, coding workers use native Codex Luna max for one clear, repeatable package with one
   deliverable and reproducible done check, normally within three tightly
   coupled files or one experiment stage. Escalate the same task to Sol medium
   after one failed coherent repair, material ambiguity, scope expansion, or a
-  non-reproducible result. Opus 5 and OpenCode GLM 5.2 remain explicitly
-  selectable alternatives. Terra-high remains human-selected only.
+  non-reproducible result. Direct Operations-owned workers use Sol medium.
+  Opus 5 and OpenCode GLM 5.2 remain explicitly selectable worker-only
+  alternatives. Terra-high remains human-selected only.
 - Bounded research and data crunching use Sol at the lowest sufficient effort;
   open-ended research uses one Terra-medium Researcher. A Verifier is optional, Sol medium, minimal, and opened
   only for one consequential anomaly that routine self-verification cannot

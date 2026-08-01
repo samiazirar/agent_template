@@ -7,8 +7,9 @@ Operations Lead or suborchestrator, also read
 only the concise standard, its project `AGENTS.md`, and its validated task card.
 
 - Native Codex is the default harness for Operations, Plan Orchestrators,
-  suborchestrators, and OpenAI Luna/Sol workers. Use OpenCode only when the
-  task explicitly selects an alternate provider such as GLM 5.2.
+  suborchestrators, and OpenAI Luna/Sol workers. OpenCode is worker-only: never
+  Operations, a planner, or a suborchestrator. Use it only when the task
+  explicitly selects an alternate provider such as GLM 5.2.
 - Work directly toward the stated result. At least 90% of active task slots
   and agent-hours must change code, data, experiments, evaluations, accepted
   results, or paper content. Planning, review, status, and waiting share at
