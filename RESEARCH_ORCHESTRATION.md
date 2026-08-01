@@ -110,6 +110,7 @@ No session starts without a semantic task card:
 ```text
 PROJECT QUESTION:
 MILESTONE RESULT:
+GOAL SOURCE: exact sentence copied from HUMAN_PLAN.md
 OUTCOME CLASS: build | run | measure | evaluate | integrate | control
 MODEL:
 TASK:
@@ -122,6 +123,7 @@ DONE CHECK:
 DISCONFIRMING RESULT:
 ```
 
+`GOAL SOURCE` mechanically anchors the package to the current Human Plan.
 `CURRENT STATE` and `EXPECTED STATE` must differ observably. The causal link
 must explain why this task, rather than merely more activity, should produce
 that change. A disconfirming result says what evidence would show the task did
@@ -439,6 +441,7 @@ Every worker ends with:
 
 ```text
 PROJECT QUESTION:
+GOAL SOURCE:
 EXPECTED STATE:
 OBSERVED STATE:
 WHY THEY MATCH OR DIFFER:

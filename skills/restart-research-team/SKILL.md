@@ -230,8 +230,13 @@ After either strategic answer is durably captured, close that pane immediately.
 - Before opening a pane, serialize the semantic task card and run:
 
   ```bash
-  python3 /home/user/azirar/.codex/skills/restart-research-team/scripts/validate_task_card.py TASK_CARD_FILE
+  python3 /home/user/azirar/.codex/skills/restart-research-team/scripts/validate_task_card.py \
+    TASK_CARD_FILE --human-plan HUMAN_PLAN.md
   ```
+
+  Copy `GOAL SOURCE` exactly from the current Human Plan, then launch with
+  `HERDR_TASK_CARD=TASK_CARD_FILE herdr-agent ...`. The guarded launcher rejects
+  unanchored cards and disallowed role/model combinations.
 
 - A task starts and ends with the semantic grounding and
   predicted-versus-observed templates in the operating contract.

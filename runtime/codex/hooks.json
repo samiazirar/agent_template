@@ -1,0 +1,34 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash '/home/user/azirar/.codex/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          },
+          {
+            "additionalContextLimit": 600,
+            "command": "python3 '/home/user/azirar/.codex/hooks/herdr-role-policy.py'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "command": "python3 '/home/user/azirar/.codex/hooks/herdr-role-policy.py'",
+            "statusMessage": "Checking Herdr role boundary",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

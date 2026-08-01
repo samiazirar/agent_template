@@ -147,6 +147,10 @@ Vertex; Gemini routes use the OpenCode API-key provider.
 
 - Launch every independent agent as a named visible Herdr session with
   `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
+- Control-role launches of suborchestrators and Workers set
+  `HERDR_TASK_CARD` to a validated card whose `GOAL SOURCE` is copied exactly
+  from `HUMAN_PLAN.md`. Raw `herdr agent start` and `herdr pane run` are not
+  valid bypasses.
 - `luna-max` is the default bounded coding worker below a Sol-medium
   suborchestrator and the direct tiny-task worker. `codex` is the Sol-medium
   suborchestrator, Plan Orchestrator, and harder-worker route. `codex-high` is
@@ -312,6 +316,13 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   worker only as an explicit tiny-task exception. A suborchestrator may not
   create another suborchestrator or add a review turn after every successful
   package.
+- Codex lifecycle hooks mechanically deny file edits, technical execution,
+  SSH, and raw agent launches from Human, Operations, and suborchestrator
+  roles. Their guarded `herdr-agent` path requires a task card anchored by an
+  exact Human Plan sentence, Sol medium for suborchestrators, and Luna max for
+  normal Workers. Sol-medium Worker escalation requires a recorded Luna
+  failure; OpenCode, Opus 5, or Terra-high requires an explicit Human model
+  choice. Hooks are guardrails; they do not run a model turn for every action.
 - Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor
   only the context for one bounded question, preferably yes/no or one concrete
   recommendation. Operations Lead launches it and receives its answer; it never

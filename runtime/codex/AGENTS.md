@@ -94,8 +94,11 @@ complete operating context for one minimal work package.
   evidence, not inherited agent prose.
 - Every task must state differing current and expected states, a causal link,
   a deliverable, a done check, and evidence that would disconfirm benefit.
-- Before launching a Herdr worker, validate its card with
-  `/home/user/azirar/.codex/skills/restart-research-team/scripts/validate_task_card.py`.
+- Before launching a Herdr suborchestrator or worker, give its card one exact
+  `GOAL SOURCE` sentence copied from `HUMAN_PLAN.md`, validate with
+  `/home/user/azirar/.codex/skills/restart-research-team/scripts/validate_task_card.py CARD --human-plan HUMAN_PLAN.md`,
+  and set `HERDR_TASK_CARD=CARD` on the `herdr-agent` launch. Control roles may
+  not use raw `herdr agent start` or `herdr pane run` to bypass this check.
 - At least 90% of active task slots and agent-hours must directly change code,
   data, an experiment, an evaluation, accepted evidence, or intended paper
   content, or directly decompose, dispatch, recover, integrate, synchronize,

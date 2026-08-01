@@ -111,6 +111,14 @@ nohup herdr-costs register --workspace TARGET_WORKSPACE --pane NEW_PANE \
 
 Do not defer registration to cleanup or reconstruct usage from transcripts.
 
+When Operations or a suborchestrator launches a suborchestrator or Worker, set
+`HERDR_TASK_CARD` to the validated frozen card. Its `GOAL SOURCE` must be one
+exact sentence from `HUMAN_PLAN.md`. `herdr-agent` enforces Sol medium for
+suborchestrators and Luna max for normal Workers. A Sol-medium Worker requires
+`LUNA FAILURE: ...` in the card; OpenCode, Opus 5, or Terra-high requires
+`HUMAN MODEL CHOICE: ...`. Never bypass this with raw `herdr agent start` or
+`herdr pane run`.
+
 ## Complete project launch
 
 When the user requests a space, project, team, ecosystem, or the whole setup,

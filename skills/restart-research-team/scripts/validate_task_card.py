@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -9,6 +10,7 @@ from pathlib import Path
 FIELDS = (
     "PROJECT QUESTION",
     "MILESTONE RESULT",
+    "GOAL SOURCE",
     "OUTCOME CLASS",
     "MODEL",
     "TASK",
@@ -19,6 +21,10 @@ FIELDS = (
     "DELIVERABLE",
     "DONE CHECK",
     "DISCONFIRMING RESULT",
+)
+OPTIONAL_FIELDS = (
+    "LUNA FAILURE",
+    "HUMAN MODEL CHOICE",
 )
 OUTCOME_CLASSES = {
     "build",
@@ -42,7 +48,7 @@ def parse(text: str) -> dict[str, str]:
     for raw_line in text.splitlines():
         line = raw_line.rstrip()
         match = re.match(r"^\s*([A-Z][A-Z ]+):\s*(.*)$", line)
-        if match and match.group(1) in FIELDS:
+        if match and match.group(1) in FIELDS + OPTIONAL_FIELDS:
             current = match.group(1)
             if current in values:
                 raise ValueError(f"duplicate field: {current}")
@@ -52,7 +58,11 @@ def parse(text: str) -> dict[str, str]:
     return {field: " ".join(parts).strip() for field, parts in values.items()}
 
 
-def validate(text: str) -> list[str]:
+def normalize(value: str) -> str:
+    return re.sub(r"\s+", " ", value.casefold()).strip()
+
+
+def validate(text: str, human_plan: str | None = None) -> list[str]:
     errors: list[str] = []
     try:
         values = parse(text)
@@ -94,6 +104,9 @@ def validate(text: str) -> list[str]:
     if not values["PROJECT QUESTION"].rstrip().endswith("?"):
         errors.append("PROJECT QUESTION must be written as a question")
 
+    if human_plan is not None and normalize(values["GOAL SOURCE"]) not in normalize(human_plan):
+        errors.append("GOAL SOURCE must be an exact sentence copied from HUMAN_PLAN.md")
+
     if len(values["CAUSAL LINK"].split()) < 6:
         errors.append("CAUSAL LINK is too short to explain why the task helps")
 
@@ -102,6 +115,17 @@ def validate(text: str) -> list[str]:
             "DISCONFIRMING RESULT must state evidence that would refute benefit"
         )
 
+    luna_failure = values.get("LUNA FAILURE", "")
+    if luna_failure and (
+        not re.search(r"\b[0-9a-f]{8}-[0-9a-f-]{27,}\b", luna_failure, re.IGNORECASE)
+        or len(luna_failure.split()) < 5
+    ):
+        errors.append("LUNA FAILURE must include the failed native session ID and concrete reason")
+
+    human_choice = values.get("HUMAN MODEL CHOICE", "")
+    if human_choice and len(human_choice.split()) < 4:
+        errors.append("HUMAN MODEL CHOICE must record the explicit choice and selected model")
+
     return errors
 
 
@@ -109,6 +133,7 @@ def self_test() -> int:
     valid = """\
 PROJECT QUESTION: Does measured depth improve robot planning?
 MILESTONE RESULT: One resumed GPU rehearsal produces measured progress.
+GOAL SOURCE: Resume the saved training run and measure whether it advances.
 OUTCOME CLASS: run
 MODEL: Native Codex GPT-5.6 Sol medium
 TASK: Resume one short training run from its saved checkpoint.
@@ -124,8 +149,9 @@ DISCONFIRMING RESULT: Reload fails or the step does not advance.
         "EXPECTED STATE: The program advances at least one step after checkpoint reload.",
         "EXPECTED STATE: The program has no verified resumed GPU step.",
     )
-    if validate(valid):
-        print(f"self-test valid card failed: {validate(valid)}", file=sys.stderr)
+    human_plan = "# Goal\nResume the saved training run and measure whether it advances.\n"
+    if validate(valid, human_plan):
+        print(f"self-test valid card failed: {validate(valid, human_plan)}", file=sys.stderr)
         return 1
     if not validate(invalid):
         print("self-test invalid card unexpectedly passed", file=sys.stderr)
@@ -135,21 +161,25 @@ DISCONFIRMING RESULT: Reload fails or the step does not advance.
 
 
 def main() -> int:
-    if len(sys.argv) == 2 and sys.argv[1] == "--self-test":
+    if sys.argv[1:] == ["--self-test"]:
         return self_test()
-    if len(sys.argv) != 2:
-        print(
-            "usage: validate_task_card.py TASK_CARD_FILE|-|--self-test",
-            file=sys.stderr,
-        )
-        return 2
+    parser = argparse.ArgumentParser()
+    parser.add_argument("task_card")
+    parser.add_argument("--human-plan")
+    args = parser.parse_args()
 
-    if sys.argv[1] == "-":
+    if args.task_card == "-":
         text = sys.stdin.read()
     else:
-        text = Path(sys.argv[1]).read_text(encoding="utf-8")
+        text = Path(args.task_card).read_text(encoding="utf-8")
 
-    errors = validate(text)
+    human_plan = (
+        Path(args.human_plan).read_text(encoding="utf-8")
+        if args.human_plan
+        else None
+    )
+
+    errors = validate(text, human_plan)
     if errors:
         for error in errors:
             print(f"FAIL: {error}", file=sys.stderr)

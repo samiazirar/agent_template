@@ -188,6 +188,128 @@ if ! command -v "${launch_argv[0]}" >/dev/null 2>&1; then
     exit 2
 fi
 
+caller_label="$({
+    herdr pane get "$HERDR_PANE_ID" |
+        python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["pane"].get("label", ""))'
+})"
+caller_role="${caller_label%% · *}"
+target_role="${label%% · *}"
+
+require_task_card() {
+    local card="${HERDR_TASK_CARD:-}"
+    local human_plan="$launch_dir/HUMAN_PLAN.md"
+    if [ -z "$card" ] || [ ! -f "$card" ]; then
+        printf '%s must set HERDR_TASK_CARD to its validated frozen task card before launching %s.\n' \
+            "$caller_role" "$target_role" >&2
+        exit 2
+    fi
+    if [ ! -f "$human_plan" ]; then
+        local project_root
+        project_root="$(git -C "$launch_dir" rev-parse --show-toplevel 2>/dev/null || true)"
+        human_plan="$project_root/HUMAN_PLAN.md"
+    fi
+    if [ ! -f "$human_plan" ]; then
+        printf 'HUMAN_PLAN.md is unavailable for task-goal validation.\n' >&2
+        exit 2
+    fi
+    python3 "$script_dir/../../restart-research-team/scripts/validate_task_card.py" \
+        "$card" --human-plan "$human_plan" >/dev/null
+}
+
+require_card_model() {
+    local expected="$1"
+    python3 - "$HERDR_TASK_CARD" "$expected" <<'PY'
+import re
+import sys
+
+text = open(sys.argv[1], encoding="utf-8").read()
+match = re.search(r"^MODEL:\s*(.+)$", text, re.MULTILINE | re.IGNORECASE)
+model = match.group(1).casefold() if match else ""
+expected = sys.argv[2]
+valid = (
+    expected == "luna-max" and "luna" in model and "max" in model
+    or expected == "sol-medium" and "sol" in model and "medium" in model
+)
+if not valid:
+    print(f"Task-card MODEL does not match required {expected} route.", file=sys.stderr)
+    raise SystemExit(2)
+PY
+}
+
+require_card_marker() {
+    local marker="$1"
+    if ! grep -Eiq "^${marker}:[[:space:]]*[^[:space:]]" "$HERDR_TASK_CARD"; then
+        printf 'Task card must include %s with the concrete reason or Human choice.\n' \
+            "$marker" >&2
+        exit 2
+    fi
+}
+
+case "$caller_role" in
+    "Human Orchestrator")
+        printf 'Human Orchestrator cannot launch agents; send the request to Operations.\n' >&2
+        exit 2
+        ;;
+    "Operations Collaborator")
+        printf 'Operations Collaborator cannot launch productive roles.\n' >&2
+        exit 2
+        ;;
+    "Operations Lead")
+        case "$target_role" in
+            Suborchestrator)
+                require_task_card
+                [ "$surface" = "codex" ] || {
+                    printf 'Suborchestrators must use native Codex Sol medium.\n' >&2
+                    exit 2
+                }
+                require_card_model sol-medium
+                ;;
+            Worker)
+                require_task_card
+                case "$surface" in
+                    luna|luna-max)
+                        require_card_model luna-max
+                        ;;
+                    codex)
+                        require_card_model sol-medium
+                        require_card_marker "LUNA FAILURE"
+                        ;;
+                    opencode*|claude|terra-high)
+                        require_card_marker "HUMAN MODEL CHOICE"
+                        ;;
+                    *)
+                        printf 'Worker route %s is not allowed from Operations.\n' "$surface" >&2
+                        exit 2
+                        ;;
+                esac
+                ;;
+        esac
+        ;;
+    Suborchestrator)
+        [ "$target_role" = "Worker" ] || {
+            printf 'Suborchestrator may launch only its own Worker.\n' >&2
+            exit 2
+        }
+        require_task_card
+        case "$surface" in
+            luna|luna-max)
+                require_card_model luna-max
+                ;;
+            codex)
+                require_card_model sol-medium
+                require_card_marker "LUNA FAILURE"
+                ;;
+            opencode*|claude|terra-high)
+                require_card_marker "HUMAN MODEL CHOICE"
+                ;;
+            *)
+                printf 'Worker route %s is not allowed from a suborchestrator.\n' "$surface" >&2
+                exit 2
+                ;;
+        esac
+        ;;
+esac
+
 tab_json="$(
     herdr tab create \
         --workspace "$HERDR_WORKSPACE_ID" \

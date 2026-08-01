@@ -127,6 +127,11 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   It may not inspect the repository, logs, remote systems, or reproduce a
   failure itself. Its own turns stay below 10% of task tokens and Luna-max must
   consume the task majority.
+- Every suborchestrator and Worker card includes one exact `GOAL SOURCE`
+  sentence copied from `HUMAN_PLAN.md`. Validate it against that file and set
+  `HERDR_TASK_CARD` on the guarded `herdr-agent` launch. A Sol-medium Worker
+  card also records `LUNA FAILURE`; another Worker model records the explicit
+  `HUMAN MODEL CHOICE`.
 - Normally only a Sol-medium suborchestrator launches native Codex
   `gpt-5.6-luna` max; Operations may launch it directly for one tiny task.
   Give Luna one clear package
