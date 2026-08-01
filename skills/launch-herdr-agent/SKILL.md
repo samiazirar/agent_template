@@ -255,10 +255,15 @@ measure usage and do not create a manual dashboard.
 
 Claude Code and Claudex use the zero-context `SessionStart` command hook
 `herdr-costs register-hook`, so new and resumed Herdr sessions remain attached
-to the ledger even when the native Claude harness recreates its session. Keep
-Pyright LSP enabled for automatic Python diagnostics. Keep broad automatic
-planning, review, subagent, and debugging plugins disabled; concrete failures
-load only `goal-directed-repair` on demand.
+to the ledger even when the native Claude harness recreates its session. The
+report also shows actual skill uses with associated tokens and cost. Keep
+Pyright LSP enabled for automatic Python diagnostics. Keep Superpowers, Code
+Review, and Code Simplifier available but never make them automatic stages;
+invoke one only when it directly advances the current package and keep its
+work inside the 10% control budget. Concrete failures use
+`goal-directed-repair` to preserve the original user problem, trace structural
+behavior when needed, repair the causal source, and stop after the direct done
+check.
 
 Bounded research and data crunching use Sol at the lowest sufficient effort,
 from low through max. Use a named Terra-medium `Researcher` by default for an

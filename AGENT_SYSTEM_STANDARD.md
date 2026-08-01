@@ -293,6 +293,12 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
 - Native Claude Code and Claudex also register new and resumed Herdr sessions
   through their `SessionStart` hook. Their duplicate streaming transcript rows
   are counted once by native message ID.
+- The same report lists explicit skill invocation count, associated tokens,
+  and API-equivalent cost. Claude and Claudex use their native active-skill
+  attribution. Codex records the exact token delta from loading a skill through
+  the end of that turn; when one turn loads multiple skills, those values
+  overlap and are not additive. Use this observed usage to keep, narrow, or
+  remove skills instead of judging them only by description size.
 - The ledger and generated terminal table are the only cost records. Do not
   create task reports, dashboards, or manual token spreadsheets.
 
@@ -304,12 +310,22 @@ task. Never use Vertex; Gemini routes use the OpenCode API-key provider.
 - Use Claudex for the Human Orchestrator and bounded GPT work that materially
   benefits from Claude Code's interface. Use native Claude Code for the
   background Opus collaborator and an explicitly selected Opus worker.
-- Keep broad automatic planning, review, subagent, and debugging workflow
-  plugins disabled. They add standing context and can override the direct
-  90/10 loop. Keep zero-context LSP diagnostics such as Pyright enabled; they
-  catch local errors immediately without creating a review task.
+- Keep Claude's Superpowers, Code Review, and Code Simplifier available. Invoke
+  them only when their result directly advances the current package:
+  structural diagnosis, one consequential review, or simplifying an already
+  working change. They are not automatic stages and do not override the 90/10,
+  no-test, no-subagent, smallest-change, or stop-after-done rules. Keep
+  zero-context LSP diagnostics such as Pyright enabled for local errors, while
+  treating user-goal mismatch and cross-component behavior as SWE problems
+  that require tracing the actual execution path.
 - Do not use the Codex-in-Claude plugin as a second GPT harness. Claudex is the
   explicit GPT-through-Claude-Code route; hidden Claude agents remain denied.
+- OpenCode remains the GLM 5.2 mechanical/context-heavy alternative and the
+  API-key Flash watcher host; its native database already records message
+  tokens, costs, and skill tool calls. Pi is a lightweight optional harness
+  with exact per-message usage in JSONL and explicit skill commands, but it is
+  not a standing ecosystem role until it offers a concrete advantage over the
+  selected Codex, Claudex, Claude, or OpenCode route.
 
 ## Watcher, verifier, messenger, and limits
 

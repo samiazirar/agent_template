@@ -10,8 +10,10 @@ only when it produces the requested working state.
 
 ## Repair loop
 
-1. Restate the intended result and the observed failure in one sentence each.
-   Preserve the user's goal and scope.
+1. Restate the user's original problem, the behavior that would solve it, and
+   the observed behavior in one sentence each. For structural or semantic
+   failures, check whether the implementation optimizes a proxy, abstraction,
+   or internal workflow that does not produce the result the user asked for.
 2. Reproduce the failure once with the cheapest direct command or inspect the
    existing failing output when reproduction would be costly. Read the actual
    error and the nearest relevant code; do not begin with a repository audit.
@@ -19,8 +21,10 @@ only when it produces the requested working state.
    one known working neighboring implementation. Prefer repairing an existing
    working path over creating another abstraction or parallel implementation.
 4. Identify one causal explanation that accounts for the observed failure.
-   Distinguish the source from the visible symptom. If the cause is already
-   unambiguous from the error and code, proceed immediately.
+   Distinguish the source from the visible symptom. Trace across component
+   boundaries when needed: input, state, ownership, interface contract,
+   execution path, and user-visible result. If the cause is already
+   unambiguous from the behavior and code, proceed immediately.
 5. Make the smallest coherent change at that source. Delete bad, duplicated,
    misleading, or superseded code when removal is the clean root repair. Do not
    add wrappers, compatibility layers, fallback paths, instrumentation, or
@@ -44,6 +48,8 @@ only when it produces the requested working state.
 - Do not declare an architectural problem merely because attempts failed. Raise
   architecture only when concrete coupling or incompatible requirements show
   that no local root repair can produce the requested state.
+- Do not accept technically correct code when the user-visible result still
+  misses the original problem. That is a failed done check, not completion.
 - An external dependency is waiting only when a named outside event is truly
   required. Record that event and continue independent goal-moving work.
 

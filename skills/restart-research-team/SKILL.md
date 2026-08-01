@@ -268,8 +268,11 @@ After either strategic answer is durably captured, close that pane immediately.
   usage artifact.
 - Claude Code and Claudex must retain the zero-context SessionStart hook
   `herdr-costs register-hook`; resumed native sessions then remain attributed
-  to their human task. Keep Pyright LSP enabled and broad automatic planning,
-  review, subagent, and debugging workflow plugins disabled.
+  to their human task. Keep Pyright LSP enabled. Keep Superpowers, Code Review,
+  and Code Simplifier available but invoke them only for direct structural
+  diagnosis, one consequential review, or simplification of an already working
+  change; they are never automatic stages and remain inside the 10% control
+  budget.
 
 - At a due check, the orchestrator may create a fresh read-only
   `gpt-5.6-terra` medium checker. Require a task-specific observable delta,
