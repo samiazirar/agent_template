@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Refresh the private static Herdr cost site from the authoritative CLI report."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+DATA_BLOCK = re.compile(
+    r'(<script id="herdr-cost-data" type="application/json">)\n.*?\n(\s*</script>)',
+    re.DOTALL,
+)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--all-time",
+        action="store_true",
+        help="refresh the daily table from lifetime recorded usage",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help="write a different HTML file instead of site/index.html",
+    )
+    args = parser.parse_args()
+
+    root = Path(__file__).resolve().parents[2]
+    output = (args.output or root / "site/index.html").resolve()
+    cli = root / "runtime/bin/herdr-costs"
+    command = [str(cli), "report", "--all"]
+    if args.all_time:
+        command.append("--all-time")
+    command.append("--json")
+    result = subprocess.run(command, check=False, capture_output=True, text=True)
+    if result.returncode:
+        sys.stderr.write(result.stderr or result.stdout)
+        return result.returncode
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        print(f"herdr-costs returned invalid JSON: {exc}", file=sys.stderr)
+        return 1
+    if payload.get("schema") != "herdr-costs.site.v1" or not payload.get("projects"):
+        print("herdr-costs JSON is missing the site schema or projects", file=sys.stderr)
+        return 1
+    try:
+        html = output.read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"cannot read site source {output}: {exc}", file=sys.stderr)
+        return 1
+    encoded = json.dumps(payload, ensure_ascii=False, indent=2).replace("<", "\\u003c")
+    match = DATA_BLOCK.search(html)
+    if not match:
+        print("site source has no herdr-cost-data block", file=sys.stderr)
+        return 1
+    refreshed = DATA_BLOCK.sub(
+        lambda found: f"{found.group(1)}\n{encoded}\n{found.group(2)}",
+        html,
+        count=1,
+    )
+    output.write_text(refreshed, encoding="utf-8")
+    weekly = payload.get("weekly", {})
+    account = weekly.get("account") or {}
+    print(
+        f"refreshed {output} · generated {payload['generated_at']} · "
+        f"projects={len(payload['projects'])} · agents={payload['aggregate']['agent_count']} · "
+        f"weekly_account={account.get('used_percent', 'unavailable')}%"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

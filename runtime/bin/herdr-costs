@@ -11,7 +11,7 @@ import sqlite3
 import subprocess
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +47,119 @@ def parse_time(value: str | None) -> datetime | None:
 
 def today_start() -> datetime:
     return datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def codex_jsonl_paths() -> list[Path]:
+    paths: list[Path] = []
+    for root in (Path.home() / ".codex/sessions", Path.home() / ".codex/archived_sessions"):
+        if root.is_dir():
+            paths.extend(root.rglob("*.jsonl"))
+    return paths
+
+
+def latest_primary_rate_limit() -> dict[str, Any] | None:
+    """Read account quota snapshots without turning quota percentages into cost."""
+    windows: dict[tuple[int, int, str], dict[str, Any]] = {}
+    latest: dict[str, Any] | None = None
+    for path in codex_jsonl_paths():
+        try:
+            handle = path.open(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        with handle:
+            for raw in handle:
+                try:
+                    item = json.loads(raw)
+                except json.JSONDecodeError:
+                    continue
+                payload = item.get("payload") or {}
+                if item.get("type") != "event_msg" or payload.get("type") != "token_count":
+                    continue
+                limits = payload.get("rate_limits") or {}
+                primary = limits.get("primary")
+                when = parse_time(item.get("timestamp"))
+                if not isinstance(primary, dict) or when is None:
+                    continue
+                try:
+                    used = float(primary["used_percent"])
+                    window_minutes = int(primary["window_minutes"])
+                    resets_at = int(primary["resets_at"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if not 0.0 <= used <= 100.0 or window_minutes <= 0 or resets_at <= 0:
+                    continue
+                plan_type = str(limits.get("plan_type") or "unknown")
+                snapshot = {
+                    "observed_at": when,
+                    "used_percent": used,
+                    "window_minutes": window_minutes,
+                    "resets_at": resets_at,
+                    "plan_type": plan_type,
+                }
+                key = (window_minutes, resets_at, plan_type)
+                window = windows.setdefault(
+                    key,
+                    {"first": snapshot, "latest": snapshot, "count": 0},
+                )
+                window["count"] += 1
+                if when < window["first"]["observed_at"]:
+                    window["first"] = snapshot
+                if when > window["latest"]["observed_at"]:
+                    window["latest"] = snapshot
+                if latest is None or when > latest["observed_at"]:
+                    latest = snapshot
+    if latest is None:
+        return None
+    key = (latest["window_minutes"], latest["resets_at"], latest["plan_type"])
+    window = windows[key]
+    first = window["first"]
+    latest_used = float(latest["used_percent"])
+    opening_used = float(first["used_percent"])
+    local_estimate = max(0.0, latest_used - opening_used)
+    other_unassigned = max(0.0, latest_used - local_estimate)
+    local_today = [
+        snapshot
+        for candidate in windows.values()
+        if (
+            candidate["latest"]["window_minutes"] == latest["window_minutes"]
+            and candidate["latest"]["resets_at"] == latest["resets_at"]
+            and candidate["latest"]["plan_type"] == latest["plan_type"]
+        )
+        for snapshot in (candidate["first"], candidate["latest"])
+        if snapshot["observed_at"].astimezone().date() == latest["observed_at"].astimezone().date()
+    ]
+    today_values = sorted(
+        {snapshot["observed_at"]: snapshot for snapshot in local_today}.values(),
+        key=lambda snapshot: snapshot["observed_at"],
+    )
+    today_delta = None
+    if len(today_values) >= 2:
+        today_delta = max(
+            0.0,
+            float(today_values[-1]["used_percent"])
+            - float(today_values[0]["used_percent"]),
+        )
+    reset_at = datetime.fromtimestamp(latest["resets_at"], timezone.utc)
+    window_start = reset_at - timedelta(minutes=latest["window_minutes"])
+    return {
+        "available": True,
+        "used_percent": round(latest_used, 3),
+        "remaining_percent": round(max(0.0, 100.0 - latest_used), 3),
+        "window_minutes": latest["window_minutes"],
+        "window_label": "7 days" if latest["window_minutes"] == 10080 else f'{latest["window_minutes"]} minutes',
+        "resets_at": reset_at.isoformat().replace("+00:00", "Z"),
+        "window_start": window_start.isoformat().replace("+00:00", "Z"),
+        "plan_type": latest["plan_type"],
+        "observed_at": latest["observed_at"].isoformat().replace("+00:00", "Z"),
+        "opening_used_percent": round(opening_used, 3),
+        "local_observed_estimate_percent": round(local_estimate, 3),
+        "other_unassigned_percent": round(other_unassigned, 3),
+        "today_delta_percent": round(today_delta, 3) if today_delta is not None else None,
+        "today_delta_supported": today_delta is not None,
+        "snapshot_count": int(window["count"]),
+        "attribution": "Local-observed estimate: percentage-point changes first observed during local turns. Opening account usage and anything not safely attributable remain Other / unassigned.",
+        "data_quality": "Concurrent Codex use on another machine can change the account percentage between local snapshots and cannot be separated here. Quota percentages are not converted to dollars.",
+    }
 
 
 def herdr_pane(pane_id: str) -> dict[str, Any]:
@@ -928,7 +1041,7 @@ def usage_summary(
     }
 
 
-def report_all(since: datetime | None) -> int:
+def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
     try:
         result = subprocess.run(
             ["herdr", "workspace", "list"],
@@ -939,7 +1052,7 @@ def report_all(since: datetime | None) -> int:
         workspaces = json.loads(result.stdout)["result"]["workspaces"]
     except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
         print("Could not read Herdr workspaces.", file=sys.stderr)
-        return 1
+        return None
     rows = []
     for workspace in workspaces:
         workspace_id = workspace["workspace_id"]
@@ -982,6 +1095,8 @@ def report_all(since: datetime | None) -> int:
                     "cached": 0,
                     "cost": 0.0,
                     "models": set(),
+                    "luna_tokens": 0,
+                    "control_tokens": 0,
                 },
             )
             item["seconds"] += float(metrics["active_seconds"])
@@ -990,14 +1105,33 @@ def report_all(since: datetime | None) -> int:
             item["cached"] += int(metrics["usage"]["cached"])
             item["cost"] += float(metrics["cost"])
             item["models"].add(f'{metrics["model"]}/{metrics["effort"]}')
-        rows.append((workspace.get("label") or workspace_id, summary, agents))
+            model_key = f'{metrics["model"]}/{metrics["effort"]}'
+            if role(record["label"]) == "Worker" and model_key == "gpt-5.6-luna/max":
+                item["luna_tokens"] += tokens
+            if role(record["label"]) in CONTROL_ROLES:
+                item["control_tokens"] += tokens
+        rows.append({
+            "label": workspace.get("label") or workspace_id,
+            "summary": summary,
+            "agents": agents,
+        })
+    return rows
+
+
+def report_all(since: datetime | None) -> int:
+    rows = collect_all_rows(since)
+    if rows is None:
+        return 1
     period = since.astimezone().date().isoformat() if since else "all time"
     print(f"Cost summary · all recorded Herdr workspaces · {period}")
     print("Standard API-equivalent USD with cache and long-context rates; subscription billing is not included.")
     print()
     print(f'{"Project / agent":48} {"Model / effort":24} {"Time":9} {"Tokens":10} {"Cached":10} {"Luna":8} {"Control":8} {"Cost":10}')
     print("-" * 136)
-    for label, summary, agents in rows:
+    for row in rows:
+        label = row["label"]
+        summary = row["summary"]
+        agents = row["agents"]
         majority = (
             "-"
             if not summary["tokens"]
@@ -1025,6 +1159,134 @@ def report_all(since: datetime | None) -> int:
             )
     if since is not None:
         print("\nAll project totals are shown; agent rows with no recorded usage today are omitted.")
+    return 0
+
+
+def rows_to_json(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    projects = []
+    total_seconds = 0.0
+    total_tokens = 0
+    total_cached = 0
+    total_cost = 0.0
+    total_luna_tokens = 0
+    total_control_tokens = 0
+    total_agents = 0
+    time_exact = True
+    for row in rows:
+        summary = row["summary"]
+        project_tokens = int(summary["tokens"])
+        agents = []
+        for label, item in sorted(
+            row["agents"].items(), key=lambda pair: pair[1]["tokens"], reverse=True
+        ):
+            agent_tokens = int(item["tokens"])
+            agents.append({
+                "label": label,
+                "role": role(label),
+                "models": sorted(item["models"]),
+                "seconds": float(item["seconds"]),
+                "time": fmt_duration(item["seconds"], item["time_exact"]),
+                "time_exact": bool(item["time_exact"]),
+                "tokens": agent_tokens,
+                "cached_tokens": int(item["cached"]),
+                "cost": round(float(item["cost"]), 9),
+                "luna_tokens": int(item["luna_tokens"]),
+                "luna_share_pct": round(
+                    100.0 * int(item["luna_tokens"]) / project_tokens
+                    if project_tokens else 0.0,
+                    3,
+                ),
+                "control_tokens": int(item["control_tokens"]),
+                "control_share_pct": round(
+                    100.0 * int(item["control_tokens"]) / project_tokens
+                    if project_tokens else 0.0,
+                    3,
+                ),
+                "is_luna_worker": bool(item["luna_tokens"]),
+                "is_control_role": bool(item["control_tokens"]),
+            })
+        projects.append({
+            "label": row["label"],
+            "time": fmt_duration(summary["active_seconds"], summary["time_exact"]),
+            "seconds": float(summary["active_seconds"]),
+            "time_exact": bool(summary["time_exact"]),
+            "tokens": project_tokens,
+            "cached_tokens": int(summary["cached_tokens"]),
+            "cost": round(float(summary["cost"]), 9),
+            "luna_tokens": int(summary["luna_max_tokens"]),
+            "luna_share_pct": round(float(summary["luna_max_pct"]), 3),
+            "control_tokens": int(summary["control_tokens"]),
+            "control_share_pct": round(float(summary["control_pct"]), 3),
+            "luna_majority": bool(summary["luna_max_pct"] > 50.0),
+            "control_within_limit": bool(summary["control_pct"] <= 10.0),
+            "agents": agents,
+        })
+        total_seconds += float(summary["active_seconds"])
+        total_tokens += project_tokens
+        total_cached += int(summary["cached_tokens"])
+        total_cost += float(summary["cost"])
+        total_luna_tokens += int(summary["luna_max_tokens"])
+        total_control_tokens += int(summary["control_tokens"])
+        total_agents += len(agents)
+        time_exact = time_exact and bool(summary["time_exact"])
+    return {
+        "aggregate": {
+            "project_count": len(projects),
+            "agent_count": total_agents,
+            "seconds": total_seconds,
+            "time": fmt_duration(total_seconds),
+            "time_exact": time_exact,
+            "tokens": total_tokens,
+            "cached_tokens": total_cached,
+            "cost": round(total_cost, 9),
+            "luna_tokens": total_luna_tokens,
+            "luna_share_pct": round(100.0 * total_luna_tokens / total_tokens if total_tokens else 0.0, 3),
+            "control_tokens": total_control_tokens,
+            "control_share_pct": round(100.0 * total_control_tokens / total_tokens if total_tokens else 0.0, 3),
+        },
+        "projects": projects,
+    }
+
+
+def report_all_json(since: datetime | None) -> int:
+    rows = collect_all_rows(since)
+    if rows is None:
+        return 1
+    period = since.astimezone().date().isoformat() if since else "all time"
+    daily = rows_to_json(rows)
+    account = latest_primary_rate_limit()
+    weekly = {
+        "account": account,
+        "local": None,
+    }
+    if account is not None:
+        weekly_start = parse_time(account["window_start"])
+        if weekly_start is not None:
+            weekly_rows = collect_all_rows(weekly_start)
+            if weekly_rows is not None:
+                weekly["local"] = rows_to_json(weekly_rows)
+        weekly["period_start"] = account["window_start"]
+        weekly["period_end"] = account["resets_at"]
+        weekly["period_label"] = account["window_label"]
+    payload = {
+        "schema": "herdr-costs.site.v1",
+        "generated_at": iso_now(),
+        "period": period,
+        "source": {
+            "command": "herdr-costs report --all --json"
+            + (" --all-time" if since is None else ""),
+            "pricing": "Standard API-equivalent USD with cache and long-context rates; subscription billing and non-token tool charges are not included.",
+            "quota": "Codex token_count.rate_limits.primary from local current and archived JSONL; quota percentages are not converted into dollars.",
+        },
+        "thresholds": {
+            "luna_majority_pct": 50.0,
+            "control_max_pct": 10.0,
+        },
+        "aggregate": daily["aggregate"],
+        "projects": daily["projects"],
+        "weekly": weekly,
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -1248,6 +1510,11 @@ def main() -> int:
         action="store_true",
         help="include lifetime recorded usage instead of today only",
     )
+    report_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="emit structured data for a site or other private consumer",
+    )
     args = parser.parse_args()
     if args.command == "register":
         return register(args)
@@ -1259,6 +1526,8 @@ def main() -> int:
         return 0
     since = None if getattr(args, "all_time", False) else today_start()
     if args.command == "report" and args.all:
+        if args.json:
+            return report_all_json(since)
         return report_all(since)
     workspace = getattr(args, "workspace", None) or os.environ.get("HERDR_WORKSPACE_ID")
     if not workspace:
