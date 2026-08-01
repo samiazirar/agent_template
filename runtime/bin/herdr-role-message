@@ -40,13 +40,13 @@ message="$*"
 
 case "$target" in
   "Operations Lead")
-    message="Role reminder: dispatch technical work to a Sol-medium suborchestrator or Luna worker; do not inspect, debug, implement, run experiments, or SSH. If the goal is incomplete and no productive child is active, dispatch the next package before ending. Message: $message"
+    message="Role reminder: dispatch technical work to a Sol-medium suborchestrator or Luna worker; do not inspect, debug, implement, run experiments, or SSH. Keep child roles visible in this project workspace: create filesystem worktrees with Git, never with 'herdr worktree create'. If the goal is incomplete and no productive child is active, dispatch the next package before ending. Message: $message"
     ;;
   "Human Orchestrator")
     message="Role reminder: handle only Human conversation and plan meaning; route technical action to Operations and do not manage execution. Message: $message"
     ;;
   "Suborchestrator"\ ·\ *)
-    message="Role reminder: use this child result only to close it and choose or dispatch the next Luna package; do not inspect, debug, implement, run experiments, or SSH. Message: $message"
+    message="Role reminder: use this child result only to close it and choose or dispatch the next Luna package; do not inspect, debug, implement, run experiments, or SSH. Keep Luna visible in this project workspace: create its filesystem worktree with Git, never with 'herdr worktree create'. Message: $message"
     ;;
 esac
 
