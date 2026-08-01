@@ -262,7 +262,7 @@ def main() -> None:
     by_label = {tab["label"]: tab for tab in tabs}
     expected_counts = {
         "00 Human Plan": 1,
-        "01 Orchestrators": 3,
+        "01 Orchestrators": 2,
         "02 Strategic Council": 1,
         "03 Suborchestrators": 1,
         "04 Workers": 1,
@@ -294,23 +294,18 @@ def main() -> None:
         for pane in leadership
         if pane["label"].startswith("Operations Lead · ")
     ]
-    collaborators = [
-        pane
-        for pane in leadership
-        if pane["label"].startswith("Operations Collaborator · ")
-    ]
     liaisons = [
         pane
         for pane in leadership
         if pane["label"].startswith("Human Orchestrator · ")
     ]
-    if len(operations) != 1 or len(collaborators) != 1 or len(liaisons) != 1:
+    if len(operations) != 1 or len(liaisons) != 1:
         fail(
-            "01 Orchestrators must contain one Human Orchestrator, one "
-            "Operations Lead, and one Operations Collaborator"
+            "01 Orchestrators must contain one Human Orchestrator and one "
+            "Operations Lead"
         )
     for pane in leadership:
-        if pane.get("agent") not in {"codex", "claude", "opencode"}:
+        if pane.get("agent") not in {"codex", "opencode"}:
             fail(f"standing leadership pane is not an agent: {pane['label']}")
         allowed_states = (
             {"idle", "done", "working"}
@@ -321,12 +316,6 @@ def main() -> None:
             fail(f"standing leadership is not waiting: {pane['label']}")
     require_opencode_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
     require_model(liaisons[0], "Human Orchestrator", "gpt-5.6-sol", "high")
-    require_native_claude_model(
-        collaborators[0],
-        "Operations Collaborator",
-        "opus",
-        "medium",
-    )
 
     transient_tabs = (
         "02 Strategic Council",

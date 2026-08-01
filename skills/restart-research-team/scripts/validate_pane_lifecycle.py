@@ -17,7 +17,6 @@ TERMINAL_AGENT_STATES = {"done", "idle", "blocked"}
 STANDING_PREFIXES = {
     "Human Orchestrator",
     "Operations Lead",
-    "Operations Collaborator",
 }
 TRANSIENT_PREFIXES = {
     "Plan Orchestrator",
@@ -101,8 +100,8 @@ def main() -> None:
         ]
         if any(count != 1 for count in standing_counts.values()) or unexpected:
             fail(
-                "standing leadership must contain exactly one Human Orchestrator, "
-                "one Operations Lead, and one Operations Collaborator; only an "
+                "standing leadership must contain exactly one Human Orchestrator and "
+                "one Operations Lead; only an "
                 "active temporary Plan Orchestrator may join them; "
                 f"found {prefixes}"
             )

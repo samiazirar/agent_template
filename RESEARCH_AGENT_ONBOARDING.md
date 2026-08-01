@@ -1,7 +1,7 @@
 # Mandatory onboarding for every research agent
 
 This is the leadership contract for every Human Orchestrator, Operations Lead,
-Operations Collaborator, and suborchestrator. Minimal workers read only
+and suborchestrator. Minimal workers read only
 `AGENT_SYSTEM_STANDARD.md` and their validated task card. Detailed execution
 rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 `PAPERPILOT_PROJECT_STANDARD.md`.
@@ -17,7 +17,7 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 - Prose, planning, approvals, status, auditing, and waiting are control work,
   not scientific progress. Keep control work below 10% of task slots and
   agent-hours.
-- Every Human Orchestrator, Operations Lead, Operations Collaborator, Plan
+- Every Human Orchestrator, Operations Lead, Plan
   Orchestrator, advisor, verifier, review, status, and wait turn is control
   work. Research is productive only when it creates accepted goal-relevant
   evidence. At 10% control, launch the next independent productive task unless
@@ -57,11 +57,6 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   sole operational authority and owns day-to-day decomposition, dependencies,
   dispatch, runs, integration, synchronization, outcome accounting, and the
   rolling 90/10 budget.
-- `Operations Collaborator · PersonName Goal` uses native Claude Opus 5 at
-  medium effort. It stays in the background, receives one bounded planning,
-  decomposition, or milestone-interpretation question only from Operations
-  Lead, reports only to Operations Lead, and returns idle. It never manages
-  workers, integrates Git, contacts the human side, or becomes an approval step.
 - `Human Orchestrator · PersonName Plan` uses native Codex `gpt-5.6-sol` high. It is the
   project's sole normal human conversation and owns the meaning of
   `HUMAN_PLAN.md`. It reloads the handoff, plan, and cited evidence before
@@ -78,8 +73,7 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 - Human Orchestrator and Operations Lead are peer interfaces with different
   responsibilities. The human talks to Human Orchestrator; Human Orchestrator
   exchanges technical requests and human decisions only with Operations Lead;
-  workers and technical roles report through Operations Lead. Operations
-  Collaborator is subordinate to Operations Lead, never a second authority.
+  workers and technical roles report through Operations Lead.
 - Cross-pane communication uses `herdr-role-message`, never a model's native
   subagent lookup. Human Orchestrator sends with
   `herdr-role-message operations "..."`; Operations Lead answers with
@@ -111,7 +105,7 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   with one deliverable, one reproduction or run, and one done check. A harder
   package uses Sol medium. Luna support or supervision may use low but never
   higher. Every later package or correction gets a fresh worker chat.
-- Native Codex, Claude Opus 5, and OpenCode GLM 5.2 are selectable productive workers when
+- Native Codex and OpenCode GLM 5.2 are selectable productive workers when
   their separate context materially benefits the assigned task. Name the
   selected model in the task card; do not treat either as a hidden fallback.
 - Bounded research and data crunching use Sol at the lowest sufficient effort,
@@ -142,8 +136,8 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   orchestrator uses `consult-chatgpt-pro` with one compact evidence packet and
   one exact question. The consultation informs the decision but does not become
   a standing approval layer.
-- Claude Opus 5 is an optional non-blocking second eye for a consequential
-  result, public claim, or human-facing artifact. Never audit the audit.
+- Native Claude Code is not a project-work surface. It may be resumed only to
+  run `/export` on a legacy chat; record the export and close it immediately.
 - Alibaba `qwen3.8-max-preview` is a low-cost shared subworker, never a leader
   or final scientific authority. Launch it only through
   `alibaba-worker claudex` or `alibaba-worker codex`, and only when
@@ -420,7 +414,7 @@ control-work percentage.
   project-root `RESTART_HANDOFF.md` as the final save. The Human Orchestrator
   then runs the guarded close helper. The helper closes only the caller's
   workspace; it never stops the shared Herdr server or named session.
-- Fresh Operations Lead, Operations Collaborator, and Human Orchestrator
+- Fresh Operations Lead and Human Orchestrator
   reconstruct and explain the plan in
   ordinary language. Ask the human only when a material ambiguity prevents the
   goal from being safely understood; do not add a blanket approval pause.

@@ -1,6 +1,6 @@
 ---
 name: launch-herdr-agent
-description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, an OpenCode Sol-high Operations Lead, a background native-Claude Opus-medium Operations Collaborator, Markdown-only Human Plan pane, OpenCode Luna-max coding workers, OpenCode Sol-medium task suborchestrators, fresh worker chats, compact restart continuity, and sparse native-Codex researchers, watchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
+description: "Launch and brief a lightweight visible Herdr project team with one native-Codex human-only Human Orchestrator, an OpenCode Sol-high Operations Lead, Markdown-only Human Plan pane, OpenCode Luna-max coding workers, OpenCode Sol-medium task suborchestrators, fresh worker chats, compact restart continuity, and sparse native-Codex researchers, watchers, advisors, or verifiers under a strict 90/10 productive-work budget. Use when an Architect asks to launch or repair a worker, research chain, project, team, ecosystem, or role topology. Run this in a separate short-lived Launcher session."
 ---
 
 # Launch Herdr sessions
@@ -79,8 +79,8 @@ The launcher opens only the selected interactive executable:
 - `claudex` uses the Codex-synchronized GPT-5.6 Sol model through the local
   Claudex gateway at medium effort.
 - `claudex-high` uses the same Claudex route at high effort only when explicitly selected.
-- `claude` uses native Claude Opus 5 at medium effort unless
-  `HERDR_CLAUDE_EFFORT` explicitly selects another supported effort.
+- `claude` is legacy-archive-only: resume an old native Claude chat solely to
+  run `/export`, save it, and close it. Never assign Claude project work.
 - `terra` uses GPT-5.6 Terra at medium reasoning for research interpretation.
 - `terra-high` uses GPT-5.6 Terra at high reasoning for one bounded productive
   task only when the human explicitly selects Terra as a worker.
@@ -109,9 +109,8 @@ again.
 ## Complete project launch
 
 When the user requests a space, project, team, ecosystem, or the whole setup,
-launch the three standing roles below. Native Claude is intentional only for
-the background Operations Collaborator; normal operational execution uses
-OpenCode unless the user selects another harness for one productive task.
+launch the two standing roles below. Operational execution uses OpenCode unless
+the user selects another permitted harness for one productive task.
 
 Create these standing roles in `01 Orchestrators`:
 
@@ -121,7 +120,7 @@ Create these standing roles in `01 Orchestrators`:
    and own the intended human-plan content. Send every technical request to
    Operations Lead and return its questions that need human judgment to the
    human. Never contact workers, suborchestrators, Plan Orchestrators, advisors,
-   researchers, verifiers, or the Operations Collaborator directly; dispatch
+   researchers, or verifiers directly; dispatch
    workers; manage execution; integrate Git; or expose internal mechanics.
    Speak like a thoughtful human collaborator. Start with the answer or
    outcome, use the project's own words, explain what it means and what comes
@@ -146,18 +145,9 @@ Create these standing roles in `01 Orchestrators`:
    and `herdr-role-message collaborator "..."` for the bounded collaborator.
    When a forwarded confirmation arrives, start the named action instead of
    acknowledging it again.
-3. `Operations Collaborator · PersonName Goal` — native Claude Opus 5 at
-   medium effort. Stay in the background and receive only one bounded
-   collaborative-planning, decomposition-alternative, or milestone-
-   interpretation question from Operations Lead at a time. Report only to
-   Operations Lead, then return idle. Never contact the Human Orchestrator,
-   dispatch or manage workers, integrate Git, inspect broadly, become an
-   approval step, or duplicate daily operations.
-
 Normal communication must follow:
 `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`. Operations
-Collaborator is a bounded side input to Operations Lead, never a second
-authority. No technical role may bypass Operations Lead.
+Lead is the sole technical authority. No technical role may bypass it.
 
 Before launching, require `command -v herdr-role-message`,
 `command -v herdr-project-save-close`, and `command -v herdr-costs`. After launch,
@@ -183,7 +173,7 @@ Operations Lead classifies observed outputs, not role names:
   verification, status, review, audit, and waiting are control work;
 - attached reproduction and verification remain part of the productive task.
 
-Before opening Operations Collaborator, a Plan Orchestrator, advisor, verifier,
+Before opening a Plan Orchestrator, advisor, verifier,
 or other control role, Operations Lead checks the rolling share of active task
 slots and agent-hours. At or above 10% control, launch the next independent
 productive task instead. Exceed 10% only for immediate safety, an irreversible
@@ -267,7 +257,7 @@ and aggregate time, tokens, and API-equivalent cost. Do not launch an agent to
 measure usage and do not create a manual dashboard.
 
 OpenCode usage comes from its native database, including model, effort, token,
-cost, duration, and skill-tool records. Claude Code and Claudex use the zero-context `SessionStart` command hook
+cost, duration, and skill-tool records. Claudex uses the zero-context `SessionStart` command hook
 `herdr-costs register-hook`, so new and resumed Herdr sessions remain attached
 to the ledger even when the native Claude harness recreates its session. The
 report also shows actual skill uses with associated tokens and cost. Keep
@@ -373,9 +363,7 @@ forbid native Agent lookup. The Operations Lead prompt must
 require OpenCode Luna-max as the default coding worker, one fresh worker per minimal package, concurrent
 independent workers, closure immediately after a transient final report is
 captured and before integration, sole-bridge routing, and active enforcement of
-the 90/10 budget. The Operations Collaborator prompt must keep native Claude
-at medium effort, background-only, one bounded planning question at a time,
-reporting only to Operations Lead, with no operational authority.
+the 90/10 budget.
 Worker prompts must give one Luna-sized result and forbid hidden delegation,
 unrelated work, and direct human-side contact. Suborchestrator prompts use Sol
 medium through OpenCode, define one task and finish condition, forbid coding, issue minimal
@@ -412,9 +400,9 @@ the cause and retry once. If recovery requires the Human or an outside event,
 save the current state and exact recovery action in `RESTART_HANDOFF.md` and
 attach one bounded event watcher instead of assuming the work will resume.
 
-All three agents inherit the global execution standard. OpenCode and Codex load
-shared personal skills directly from `~/.agents/skills`; native Claude and
-Claudex load the same skill directories through `~/.claude/skills`.
+Both standing agents inherit the global execution standard. OpenCode and Codex
+load shared personal skills directly from `~/.agents/skills`; Claudex loads
+the same skill directories through `~/.claude/skills` when explicitly used.
 
 Use human names everywhere visible to people. Keep Herdr's internal identifiers
 internal. Do not perform project work while launching and do not leave a failed

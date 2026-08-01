@@ -1,6 +1,6 @@
 ---
 name: restart-research-team
-description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator, an OpenCode Sol-high Operations Lead, and a background Claude Opus-medium Operations Collaborator, reconstruct the lightweight standard layout with OpenCode Luna-max coding workers and OpenCode Sol-medium task suborchestrators under the 90/10 budget, and wait for user plan discussion without resuming research.
+description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and an OpenCode Sol-high Operations Lead, reconstruct the lightweight standard layout with OpenCode Luna-max coding workers and OpenCode Sol-medium task suborchestrators under the 90/10 budget, and wait for user plan discussion without resuming research.
 ---
 
 # Restart Research Team
@@ -38,8 +38,7 @@ Never present pane IDs, hashes, internal phase codes, “gate,” “authority,�
 Do not declare the inherited plan correct. Fresh Operations Lead reconstructs
 the technical state. The fresh Human Orchestrator reloads the handoff, plan,
 and cited raw evidence, then preserves good human content and deepens only what
-is missing. Operations Collaborator remains idle unless Operations Lead asks
-one bounded planning question.
+is missing.
 
 ## Fixed workspace layout
 
@@ -61,9 +60,8 @@ IDs remain dormant in the file.
 
 Create:
 
-- one fresh native Codex GPT-5.6 Sol-high Human Orchestrator, one fresh OpenCode
-  GPT-5.6 Sol-high Operations Lead, and one native Claude Opus-medium
-  Operations Collaborator in `01 Orchestrators`;
+- one fresh native Codex GPT-5.6 Sol-high Human Orchestrator and one fresh
+  OpenCode GPT-5.6 Sol-high Operations Lead in `01 Orchestrators`;
 - one empty named shell bay in `02 Strategic Council`;
 - empty named shell bays in `03 Suborchestrators`, `04 Workers`, and
   `05 Progress Checks`.
@@ -72,9 +70,7 @@ Strategic advisors are transient. Open Sol xhigh only for one bounded question
 after the human plan is ready, capture the answer, archive the native session
 ID, and close the pane. Prefer a yes/no verdict or one concrete recommendation.
 Use `consult-chatgpt-pro` for consequential strategic planning or plan
-validation. Operations Lead is the sole day-to-day coordinator. Operations
-Collaborator stays in the background, reports only to Operations Lead, and has
-no worker, Git, integration, or approval authority. The Human
+validation. Operations Lead is the sole day-to-day coordinator. The Human
 Orchestrator is the sole normal human conversation and owns the meaning of
 `HUMAN_PLAN.md`; it exchanges technical requests and human decisions only with
 Operations Lead. A temporary Plan Orchestrator receives its brief from and
@@ -83,7 +79,7 @@ reports only to Operations Lead; it is an orchestrator, not a worker.
 Require `command -v herdr-role-message`, `command -v herdr-project-save-close`,
 and `command -v herdr-costs` before launch. Human Orchestrator sends
 technical intent only with `herdr-role-message operations`; Operations Lead
-uses `herdr-role-message human` and `herdr-role-message collaborator`;
+uses `herdr-role-message human`;
 technical roles return with `herdr-role-message operations` or the exact
 human-named parent through `herdr-role-message named`. Human Orchestrator's
 only additional Herdr action is the guarded close helper after an explicit
@@ -131,11 +127,6 @@ only the raw evidence needed to verify current reality. Ask it to:
    synthesis, and keep verification optional and minimal;
 7. emit a compact current-state envelope for the human orchestrator;
 8. emit `OPERATIONS_READY` and wait without executing.
-
-Operations Collaborator reads only the operating contract, restart handoff, and
-Operations Lead's bounded question. Ask it to acknowledge that it is native
-Claude Opus 5 medium, reports only to Operations Lead, has no worker, Git,
-integration, human-contact, or approval authority, and otherwise remains idle.
 
 The Human Orchestrator reads the operating contract, `RESTART_HANDOFF.md`,
 `HUMAN_PLAN.md`, the operations envelope, and each cited evidence item itself.
@@ -285,10 +276,8 @@ After either strategic answer is durably captured, close that pane immediately.
   advanced. It cannot stop, approve, edit, or recursively audit.
 - Routine work self-verifies. Use one independent audit only at an expensive
   launch, release, public artifact, or accepted-result boundary.
-- Claude Opus 5 is an optional non-blocking second eye for consequential
-  results and existing human-facing artifacts. OpenCode does normal
-  source work and local verification. Reuse the exact existing artifact and
-  canonical URL; follow the artifact-update skill before publication.
+- Native Claude Code is legacy-archive-only. Resume it solely to run `/export`,
+  record the export and session reference, and close it immediately.
 - As soon as a worker finishes, capture its final short report and native
   session reference, close its pane, and then integrate or reject the saved
   work. Retire its worktree after merge or rejection. Resume the same task in a

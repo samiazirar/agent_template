@@ -1,4 +1,4 @@
 interface:
   display_name: "Launch Herdr Team"
   short_description: "Launch strict 90/10 human and operations roles"
-  default_prompt: "Use $launch-herdr-agent as a short-lived Launcher to create one native-Codex Human Orchestrator, the OpenCode Sol-high Operations Lead, the background Claude Opus-medium Operations Collaborator, and only justified 90/10-budgeted technical roles."
+  default_prompt: "Use $launch-herdr-agent as a short-lived Launcher to create one native-Codex Human Orchestrator, the OpenCode Sol-high Operations Lead, and only justified 90/10-budgeted technical roles."

@@ -1,6 +1,6 @@
 # Research team operating contract
 
-This contract governs every Codex, Claudex, Claude, suborchestrator,
+This contract governs every Codex, Claudex, OpenCode, suborchestrator,
 worker, auditor, and watcher in the user's research workspaces.
 
 Every new session must first read
@@ -21,7 +21,7 @@ are mandatory; this document supplies the detailed execution contract.
   counts with that productive task.
 - If control work reaches 10%, do not create another control task. Dispatch or
   perform the next productive task.
-- Human Orchestrator, Operations Lead, Operations Collaborator, Plan
+- Human Orchestrator, Operations Lead, Plan
   Orchestrator, advisor, verifier, review, status, and wait turns are always
   control work. Research counts as productive only when it creates accepted
   goal-relevant evidence.
@@ -141,12 +141,6 @@ alone cannot complete an empirical milestone.
   does not maintain `HUMAN_PLAN.md` or act as the normal user-facing
   correspondent. It remains read-only for project code except when integrating
   verified worker commits.
-- The native Claude Opus-medium **Operations Collaborator** stays in the
-  background. It receives one bounded collaborative-plan,
-  decomposition-alternative, or milestone-interpretation question from
-  Operations Lead, returns one concise recommendation only to Operations Lead,
-  then returns idle. It never contacts the human side, manages workers,
-  integrates Git, becomes an approval step, or duplicates daily operations.
 - The native Codex Sol-high **human orchestrator** is the project's sole normal human
   conversation and owns the meaning of `HUMAN_PLAN.md`. Before every plan
   brief or answer, it reloads `RESTART_HANDOFF.md`, `HUMAN_PLAN.md`, and the
@@ -155,7 +149,7 @@ alone cannot complete an empirical milestone.
   observable in ordinary language. It does not edit the plan directly,
   dispatch workers, manage merges or runs, read whole worker transcripts, or
   duplicate day-to-day operations. It sends technical requests only to
-  Operations Lead and does not contact Operations Collaborator, workers,
+  Operations Lead and does not contact workers,
   suborchestrators, Plan Orchestrators, advisors, researchers, or verifiers
   directly.
 - An OpenCode Sol-medium suborchestrator owns exactly one meaningful multi-package task,
@@ -170,8 +164,8 @@ alone cannot complete an empirical milestone.
   one experiment stage. Workers reproduce first, make the change or run,
   compare expected versus observed state, report only to Operations Lead or
   their one owning suborchestrator, commit, sync, and stop.
-- OpenCode Sol medium is the default harder coding worker. Native Codex, Opus 5,
-  and OpenCode GLM 5.2 remain explicit alternatives when a separate context
+- OpenCode Sol medium is the default harder coding worker. Native Codex and
+  OpenCode GLM 5.2 remain explicit alternatives when a separate context
   clearly helps. Bounded
   research and data crunching use Sol at the lowest sufficient effort, from
   low through max; open-ended synthesis defaults to one Terra-medium
@@ -212,15 +206,14 @@ alone cannot complete an empirical milestone.
 Operations Lead and Human Orchestrator are peer interfaces with different
 responsibilities, not an approval chain. Human Orchestrator is the only normal
 conversation with the user; Operations Lead is the sole operational authority
-and bridge to technical roles. Operations Collaborator is subordinate to
-Operations Lead. Operations Lead may interrupt the user only for an immediate
+and bridge to technical roles. Operations Lead may interrupt the user only for an immediate
 safety or irreversible-action emergency.
 
 The bridge is the installed `herdr-role-message` helper, not native model-agent
 discovery. Human Orchestrator sends technical intent with
 `herdr-role-message operations`; Operations Lead sends human questions and
-material results with `herdr-role-message human`; Operations Collaborator and
-technical roles return through `herdr-role-message operations`. The helper is
+material results with `herdr-role-message human`; technical roles return
+through `herdr-role-message operations`. The helper is
 the Human Orchestrator's normal Herdr action. Its only exception is the guarded
 `herdr-project-save-close --close` command after an explicit Human close
 request and completed Operations save.
@@ -325,27 +318,18 @@ Use separate bounded roles. None is a standing review committee.
 - Automatic messages are limited to a required user decision, accepted
   goal-relevant result, confirmed unusual lack of progress, failed long
   process, no productive route after one bounded advisor attempt, or a
-  material Codex/Claude weekly-capacity event.
+  material Codex or OpenCode weekly-capacity event.
 - Routine worker completion, ordinary retries, unchanged status, and
   acknowledgements are not human messages.
 - Human messages use project and task names. Internal pane/session IDs, hashes,
   phase codes, and deduplication keys remain machine-only.
 
-### Opus second eye
+### Legacy Claude chats
 
-- Claude Opus 5 may provide one non-blocking second eye for a consequential
-  result, public claim, or human-facing artifact. It identifies concrete
-  mismatches and useful repairs; it never becomes an approval dependency.
-- OpenCode performs normal implementation and local artifact
-  verification. Use Opus only for independent interpretation, visual critique,
-  artifact-native work, or an authenticated same-URL publication step.
-- Within a named Claudex pane, relevant Claude-side workflows and short-lived
-  native helpers may be used as implementation machinery for that pane's one
-  task. The pane owner remains accountable and validates their outputs.
-  Anything with a separate outcome, workspace, durable result, or reporting
-  route is independent work and must be a named visible Herdr pane.
-- A finding creates a bounded repair task if useful. It does not stop unrelated
-  work and is never followed by an audit of the audit.
+- Native Claude Code is not a project-work surface. Resume a legacy Claude
+  chat only to run `/export`, record the saved export and native session
+  reference in `OLD_HISTORY.md`, and close it immediately. Claudex remains an
+  explicitly selectable GPT harness and is not native Claude Code.
 
 ## Failures are isolated, not project-wide
 
