@@ -196,13 +196,12 @@ herdr wait agent-status "$pane_id" --status idle --timeout 30000 >/dev/null
 
 cost_script="$(readlink -f "$script_dir/../../../runtime/bin/herdr-costs")"
 if [ -x "$cost_script" ]; then
-    if ! "$cost_script" register \
+    nohup "$cost_script" register \
         --workspace "$HERDR_WORKSPACE_ID" \
         --pane "$pane_id" \
         --parent-pane "$HERDR_PANE_ID" \
-        --surface "$surface" >/dev/null; then
-        printf 'Cost registration is deferred until the first model turn exposes a native session.\n' >&2
-    fi
+        --surface "$surface" \
+        --wait-seconds 86400 </dev/null >/dev/null 2>&1 &
 fi
 
 trap - ERR

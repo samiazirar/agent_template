@@ -700,6 +700,19 @@ def register(args: argparse.Namespace) -> int:
     pane = herdr_pane(args.pane)
     parent = herdr_pane(args.parent_pane)
     session = (pane.get("agent_session") or {}).get("value")
+    if not session and args.wait_seconds > 0:
+        subprocess.run(
+            [
+                "herdr", "wait", "agent-status", args.pane,
+                "--status", "working",
+                "--timeout", str(args.wait_seconds * 1000),
+            ],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        pane = herdr_pane(args.pane)
+        session = (pane.get("agent_session") or {}).get("value")
     if not session:
         print("launched pane has no native session", file=sys.stderr)
         return 1
@@ -753,6 +766,7 @@ def main() -> int:
     register_parser.add_argument("--pane", required=True)
     register_parser.add_argument("--parent-pane", required=True)
     register_parser.add_argument("--surface", required=True)
+    register_parser.add_argument("--wait-seconds", type=int, default=0)
     subparsers.add_parser("register-hook", help=argparse.SUPPRESS)
     report_parser = subparsers.add_parser("report")
     report_parser.add_argument("--workspace")

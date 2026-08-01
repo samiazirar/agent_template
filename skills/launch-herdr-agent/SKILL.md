@@ -96,6 +96,19 @@ while an OpenCode target is working unless deliberate interruption is
 required. If it shows “Messages to be submitted after next tool call,” the
 message is queued rather than accepted: do not claim delivery or duplicate it.
 
+Use `herdr-agent` for every normal launch so cost registration arms before the
+first model turn. If a launcher must create a model pane directly in another
+workspace, it must immediately arm the same registration before sending the
+task:
+
+```bash
+nohup herdr-costs register --workspace TARGET_WORKSPACE --pane NEW_PANE \
+  --parent-pane OWNING_PARENT --surface PROFILE --wait-seconds 86400 \
+  </dev/null >/dev/null 2>&1 &
+```
+
+Do not defer registration to cleanup or reconstruct usage from transcripts.
+
 ## Complete project launch
 
 When the user requests a space, project, team, ecosystem, or the whole setup,
