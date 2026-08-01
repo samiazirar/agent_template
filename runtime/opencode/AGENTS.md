@@ -30,7 +30,7 @@ only the concise standard, its project `AGENTS.md`, and its validated task card.
 - Workers report only to Operations Lead or their one owning suborchestrator,
   commit and synchronize the bounded result, then stop. Close every transient
   session as soon as its result has been captured.
-- Never run `herdr wait`, `sleep`, or a polling loop for another role. Report
+- Never run `herdr agent wait`, `sleep`, or a polling loop for another role. Report
   with `herdr-role-message` to wake the parent and stop.
 - OpenCode skills are discovered from `~/.agents/skills` and
   `~/.claude/skills` and loaded on demand.

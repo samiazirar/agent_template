@@ -69,6 +69,11 @@ Every orchestrator, suborchestrator, worker, and advisor uses the same loop:
 5. **Integrate:** update the project state from evidence and choose the next
    productive action.
 
+For Operations and suborchestrators, “act” means dispatching the next Luna
+package or integrating an accepted commit. It never means personally reading
+through project code, debugging, SSHing, reproducing, implementing, or running
+the technical package.
+
 Use this evidence order:
 
 1. measured run, evaluation, or externally observable behavior;
@@ -141,6 +146,8 @@ alone cannot complete an empirical milestone.
   does not maintain `HUMAN_PLAN.md` or act as the normal user-facing
   correspondent. It remains read-only for project code except when integrating
   verified worker commits.
+  Any code, log, remote, failure, or experiment inspection is dispatched to a
+  Luna worker; Operations does not perform it before decomposition.
 - The native Codex Sol-high **human orchestrator** is the project's sole normal human
   conversation and owns the meaning of `HUMAN_PLAN.md`. Before every plan
   brief or answer, it reloads `RESTART_HANDOFF.md`, `HUMAN_PLAN.md`, and the
@@ -160,6 +167,10 @@ alone cannot complete an empirical milestone.
   task ends. It stays quiet while the worker runs and cannot create another
   suborchestrator. Operations uses a direct Luna-max worker only as an explicit
   tiny-task exception. Sol-medium coding is a harder-worker escalation.
+  The suborchestrator reads only its assignment, supplied plan/handoff excerpt,
+  and child results. Repository search, debugging, SSH, reproduction, and
+  technical diagnosis are worker packages. Its first technical action is the
+  Luna launch, and Luna-max must consume most task tokens.
 - Native Codex Luna max is normally used below a Sol-medium suborchestrator,
   or directly by Operations for one tiny atomic task, and implements or executes exactly one
   clear package. A Luna-sized package has one deliverable, one reproduction or
@@ -222,7 +233,7 @@ the Human Orchestrator's normal Herdr action. Its only exception is the guarded
 request and completed Operations save.
 
 Worker and suborchestrator completion messages are active wake-ups, not status
-notes. A parent orchestrator never calls `herdr wait`, `sleep`, or a polling
+notes. A parent orchestrator never calls `herdr agent wait`, `sleep`, or a polling
 loop for a child. After dispatch it arms `herdr-emergency-wake` with the child
 pane, a task-specific maximum-silence interval, and one recovery action, then
 ends the turn after launching any other independent work. The child's
@@ -511,6 +522,9 @@ periodic status turns.
   ledger. `herdr-costs report` shows human task names only, with worker own
   usage, task totals under each suborchestrator, Operations totals, and the
   Human total.
+- The first report line shows Luna-max and control-role token shares. Run
+  `herdr-costs report --all` for a compact cross-project table with an explicit
+  Luna-majority result.
 - Report recorded tokens and model-active time where the harness exposes it;
   mark transcript-span time as approximate. Dollar values are API-equivalent
   estimates from the selected model's public token rates. Subscription usage

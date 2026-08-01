@@ -66,4 +66,6 @@ print(matches[0])
 ' "$mode" "$target"
 )"
 
-herdr pane run "$pane_id" "$message" >/dev/null
+# Herdr 0.7.5 submits agent prompts atomically and refuses stale/non-agent
+# targets instead of silently typing into whatever now owns the pane.
+herdr agent prompt "$pane_id" "$message" >/dev/null

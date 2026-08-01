@@ -31,6 +31,11 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   run the smallest useful change, record the observed result, commit and sync
   the coherent chunk, and return to the user. Do not schedule test suites,
   browser testing, broad reviews, or cleanup as separate work.
+- Apply that loop through the assigned role. Operations dispatches and
+  integrates accepted commits but does not implement or investigate a package.
+  A suborchestrator reads only its task, supplied plan/handoff excerpt, and
+  child results; it launches Luna-max before any technical investigation and
+  ends its turn after dispatch.
 - Reuse existing code first: inspect the project, official upstream code,
   installed tools, and known working neighboring implementations before
   writing a replacement. Extend or repair the best existing path unless a
@@ -56,6 +61,8 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   sole operational authority and owns day-to-day decomposition, dependencies,
   dispatch, runs, integration, synchronization, outcome accounting, and the
   rolling 90/10 budget.
+  It does not patch, debug, broadly inspect project code, run experiments, or
+  SSH for technical work; each such need becomes a Luna package.
 - `Human Orchestrator · PersonName Plan` uses native Codex `gpt-5.6-sol` high. It is the
   project's sole normal human conversation and owns the meaning of
   `HUMAN_PLAN.md`. It reloads the handoff, plan, and cited evidence before
@@ -80,13 +87,14 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   and, only after an explicit Human close request and completed Operations
   save, `herdr-project-save-close --close`. It may use no other Herdr control
   command.
-- Direct prompting uses `herdr pane run` only after the target is `idle` or
-  `done`, followed by confirmation that the new turn started or completed.
+- Direct prompting uses `herdr agent prompt` after the target is `idle` or
+  `done`; initial launch validation uses its bounded `--wait` mode so Herdr
+  reports `agent_prompt_stalled` when no lifecycle change occurs.
   Never use `send-text` for a prompt. A “Messages to be submitted after next
   tool call” banner means queued, not processed; wait for its turn and never
   duplicate it.
 - Operations Lead and every suborchestrator must remain interruptible. They
-  never call `herdr wait`, `sleep`, or a polling loop for a worker. After
+  never call `herdr agent wait`, `sleep`, or a polling loop for a worker. After
   dispatch, the parent arms `herdr-emergency-wake` for a task-specific maximum
   silence and ends its turn after launching any other independent work. The
   worker wakes the parent directly with `herdr-role-message` when it completes
@@ -111,6 +119,9 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   suborchestrator layer. Operations may launch a direct Luna-max worker only
   for an explicit tiny atomic task. Sol-medium coding is a harder-worker
   escalation after Luna.
+  It may not inspect the repository, logs, remote systems, or reproduce a
+  failure itself. Its own turns stay below 10% of task tokens and Luna-max must
+  consume the task majority.
 - Normally only a Sol-medium suborchestrator launches native Codex
   `gpt-5.6-luna` max; Operations may launch it directly for one tiny task.
   Give Luna one clear package
@@ -398,10 +409,11 @@ control-work percentage.
   Fresh sessions reconstruct from `HUMAN_PLAN.md`, handoffs, and cited evidence.
 - Let worker messages and the emergency helper wake parent orchestrators.
   Watch scheduler/process state externally. Never occupy an orchestrator turn
-  with `herdr wait`, `sleep`, or polling unchanged state.
-- Run `herdr-costs report` for own and aggregate time, tokens, and
-  API-equivalent dollars by human task name. The private ledger and terminal
-  report replace manual usage files or dashboards.
+  with `herdr agent wait`, `sleep`, or polling unchanged state.
+- Run `herdr-costs report` for own and aggregate time, Luna-max/control token
+  shares, and API-equivalent dollars by human task name. Run
+  `herdr-costs report --all` for every recorded Herdr workspace. The private
+  ledger and terminal report replace manual usage files or dashboards.
 
 ## 10. PaperPilot
 

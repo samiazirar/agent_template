@@ -804,6 +804,100 @@ def normalized_parent(record: dict[str, Any], records: list[dict[str, Any]]) -> 
     return operations
 
 
+CONTROL_ROLES = {
+    "Human Orchestrator",
+    "Operations Lead",
+    "Operations Orchestrator",
+    "Operations Collaborator",
+    "Suborchestrator",
+    "Plan Orchestrator",
+    "Advisor",
+    "Strategic Advisor",
+    "Verifier",
+    "Watcher",
+    "Progress",
+    "Archive",
+    "Launcher",
+}
+
+
+def usage_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
+    by_model: dict[str, int] = defaultdict(int)
+    by_role: dict[str, int] = defaultdict(int)
+    total_cost = 0.0
+    for record in records:
+        metrics = session_metrics(record)
+        tokens = int(metrics["usage"]["tokens"])
+        model_key = f'{metrics["model"]}/{metrics["effort"]}'
+        by_model[model_key] += tokens
+        by_role[role(record["label"])] += tokens
+        total_cost += float(metrics["cost"])
+    total_tokens = sum(by_model.values())
+    luna_max = by_model.get("gpt-5.6-luna/max", 0)
+    control = sum(tokens for name, tokens in by_role.items() if name in CONTROL_ROLES)
+    return {
+        "tokens": total_tokens,
+        "cost": total_cost,
+        "luna_max_tokens": luna_max,
+        "luna_max_pct": 100.0 * luna_max / total_tokens if total_tokens else 0.0,
+        "control_tokens": control,
+        "control_pct": 100.0 * control / total_tokens if total_tokens else 0.0,
+        "by_model": dict(by_model),
+    }
+
+
+def report_all() -> int:
+    try:
+        result = subprocess.run(
+            ["herdr", "workspace", "list"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        workspaces = json.loads(result.stdout)["result"]["workspaces"]
+    except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
+        print("Could not read Herdr workspaces.", file=sys.stderr)
+        return 1
+    rows = []
+    for workspace in workspaces:
+        workspace_id = workspace["workspace_id"]
+        try:
+            pane_result = subprocess.run(
+                ["herdr", "pane", "list", "--workspace", workspace_id],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            panes = json.loads(pane_result.stdout)["result"]["panes"]
+        except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
+            continue
+        labels = [str(pane.get("label") or "") for pane in panes]
+        if not (
+            any(label.startswith("Human Orchestrator · ") for label in labels)
+            and any(label.startswith("Operations Lead · ") for label in labels)
+        ):
+            continue
+        reconcile_workspace(workspace_id)
+        records = load_records(workspace_id)
+        if not records:
+            continue
+        summary = usage_summary(records)
+        rows.append((workspace.get("label") or workspace_id, summary))
+    print("Cost summary · all recorded Herdr workspaces")
+    print("API-equivalent USD; lifetime recorded usage; subscription billing is not included.")
+    print()
+    print(f'{"Project":36} {"Tokens":10} {"Luna max":10} {"Control":10} {"Cost":10} {"Luna majority":13}')
+    print("-" * 96)
+    for label, summary in rows:
+        majority = "yes" if summary["luna_max_pct"] > 50.0 else "NO"
+        print(
+            f'{label[:36]:36} {fmt_tokens(summary["tokens"]):10} '
+            f'{summary["luna_max_pct"]:9.1f}% {summary["control_pct"]:9.1f}% '
+            f'${summary["cost"]:9.3f} {majority:13}'
+        )
+    return 0
+
+
 def report(workspace: str) -> int:
     reconcile_workspace(workspace)
     records = load_records(workspace)
@@ -811,6 +905,7 @@ def report(workspace: str) -> int:
         print("No registered sessions for this workspace yet.")
         return 0
     active = current_sessions(workspace)
+    summary = usage_summary(records)
     grouped: dict[str, dict[str, Any]] = {}
     skill_totals: dict[tuple[str, str], dict[str, Any]] = {}
     for record in records:
@@ -886,6 +981,12 @@ def report(workspace: str) -> int:
 
     print(f"Cost and time · workspace {workspace}")
     print("API-equivalent USD; subscription billing and non-token tool charges are not included.")
+    print(
+        f'Token mix: Luna max {fmt_tokens(summary["luna_max_tokens"])} '
+        f'({summary["luna_max_pct"]:.1f}%); control roles '
+        f'{fmt_tokens(summary["control_tokens"])} ({summary["control_pct"]:.1f}%). '
+        f'Luna majority: {"yes" if summary["luna_max_pct"] > 50.0 else "NO"}.'
+    )
     print()
     print(f'{"Task":45} {"Model / effort":28} {"State":7} {"Own time":10} {"Total time":10} {"Own tok":9} {"Total tok":9} {"Own $":9} {"Total $":9}')
     print("-" * 146)
@@ -928,8 +1029,8 @@ def register(args: argparse.Namespace) -> int:
     if not session and args.wait_seconds > 0:
         subprocess.run(
             [
-                "herdr", "wait", "agent-status", args.pane,
-                "--status", "working",
+                "herdr", "agent", "wait", args.pane,
+                "--until", "working",
                 "--timeout", str(args.wait_seconds * 1000),
             ],
             check=False,
@@ -1001,6 +1102,11 @@ def main() -> int:
     reconcile_parser.add_argument("--project-dir", type=Path)
     report_parser = subparsers.add_parser("report")
     report_parser.add_argument("--workspace")
+    report_parser.add_argument(
+        "--all",
+        action="store_true",
+        help="show a compact cost and token-mix table for all workspaces",
+    )
     args = parser.parse_args()
     if args.command == "register":
         return register(args)
@@ -1010,6 +1116,8 @@ def main() -> int:
         count = reconcile_workspace(args.workspace, args.project_dir)
         print(f"Registered {count} previously missing sessions.")
         return 0
+    if args.command == "report" and args.all:
+        return report_all()
     workspace = getattr(args, "workspace", None) or os.environ.get("HERDR_WORKSPACE_ID")
     if not workspace:
         print("Use --workspace or run inside Herdr.", file=sys.stderr)

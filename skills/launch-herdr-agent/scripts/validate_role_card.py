@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -27,11 +28,11 @@ CONTRACTS = {
         "MODEL: Native Codex GPT-5.6 Sol high",
         "RECEIVES FROM: Human Orchestrator; workers; suborchestrators; Plan Orchestrators; advisors; researchers; verifiers",
         "SENDS TO: Human Orchestrator; assigned technical roles",
-        "OWNS: Technical state; decomposition; execution; role lifecycle; integration; synchronization; rolling 90/10 budget",
-        "MUST NOT: Share operational authority; use the Human Orchestrator as an execution manager; send routine technical chatter to the human side; speak to the Human except an immediate safety emergency",
+        "OWNS: Technical state from worker results; decomposition; dispatch; role lifecycle; accepted-commit integration; synchronization; rolling 90/10 budget",
+        "MUST NOT: Implement, patch, debug, inspect project code broadly, run experiments, or SSH for technical work; absorb a worker package; share operational authority; use the Human Orchestrator as an execution manager; send routine technical chatter to the human side; speak to the Human except an immediate safety emergency",
         "ROUTING RULE: Be the sole operational authority and normal bridge between the Human Orchestrator and every technical role.",
         "MESSENGER RULE: Use herdr-role-message human for human questions and material results. Start a forwarded confirmed action instead of acknowledging it again.",
-        "WAKE RULE: Never run herdr wait, sleep, or a polling loop for a child role. Arm herdr-emergency-wake after dispatch; the child wakes you with herdr-role-message on completion or material trouble.",
+        "WAKE RULE: Never run herdr agent wait, sleep, or a polling loop for a child role. Arm herdr-emergency-wake after dispatch; the child wakes you with herdr-role-message on completion or material trouble.",
         "DISPATCH RULE: Default every meaningful productive task to one quiet native-Codex Sol-medium suborchestrator; it launches a new Luna-max session for each frozen atomic package. Launch Luna-max directly only for an explicit tiny atomic task. Use a Sol-medium coding worker only as a harder-package escalation after Luna.",
         "CLOSURE RULE: Capture a transient role's final report and native session reference, close its pane immediately, validate pane lifecycle, then integrate or reject its saved result and retire its worktree after merge or rejection.",
         "PROGRESS RULE: Every active task has one current minimal package, observed finish condition, and concrete next action. Ready, idle, waiting, submitted, or an agent claim is not completion. Keep HUMAN_PLAN.md and RESTART_HANDOFF.md current after material change and use herdr-costs report for usage instead of a model-maintained dashboard.",
@@ -60,10 +61,10 @@ CONTRACTS = {
         "MODEL: Native Codex GPT-5.6 Sol medium",
         "RECEIVES FROM: Operations Lead",
         "SENDS TO: Operations Lead; its assigned workers",
-        "OWNS: One meaningful task; its goal; its observed finish condition; its sequence of minimal productive packages",
-        "MUST NOT: Code; edit project files; execute experiments; perform a worker package itself; contact the Human or Human Orchestrator; create another suborchestrator; manage work outside its task",
-        "ROUTING RULE: Freeze one atomic task card, launch one fresh native-Codex Luna-max session for that package, arm herdr-emergency-wake instead of waiting, close it after its wake message, absorb the result, then launch a new Luna-max session for the next card. Use a Sol-medium worker only for an explicit harder-package escalation. Integrate the task, report with herdr-role-message operations, then stop.",
-        "WAKE RULE: Never run herdr wait, sleep, or a polling loop for a child role. The worker wakes you directly; the emergency wake fires once only if the child remains open past maximum silence.",
+        "OWNS: One meaningful task; its goal; its observed finish condition; decomposition into minimal productive packages",
+        "MUST NOT: Inspect or search project code; SSH; diagnose or debug technical behavior; code; edit project files; execute experiments; perform a worker package itself; contact the Human or Human Orchestrator; create another suborchestrator; manage work outside its task",
+        "ROUTING RULE: Read only the assigned task, supplied plan or handoff excerpt, and child results. Make the first technical action launch one fresh native-Codex Luna-max session with a frozen atomic card, arm herdr-emergency-wake, and end the turn. Close it after its wake message, absorb only the compact result, then launch a new Luna-max session for the next card. Use a Sol-medium worker only for an explicit harder-package escalation. Report the task result with herdr-role-message operations, then stop.",
+        "WAKE RULE: Never run herdr agent wait, sleep, or a polling loop for a child role. The worker wakes you directly; the emergency wake fires once only if the child remains open past maximum silence.",
     ),
     "strategic-advisor": (
         "ROLE: Strategic Advisor",
@@ -104,13 +105,36 @@ CONTRACTS = {
 }
 
 
+TECHNICAL_DIRECTIVE = re.compile(
+    r"\b(?:"
+    r"(?:inspect|search|read)\s+(?:the\s+)?(?:repo(?:sitory)?|code|logs?|files?|remote|experiment)|"
+    r"debug|diagnose|reproduce|implement|patch|edit|modify|execute|"
+    r"run\s+(?:the\s+)?(?:experiment|code|tests?|commands?|jobs?)|ssh"
+    r")\b",
+    re.IGNORECASE,
+)
+NEGATED_DIRECTIVE = re.compile(
+    r"\b(?:must not|do not|never|forbid|without|rather than|instead of)\b",
+    re.IGNORECASE,
+)
+
+
 def render(role: str) -> str:
+    if role == "operations-lead":
+        goal_rule = "GOAL RULE: Move the goal by dispatching productive Luna work and integrating accepted commits; never perform the technical package yourself."
+        budget_rule = "90/10 RULE: Operations and suborchestrator turns are control work and together stay below 10% of project tokens and agent-hours. Luna-max workers must be the majority of project tokens; if they are not, stop technical inspection and dispatch the next goal-moving Luna package."
+    elif role == "suborchestrator":
+        goal_rule = "GOAL RULE: Move the task only by freezing and dispatching its next Luna package; technical investigation, reproduction, implementation, and execution belong to the worker."
+        budget_rule = "90/10 RULE: Your turns are control work and stay below 10% of the task's aggregate tokens and agent-hours. Luna-max workers must consume the majority; end each turn immediately after dispatch or one compact child-result decision."
+    else:
+        goal_rule = "GOAL RULE: Preserve the user-approved goal and observed finish condition. Take the smallest causal action that moves them; do not widen into unrelated architecture or stop at readiness, ordinary failure, waiting language, or a model claim."
+        budget_rule = "90/10 RULE: At least 90% of active project task slots and agent-hours must directly change code, data, experiments, evaluations, accepted evidence, or paper content; all orchestration, planning, advice, checking, status, and waiting share at most 10%."
     return "\n".join(
         (
             "ROLE CONTRACT",
             *CONTRACTS[role],
-            "GOAL RULE: Preserve the user-approved goal and observed finish condition. Take the smallest causal action that moves them; do not widen into unrelated architecture or stop at readiness, ordinary failure, waiting language, or a model claim.",
-            "90/10 RULE: At least 90% of active project task slots and agent-hours must directly change code, data, experiments, evaluations, accepted evidence, or paper content; all orchestration, planning, advice, checking, status, and waiting share at most 10%.",
+            goal_rule,
+            budget_rule,
             "END ROLE CONTRACT",
         )
     )
@@ -136,6 +160,22 @@ def main() -> int:
         for line in missing:
             print(f"- {line}", file=sys.stderr)
         return 1
+
+    if args.role in {"operations-lead", "suborchestrator"}:
+        remainder = text.replace(contract, "", 1)
+        conflicts = [
+            line.strip()
+            for line in remainder.splitlines()
+            if TECHNICAL_DIRECTIVE.search(line) and not NEGATED_DIRECTIVE.search(line)
+        ]
+        if conflicts:
+            print(
+                "Role card is invalid; technical work was assigned to a control role:",
+                file=sys.stderr,
+            )
+            for line in conflicts:
+                print(f"- {line}", file=sys.stderr)
+            return 1
 
     print(f"Role card valid: {args.role}")
     return 0

@@ -110,13 +110,14 @@ maintenance session starts before the user has discussed the human plan.
 
 ## Initial briefs
 
-Operations Lead reads the operating contract, inherited plan, restart handoff, and
-only the raw evidence needed to verify current reality. Ask it to:
+Operations Lead reads the operating contract, inherited plan, and restart
+handoff. It delegates every code, log, remote, failure, and experiment
+inspection to Luna rather than reconstructing technical state itself. Ask it to:
 
 1. preserve the user-approved question; surface ambiguity instead of silently
    reinterpreting it;
-2. reconstruct current state using the evidence hierarchy in the operating
-   contract;
+2. reconstruct current state from Luna inspection packages using the evidence
+   hierarchy in the operating contract;
 3. make the first milestone end in an observable project result rather than
    enabling infrastructure;
 4. assign each meaningful productive task to one named native-Codex Sol-medium
@@ -208,16 +209,18 @@ After either strategic answer is durably captured, close that pane immediately.
   native-Codex Sol-medium suborchestrator owns one task and its finish
   condition, performs no coding or experiment execution, issues only the next
   useful packages, launches one fresh native-Codex Luna-max worker per normal coding package
-  or native-Codex Sol-medium worker for a harder package, absorbs compact results, integrates
-  its task for Operations Lead, stays quiet while a worker runs, and closes when
-  the task ends. It may not create
+  or native-Codex Sol-medium worker for a harder package, absorbs only compact
+  child results, reports its task result to Operations Lead, stays quiet while
+  a worker runs, and closes when the task ends. It may not inspect the
+  repository, logs, remote systems, or diagnose or reproduce technical behavior.
+  It may not create
   another suborchestrator or add a review turn after every successful package.
 - Claudex may use relevant native workflows and short-lived helpers inside one
   named pane's assigned task and worktree. Independent work with its own task
   card, workspace, durable result, or reporting route must be opened as a named
   visible Herdr pane.
 - Every completed worker sends its completion envelope to its owning
-  orchestrator, waking that parent directly. The parent never runs `herdr wait`,
+  orchestrator, waking that parent directly. The parent never runs `herdr agent wait`,
   `sleep`, or a polling loop for a child. It arms `herdr-emergency-wake` after
   dispatch and ends its turn; closing the child after its message disarms the
   fallback. Operations Lead routes only an accepted material result, genuine
@@ -265,8 +268,9 @@ After either strategic answer is durably captured, close that pane immediately.
 - Keep `HUMAN_PLAN.md` human-readable and `RESTART_HANDOFF.md` compact and
   restart-ready after every material result, active-task change, external wait,
   or decision. Run `herdr-costs report` for the private human-named hierarchy
-  of own and aggregate time, tokens, and API-equivalent cost; create no manual
-  usage artifact.
+  of own and aggregate time, Luna-max/control token shares, tokens, and
+  API-equivalent cost. Run `herdr-costs report --all` for the compact
+  cross-project table; create no manual usage artifact.
 - OpenCode usage and skill calls come from its native database. Claude Code and Claudex must retain the zero-context SessionStart hook
   `herdr-costs register-hook`; resumed native sessions then remain attributed
   to their human task. Keep Pyright LSP enabled. Keep Superpowers, Code Review,

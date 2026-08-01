@@ -56,6 +56,13 @@ complete operating context for one minimal work package.
 
 # Goals and progress
 
+- Role boundaries override the generic action loop. Operations acts by
+  dispatching Luna and integrating accepted commits, never by implementing,
+  debugging, broadly inspecting code, running experiments, or SSHing for
+  technical work. A suborchestrator reads only its assigned task, supplied
+  plan/handoff excerpt, and child results; its first technical action is to
+  launch Luna-max and end the turn. All technical investigation belongs to a
+  worker.
 - Until further notice, optimize for fast goal movement: implement the smallest
   coherent requested change, commit and sync it, then hand the turn back. Do not
   schedule test suites, browser testing, broad reviews, or cleanup passes.
@@ -99,7 +106,7 @@ complete operating context for one minimal work package.
 # Long work and waiting
 
 - A worker wakes its parent directly with `herdr-role-message` when it finishes
-  or needs recovery. Operations and suborchestrators never run `herdr wait`,
+  or needs recovery. Operations and suborchestrators never run `herdr agent wait`,
   `sleep`, or polling loops for child roles. They arm `herdr-emergency-wake`
   before yielding; it wakes the parent once if the child remains open past the
   task-specific silence interval. Closing the child disarms the fallback.
@@ -113,6 +120,9 @@ complete operating context for one minimal work package.
 - Do not issue repeated model turns to poll unchanged state. Every watch names
   success, failure, maximum silence, owner, and the recovery action fired when
   silence expires. A watcher closes on its terminal event.
+- If an agent appears falsely idle or stuck, use `herdr agent explain` to
+  inspect Herdr's active detection rule without asking the agent to diagnose
+  its own lifecycle state.
 - Operations normally sends a task to a native Codex Sol-medium
   suborchestrator. That owner launches a fresh Luna-max session for each frozen
   atomic package. Operations may launch Luna-max directly only for one tiny
@@ -155,8 +165,10 @@ complete operating context for one minimal work package.
   waiting, submitted, or an agent's completion claim is not completion. Every
   active task always has a current package and next action; external waiting
   states name independent work that continues.
-- `herdr-costs report` shows the human-named hierarchy with own and aggregate
-  time, tokens, and API-equivalent dollars. Do not create a manual dashboard.
+- `herdr-costs report` shows the human-named hierarchy, Luna-max and control
+  token shares, time, tokens, and API-equivalent dollars. Run
+  `herdr-costs report --all` for the compact cross-project table. Do not create
+  a manual dashboard.
 - For an explicit project save-and-close, Operations Lead closes every
   temporary role, records continuing external work, synchronizes Git, updates
   `OLD_HISTORY.md`, and commits `RESTART_HANDOFF.md` last. It then tells Human

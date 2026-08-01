@@ -192,7 +192,7 @@ trap cleanup_failed_launch ERR
 herdr pane rename "$pane_id" "$label" >/dev/null
 printf -v launch_command '%q ' "${launch_env[@]}" "${launch_argv[@]}"
 herdr pane run "$pane_id" "${launch_command% }" >/dev/null
-herdr wait agent-status "$pane_id" --status idle --timeout 30000 >/dev/null
+herdr agent wait "$pane_id" --until idle --until done --timeout 30000 >/dev/null
 
 cost_script="$(readlink -f "$script_dir/../../../runtime/bin/herdr-costs")"
 if [ -x "$cost_script" ]; then

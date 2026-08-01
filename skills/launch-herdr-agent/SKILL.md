@@ -89,9 +89,9 @@ a Worker may edit its own worktree and commit its one bounded result; a routine
 research task remains read-only. Neither may broaden its task.
 
 Do not pass a task to the native executable as an argv prompt. After the new
-agent reaches its interactive prompt, send its task with `herdr pane run`.
+agent reaches its interactive prompt, send its task with `herdr agent prompt`.
 Never use `send-text` for a task or message. Native Codex accepts steering
-during an active turn and explicit next-turn queuing. Do not call `pane run`
+during an active turn and explicit next-turn queuing. Do not call `agent prompt`
 while an OpenCode target is working unless deliberate interruption is
 required. If it shows “Messages to be submitted after next tool call,” the
 message is queued rather than accepted: do not claim delivery or duplicate it.
@@ -149,6 +149,9 @@ Operations pane x-coordinate.
    integration, commits, synchronization, technical state, and the rolling
    90/10 budget. Be the sole operational authority and normal bridge between
    the Human Orchestrator and every technical role.
+   Never implement, patch, debug, broadly inspect project code, run an
+   experiment, or SSH for technical work. Dispatch each such need to Luna and
+   integrate only accepted worker commits.
    Use `herdr-role-message human "..."` for human questions or material results.
    When a forwarded confirmation arrives, start the named action instead of
    acknowledging it again.
@@ -218,7 +221,8 @@ suborchestrator. That owner freezes one atomic card and launches one fresh
 named native-Codex Luna-max session for it, then closes it before launching a
 new Luna session for the next atomic card. The suborchestrator never codes,
 edits project files, or executes experiments, and stays quiet while its worker
-runs. One worker owns one deliverable, one
+runs. It also never searches project code, debugs, reproduces, or inspects a
+remote system itself; those are Luna packages. One worker owns one deliverable, one
 reproduction or run, one done check, normally no more than three tightly
 coupled files or one experiment stage, one branch, and one worktree. Launch multiple
 workers concurrently when their subtasks are independent. Never give one
@@ -234,8 +238,10 @@ The parent never waits inside its model turn. After launching a child, arm
 and one recovery action, then finish the parent turn after dispatching any
 other independent work. The child reports with `herdr-role-message`, which
 wakes or steers the parent, and stops without waiting for acknowledgement.
-Closing the child pane disarms the emergency wake. Never run `herdr wait`,
+Closing the child pane disarms the emergency wake. Never run `herdr agent wait`,
 `sleep`, or a polling loop in Operations Lead or a suborchestrator.
+If Herdr reports an implausible lifecycle state, use `herdr agent explain` to
+inspect the active detection rule without spending a model turn on self-diagnosis.
 
 Luna self-verifies against the attached done check. Give a harder package to a
 fresh native-Codex Sol-medium worker when Luna cannot choose between materially different approaches,
@@ -249,8 +255,8 @@ named suborchestrator in `03 Suborchestrators`. Give it one measurable task goal
 and observed finish condition. It does no coding or experiment execution. It
 turns only the next useful work into a frozen atomic task card, launches one fresh
 native-Codex Luna-max worker per normal coding package or native-Codex Sol-medium worker for a harder
-package, absorbs compact results, integrates the task for Operations Lead, and
-closes when the task ends. Operations may launch a direct Luna-max worker only
+package, absorbs only compact child results, reports the finished task to
+Operations Lead, and closes when the task ends. Operations may launch a direct Luna-max worker only
 for an explicit tiny atomic task. Sol-medium coding workers are harder-package
 escalations after Luna. It communicates only with Operations
 Lead and its own workers. It may not contact the Human Orchestrator, create
@@ -275,8 +281,9 @@ waiting pane.
 
 `herdr-agent` registers every session automatically. The lightweight
 terminal command `herdr-costs report` shows the human-named hierarchy with own
-and aggregate time, tokens, and API-equivalent cost. Do not launch an agent to
-measure usage and do not create a manual dashboard.
+and aggregate time, Luna-max/control token shares, tokens, and API-equivalent
+cost. `herdr-costs report --all` shows the compact cross-project table. Do not
+launch an agent to measure usage and do not create a manual dashboard.
 
 OpenCode alternate-provider usage comes from its native database. Native Codex
 usage is collected by the Herdr integration. Claudex uses the zero-context `SessionStart` command hook
@@ -387,13 +394,15 @@ require a quiet Sol-medium suborchestrator by default, one new fresh Luna-max
 session per frozen atomic package, and direct Luna-max only for a tiny atomic task, concurrent
 independent workers, closure immediately after a transient final report is
 captured and before integration, sole-bridge routing, and active enforcement of
-the 90/10 budget. It must forbid `herdr wait`, `sleep`, and polling for child
+the 90/10 budget. It must forbid `herdr agent wait`, `sleep`, and polling for child
 roles; require direct child wake messages and one armed emergency wake per
 child.
 Worker prompts must give one Luna-sized result and forbid hidden delegation,
 unrelated work, and direct human-side contact. Suborchestrator prompts use Sol
-medium through native Codex, define one task and finish condition, forbid coding, issue minimal
-packages to fresh workers, report only to Operations Lead, and forbid another
+medium through native Codex, define one task and finish condition, forbid coding,
+repository inspection, debugging, reproduction, SSH, and experiment execution,
+make Luna launch the first technical action, issue minimal packages to fresh
+workers, report only to Operations Lead, and forbid another
 orchestration layer.
 Plan Orchestrator prompts must limit writes to `HUMAN_PLAN.md`, report only to
 Operations Lead, and stop after one commit. Bounded research/data prompts use
@@ -412,10 +421,11 @@ prompt if an acknowledgement contradicts the canonical role block. Do not open
 a separate checker agent.
 
 After prompting, wait only for each session to become working. Use
-`herdr pane run` only after the target reports `idle` or `done`, and confirm
-the target becomes `working` or completes the submitted turn. This is the
-mechanical send check; text merely visible in an input box or queue is not an
-accepted prompt. If a launch fails, close only the failed tab, retry once with
+`herdr agent prompt TARGET TASK --wait --until working --until idle --until done
+--until blocked --timeout 10000` after the target reports `idle` or `done`.
+Herdr returns `agent_prompt_stalled` when submission produces no lifecycle
+change. This is the mechanical send check; text merely visible in an input box
+or queue is not an accepted prompt. If a launch fails, close only the failed tab, retry once with
 the same surface, and report the concrete launch failure if the retry also
 fails.
 

@@ -17,6 +17,11 @@ orchestration contracts provide the detailed rules.
 - Treat the requested action boundary literally. A read, report, diagnose, or
   evidence task does not authorize edits, repository-wide scans, unrelated
   retries, tests, cleanup, launches, or implementation.
+- Role boundaries override generic action language. Operations moves the goal
+  by dispatching Luna work and integrating accepted commits, not by technical
+  implementation, debugging, broad code inspection, experiment execution, or
+  remote technical work. A suborchestrator's first technical action is to
+  launch Luna-max; technical investigation is itself a worker package.
 - One task owns one branch, worktree, and named Herdr session. Accepted chunks
   are merged in dependency order; after integration, the canonical checkout
   and GitHub represent the same code.
@@ -173,6 +178,9 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   suborchestrator lifecycle, integration, synchronization, the 90/10 budget,
   and technical state. It is the sole operational authority and normal bridge
   between the Human Orchestrator and every technical role.
+  It remains read-only for project content except Git integration of accepted
+  worker commits. If it needs code, log, remote, or experiment inspection, it
+  dispatches that inspection as a Luna package.
 - Normal communication follows one path:
   `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`.
   Workers, suborchestrators, Plan Orchestrators, advisors, researchers, and
@@ -188,12 +196,13 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   hidden. Human Orchestrator may use this messenger and the guarded
   `herdr-project-save-close --close` command after an explicit Human close
   request and a completed Operations save. It may use no other Herdr control.
-- A prompt is sent with `herdr pane run`, never `send-text`. Send only after
-  the target is `idle` or `done`, then confirm it becomes `working` or
-  completes the new turn. Text shown as “Messages to be submitted after next
-  tool call” is queued, not yet accepted; do not claim it was processed and do
-  not send a duplicate.
-- A parent orchestrator never runs `herdr wait`, `sleep`, or a polling loop for
+- A prompt is sent with `herdr agent prompt`, never `send-text`. Initial launch
+  validation uses its bounded `--wait` mode so ineffective submission returns
+  `agent_prompt_stalled` instead of silently stalling. Operations and
+  suborchestrators do not wait for child completion. Text shown as “Messages to
+  be submitted after next tool call” is queued, not yet accepted; do not claim
+  it was processed and do not send a duplicate.
+- A parent orchestrator never runs `herdr agent wait`, `sleep`, or a polling loop for
   a child role. Before yielding after dispatch, it arms
   `herdr-emergency-wake` with the child pane and a task-specific maximum-silence
   interval. The child wakes its parent directly with `herdr-role-message` on
@@ -201,6 +210,9 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   the child, which disarms the emergency wake. If no child message arrives,
   the helper wakes the parent once with the recovery action. No model turn
   remains occupied by waiting.
+- If Herdr's lifecycle state looks wrong, use `herdr agent explain` to inspect
+  the active detection rule without spending a model turn asking the agent to
+  diagnose Herdr itself.
 - “Do,” “go,” “continue,” and equivalent short confirmations authorize the
   already-discussed next action. Human Orchestrator forwards the instruction
   once and Operations Lead starts it; neither asks the user to restate it or
@@ -268,7 +280,9 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   suborchestrator.
 - Suborchestrators are the default task owners. They use native Codex Sol
   medium, own exactly one meaningful task, and do no coding, file editing, or
-  experiment execution. Each states the task goal and finish condition, turns
+  experiment execution, repository inspection, debugging, or remote technical
+  work. Each reads only the assigned task, supplied plan/handoff excerpt, and
+  child results; states the task goal and finish condition; turns
   only the next useful work into a frozen atomic card, launches a fresh
   native-Codex Luna-max session for every normal package or native
   Codex Sol-medium worker for
@@ -314,6 +328,9 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   of worker own time/tokens/cost, suborchestrator totals, Operations totals, and
   the Human total. Dollar values are API-equivalent estimates; subscription
   sessions are not token-billed and provider billing remains authoritative.
+  The report begins with Luna-max and control-role token shares. Run
+  `herdr-costs report --all` from any Herdr pane for a compact cross-project
+  table and an explicit Luna-majority result.
 - OpenCode accounting reads its native session database, including per-message
   model, variant, token, cost, active-time, and skill-tool records. Native
   Claude Code and Claudex also register new and resumed Herdr sessions

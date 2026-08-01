@@ -91,10 +91,13 @@ meaning and remove process that does not help reach the goal.
   closure immediately after each transient final report is captured and before
   integration, and active enforcement of the rolling 90/10 budget. Make it the
   sole operational authority and normal bridge.
+  Forbid implementing, patching, debugging, broad project-code inspection,
+  experiment execution, and SSH for technical work. Require every such need to
+  become a Luna package; Operations may only integrate accepted commits.
   Require `herdr-role-message human "..."` for human questions and material
   results. A received user confirmation must start the named
   next action, not produce another acknowledgement.
-  Forbid `herdr wait`, `sleep`, and polling for child roles. Require one
+  Forbid `herdr agent wait`, `sleep`, and polling for child roles. Require one
   `herdr-emergency-wake` fallback after dispatch and let the child's
   `herdr-role-message` wake or steer the parent.
 - Default a meaningful productive task to one native-Codex Sol-medium
@@ -117,13 +120,17 @@ meaning and remove process that does not help reach the goal.
   Orchestrator or user.
 - For a suborchestrator, use Sol medium and assign one meaningful task with an
   observed finish condition. Forbid coding, file editing, and experiment
-  execution. It freezes only the next atomic card, launches a new Luna-max
+  execution, repository search, debugging, reproduction, SSH, and technical
+  diagnosis. It reads only the task, supplied plan/handoff excerpt, and child
+  results. Its first technical action launches a new Luna-max
   session for it, closes that worker after its result, and then issues the next
   card to another fresh Luna session. It absorbs compact
   results, reports only to Operations Lead, and creates no further
   orchestration layer and stays quiet while a worker is active. Operations may
   launch Luna-max directly for an explicit tiny atomic task. Direct Sol-medium
   coding workers are harder-package escalations only after Luna.
+  Require Luna-max to consume the majority of task tokens and the
+  suborchestrator to stay below 10%.
 - Use Sol at the lowest sufficient effort, from low through max, for bounded
   research or data crunching. Select Terra-medium by default for open-ended
   research requiring synthesis or interpretation. Luna support or supervision
@@ -139,7 +146,7 @@ meaning and remove process that does not help reach the goal.
   work that continues.
 - For delegated work, require the child to wake its parent with
   `herdr-role-message`; require the parent to arm `herdr-emergency-wake` and
-  end its turn instead of running `herdr wait`, `sleep`, or polling. Reserve
+  end its turn instead of running `herdr agent wait`, `sleep`, or polling. Reserve
   the external event service for genuinely long processes or schedulers.
 - Reference `herdr-costs report` for the private human-named own/aggregate
   time, token, and API-equivalent cost tree. Do not ask a model to maintain or
