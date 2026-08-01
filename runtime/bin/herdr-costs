@@ -17,10 +17,11 @@ from typing import Any
 
 
 OPENAI_PRICES = {
-    # Standard API USD per 1M tokens: short-context rates, then long-context.
+    # Standard API USD per 1M tokens, verified 2026-08-01 against the official
+    # GPT-5.6 model pages: short-context rates, then >272K-input rates.
     "gpt-5.6-sol": (5.00, 0.50, 6.25, 30.00, 10.00, 1.00, 12.50, 45.00),
-    "gpt-5.6-terra": (2.00, 0.20, 2.50, 12.00, 4.00, 0.40, 5.00, 18.00),
-    "gpt-5.6-luna": (0.20, 0.02, 0.25, 1.20, 0.40, 0.04, 0.50, 1.80),
+    "gpt-5.6-terra": (2.50, 0.25, 3.125, 15.00, 5.00, 0.50, 6.25, 22.50),
+    "gpt-5.6-luna": (1.00, 0.10, 1.25, 6.00, 2.00, 0.20, 2.50, 9.00),
 }
 CLAUDE_PRICES = {
     "claude-opus-5": (5.00, 0.50, 6.25, 10.00, 25.00),
@@ -153,12 +154,15 @@ def latest_primary_rate_limit() -> dict[str, Any] | None:
         "observed_at": latest["observed_at"].isoformat().replace("+00:00", "Z"),
         "opening_used_percent": round(opening_used, 3),
         "local_observed_estimate_percent": round(local_estimate, 3),
+        "beech_observed_increase_percent": round(local_estimate, 3),
+        "pre_beech_observation_percent": round(other_unassigned, 3),
+        "other_machine_percent": None,
         "other_unassigned_percent": round(other_unassigned, 3),
         "today_delta_percent": round(today_delta, 3) if today_delta is not None else None,
         "today_delta_supported": today_delta is not None,
         "snapshot_count": int(window["count"]),
-        "attribution": "Local-observed estimate: percentage-point changes first observed during local turns. Opening account usage and anything not safely attributable remain Other / unassigned.",
-        "data_quality": "Concurrent Codex use on another machine can change the account percentage between local snapshots and cannot be separated here. Quota percentages are not converted to dollars.",
+        "attribution": "Beech-observed increase: account percentage-point changes first seen in Codex turns on beech. This is not device attribution. Usage before the first beech snapshot is shown separately; exact other-machine usage is unavailable.",
+        "data_quality": "Codex exposes an account-wide percentage without a device identifier. Concurrent use elsewhere can be included in the beech-observed increase, so exact beech-versus-other quota usage cannot be separated. Quota percentages are not converted to dollars.",
     }
 
 
@@ -974,22 +978,6 @@ def normalized_parent(record: dict[str, Any], records: list[dict[str, Any]]) -> 
     return operations
 
 
-CONTROL_OVERHEAD_ROLES = {
-    "Human Orchestrator",
-    "Operations Collaborator",
-    "Plan Orchestrator",
-    "Advisor",
-    "Strategic Advisor",
-    "Verifier",
-    "Watcher",
-    "Progress",
-    "Archive",
-    "Launcher",
-    "Usage Analyst",
-    "Usage Reader",
-}
-
-
 def usage_summary(
     records: list[dict[str, Any]],
     since: datetime | None = None,
@@ -1022,10 +1010,9 @@ def usage_summary(
             time_exact = time_exact and bool(metrics["time_exact"])
     total_tokens = sum(by_model.values())
     luna_max = luna_worker_tokens
-    control = sum(
-        tokens for name, tokens in by_role.items()
-        if name in CONTROL_OVERHEAD_ROLES
-    )
+    # Usefulness, overhead, and drift belong to observed actions, not roles.
+    # Leave them unclassified until bounded transcript analysis supplies that
+    # semantic judgment.
     return {
         "tokens": total_tokens,
         "cost": total_cost,
@@ -1034,8 +1021,9 @@ def usage_summary(
         "time_exact": time_exact,
         "luna_max_tokens": luna_max,
         "luna_max_pct": 100.0 * luna_max / total_tokens if total_tokens else 0.0,
-        "control_tokens": control,
-        "control_pct": 100.0 * control / total_tokens if total_tokens else 0.0,
+        "control_tokens": None,
+        "control_pct": None,
+        "control_available": False,
         "by_model": dict(by_model),
     }
 
@@ -1095,7 +1083,6 @@ def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
                     "cost": 0.0,
                     "models": set(),
                     "luna_tokens": 0,
-                    "control_tokens": 0,
                 },
             )
             item["seconds"] += float(metrics["active_seconds"])
@@ -1107,8 +1094,6 @@ def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
             model_key = f'{metrics["model"]}/{metrics["effort"]}'
             if role(record["label"]) == "Worker" and model_key == "gpt-5.6-luna/max":
                 item["luna_tokens"] += tokens
-            if role(record["label"]) in CONTROL_OVERHEAD_ROLES:
-                item["control_tokens"] += tokens
         rows.append({
             "label": workspace.get("label") or workspace_id,
             "summary": summary,
@@ -1125,7 +1110,7 @@ def report_all(since: datetime | None) -> int:
     print(f"Cost summary · all recorded Herdr workspaces · {period}")
     print("Standard API-equivalent USD with cache and long-context rates; subscription billing is not included.")
     print()
-    print(f'{"Project / agent":48} {"Model / effort":24} {"Time":9} {"Tokens":10} {"Cached":10} {"Luna":8} {"Control":8} {"Cost":10}')
+    print(f'{"Project / agent":48} {"Model / effort":24} {"Time":9} {"Tokens":10} {"Cached":10} {"Luna":8} {"Overhead":8} {"Cost":10}')
     print("-" * 136)
     for row in rows:
         label = row["label"]
@@ -1143,7 +1128,7 @@ def report_all(since: datetime | None) -> int:
             f'{fmt_duration(summary["active_seconds"], summary["time_exact"]):9} '
             f'{fmt_tokens(summary["tokens"]):10} '
             f'{fmt_tokens(summary["cached_tokens"]):10} '
-            f'{summary["luna_max_pct"]:6.1f}% {summary["control_pct"]:6.1f}% '
+            f'{summary["luna_max_pct"]:6.1f}% {"n/a":>8} '
             f'${summary["cost"]:9.3f} {majority}'
         )
         for agent_label, item in sorted(
@@ -1168,7 +1153,6 @@ def rows_to_json(rows: list[dict[str, Any]]) -> dict[str, Any]:
     total_cached = 0
     total_cost = 0.0
     total_luna_tokens = 0
-    total_control_tokens = 0
     total_agents = 0
     time_exact = True
     for row in rows:
@@ -1195,14 +1179,10 @@ def rows_to_json(rows: list[dict[str, Any]]) -> dict[str, Any]:
                     if project_tokens else 0.0,
                     3,
                 ),
-                "control_tokens": int(item["control_tokens"]),
-                "control_share_pct": round(
-                    100.0 * int(item["control_tokens"]) / project_tokens
-                    if project_tokens else 0.0,
-                    3,
-                ),
+                "control_tokens": None,
+                "control_share_pct": None,
+                "control_available": False,
                 "is_luna_worker": bool(item["luna_tokens"]),
-                "is_control_role": bool(item["control_tokens"]),
             })
         projects.append({
             "label": row["label"],
@@ -1214,10 +1194,11 @@ def rows_to_json(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "cost": round(float(summary["cost"]), 9),
             "luna_tokens": int(summary["luna_max_tokens"]),
             "luna_share_pct": round(float(summary["luna_max_pct"]), 3),
-            "control_tokens": int(summary["control_tokens"]),
-            "control_share_pct": round(float(summary["control_pct"]), 3),
+            "control_tokens": None,
+            "control_share_pct": None,
+            "control_available": False,
             "luna_majority": bool(summary["luna_max_pct"] > 50.0),
-            "control_within_limit": bool(summary["control_pct"] <= 10.0),
+            "control_within_limit": None,
             "agents": agents,
         })
         total_seconds += float(summary["active_seconds"])
@@ -1225,7 +1206,6 @@ def rows_to_json(rows: list[dict[str, Any]]) -> dict[str, Any]:
         total_cached += int(summary["cached_tokens"])
         total_cost += float(summary["cost"])
         total_luna_tokens += int(summary["luna_max_tokens"])
-        total_control_tokens += int(summary["control_tokens"])
         total_agents += len(agents)
         time_exact = time_exact and bool(summary["time_exact"])
     return {
@@ -1240,8 +1220,9 @@ def rows_to_json(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "cost": round(total_cost, 9),
             "luna_tokens": total_luna_tokens,
             "luna_share_pct": round(100.0 * total_luna_tokens / total_tokens if total_tokens else 0.0, 3),
-            "control_tokens": total_control_tokens,
-            "control_share_pct": round(100.0 * total_control_tokens / total_tokens if total_tokens else 0.0, 3),
+            "control_tokens": None,
+            "control_share_pct": None,
+            "control_available": False,
         },
         "projects": projects,
     }
@@ -1274,9 +1255,9 @@ def report_all_json(since: datetime | None) -> int:
         "source": {
             "command": "herdr-costs report --all --json"
             + (" --all-time" if since is None else ""),
-            "pricing": "Standard API-equivalent USD with cache and long-context rates; subscription billing and non-token tool charges are not included.",
+            "pricing": "Official standard API-equivalent USD per 1M tokens: GPT-5.6 Sol $5 input/$0.50 cached/$30 output; Terra $2.50/$0.25/$15; Luna $1/$0.10/$6. Cache writes cost 1.25x input; prompts over 272K input cost 2x input and 1.5x output. Claude Opus 5 is $5/$0.50/$25 with $6.25 five-minute and $10 one-hour cache writes. Subscription billing and non-token tool charges are not included.",
             "quota": "Codex token_count.rate_limits.primary from local current and archived JSONL; quota percentages are not converted into dollars.",
-            "control": "Role-classified non-productive overhead lower bound. Task-direct Operations and suborchestrator decomposition, Luna dispatch, recovery, integration, and synchronization count as productive orchestration rather than control.",
+            "control": "Not inferred from role or model names. Productive contribution, overhead, drift, and unclear work require bounded Luna transcript analysis against the approved Human Plan and task goal; unanalyzed tokens remain unclassified.",
         },
         "thresholds": {
             "luna_majority_pct": 50.0,
@@ -1381,8 +1362,7 @@ def report(workspace: str, since: datetime | None) -> int:
     print("Standard API-equivalent USD with cache and long-context rates; subscription billing and non-token tool charges are not included.")
     print(
         f'Token mix: Luna max {fmt_tokens(summary["luna_max_tokens"])} '
-        f'({summary["luna_max_pct"]:.1f}%); control roles '
-        f'{fmt_tokens(summary["control_tokens"])} ({summary["control_pct"]:.1f}%). '
+        f'({summary["luna_max_pct"]:.1f}%); overhead/drift not analyzed. '
         f'Luna majority: {"yes" if summary["luna_max_pct"] > 50.0 else "NO"}.'
     )
     print()

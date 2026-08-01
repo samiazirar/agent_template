@@ -7,10 +7,13 @@ orchestration contracts provide the detailed rules.
 ## Goal and delivery
 
 - Begin from one explicit user-approved goal and the next observable state.
-- Spend at least 90% of task slots and agent-hours changing code, data,
-  experiments, evaluations, accepted results, or intended paper content.
-- Planning, status, advice, broad checking, and waiting share the remaining
-  10%. Never rename them as productive work.
+- Spend at least 90% of task slots and agent-hours on actions that causally
+  advance the approved goal. This includes changed code, data, experiments,
+  evaluations, accepted results, intended paper content, and the minimum useful
+  instruction, decision, decomposition, dispatch, recovery, integration,
+  synchronization, or closure needed to produce them.
+- Repetition, detached planning, status-only turns, broad checking, unnecessary
+  review, waiting, polling, and work toward the wrong goal share at most 10%.
 - Until the user says otherwise: make the smallest coherent goal-moving
   change, do not schedule test suites or browser testing, commit it with a
   human-readable message, push the canonical branch, and hand control back.
@@ -58,19 +61,23 @@ orchestration contracts provide the detailed rules.
 
 ### Enforce 90/10 at admission
 
-- Productive work directly changes code, data, an experiment, an evaluation,
-  accepted research evidence, or intended paper content. Attached reproduction
+- Productive contribution is an observed action whose result is necessary and
+  causally advances the approved goal. It includes implementation, runs,
+  measurement, evaluation, useful Human instruction or clarification, and the
+  minimum decision, decomposition, dispatch, recovery, integration,
+  synchronization, or closure needed to move the result. Attached reproduction
   and verification belong to that productive task.
-- Classify the observed action, not the model or role name. Task-direct
-  decomposition into a frozen package, Luna dispatch or recovery, result
-  integration, synchronization, and worker closure are productive
-  orchestration. Detached planning, collaborative planning, plan updates,
-  advice, broad review, status, audit, and waiting are control work.
+- Overhead consumes time or tokens without materially changing the next action
+  or result. Drift advances a different goal, violates role or scope,
+  overengineers, or continues a failed path after disconfirming evidence.
+  Classify observed actions against the Human Plan and task goal; never infer
+  usefulness from a model, role, or session name, and leave ambiguity
+  unclassified.
 - Operations Lead tracks the rolling share by active task slots and agent-hours
-  before opening control work. At or above 10%, open the next independent
+  before opening overhead work. At or above 10%, open the next independent
   productive task instead. Exceed 10% only for an immediate safety issue,
   irreversible action, or a human decision that truly prevents productive work.
-- Every admitted control action must name the productive action it directly
+- Every admitted overhead action must name the productive action it directly
   unlocks. Do not open planning, advice, checking, or plan-writing sessions for
   general reassurance.
 - Idle standing orchestrators consume no model turns. Do not wake the Human
@@ -193,8 +200,10 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   `Human ↔ Human Orchestrator ↔ Operations Lead ↔ technical role`.
   Workers, suborchestrators, Plan Orchestrators, advisors, researchers, and
   verifiers do not bypass Operations Lead.
-- In `01 Orchestrators`, the Human Orchestrator is always the left pane and
-  Operations Lead is always the right pane.
+- In `01 Orchestrators`, exactly two standing panes share one tab by default:
+  the Human Orchestrator in its own left pane and Operations Lead in its own
+  right pane, normally at a 50/50 split for easy phone monitoring. A standing
+  Operations Collaborator exists only when the Human explicitly requests one.
 - That path must work mechanically, not only in prose. Roles send cross-pane
   messages with `herdr-role-message`: Human Orchestrator uses
   `herdr-role-message operations`, Operations Lead uses

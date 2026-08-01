@@ -15,27 +15,32 @@ are mandatory; this document supplies the detailed execution contract.
   decision.
 - Optimize for changed code, data, experiments, evaluations, results, or paper
   content that moves that finish condition.
-- Keep control work below 10% of rolling task slots and agent-hours. Control
-  work is detached planning, advice, broad audits or reviews, reports, status,
-  handoffs, and waiting. Task-direct package decomposition, Luna dispatch or
-  recovery, result integration, synchronization, and worker closure are
-  productive orchestration. Productive verification attached to an
-  implementation or run counts with that productive task.
+- Keep overhead and drift below 10% of rolling task slots and agent-hours.
+  Productive contribution is an observed action whose result is necessary and
+  causally advances the approved goal. This includes implementation and
+  experiment work plus the minimum useful Human instruction, clarification,
+  decision, package decomposition, dispatch, recovery, integration,
+  synchronization, or closure needed to move it. Attached verification counts
+  with its productive task.
 - If control work reaches 10%, do not create another control task. Dispatch or
   perform the next productive task.
-- Classify the action rather than the role. Operations Lead and
-  suborchestrator turns are productive when they directly dispatch, recover,
-  integrate, synchronize, or close a concrete Luna package; their detached
-  planning, status, checking, or waiting remains control. Research counts as
-  productive only when it creates accepted goal-relevant evidence.
-- Every control task names the productive action it directly unlocks. Exceed
+- Classify the action rather than the role. No Human, orchestrator, or worker is
+  inherently productive or overhead. Overhead repeats, plans, reports, waits,
+  polls, rereads, or checks without materially changing the next action or
+  result. Drift advances the wrong goal, violates role or scope, overengineers,
+  or continues a failed path after disconfirming evidence. Leave genuinely
+  ambiguous actions unclassified.
+- Every proposed overhead action names the productive action it directly
+  unlocks. Exceed
   10% only for immediate safety, an irreversible action, or a human decision
   that truly prevents productive work. Idle standing roles stay asleep.
-- A report, schema, plan, refusal proof, or authorization is not progress by
-  itself. It is allowed only when it immediately enables a named productive
-  action.
+- A report, schema, plan, refusal proof, or authorization is not progress merely
+  because of its artifact type. Count it only when its content is requested as
+  the goal or materially changes a necessary decision or next action.
 - Classify work from what it actually produced, not its title or intended role.
-  Prose remains control work even when called implementation or evidence.
+  Prose that only restates known state or relabels work is overhead; useful
+  Human instruction, scientific findings, or an actionable decision may be
+  productive.
 - Until the user says otherwise, the delivery loop is: make the smallest
   coherent goal-moving change, record the observed result, commit, push through
   the canonical branch, and hand the turn back. Do not create separate test
@@ -91,9 +96,9 @@ Before admitting work, apply two tests:
 
 - **Counterfactual:** if the task succeeds exactly as written, what project
   state changes?
-- **Substitution:** if its deliverable could be replaced by prose without
-  changing code, data, behavior, a run, a measurement, an evaluation, or the
-  paper result, it is control work.
+- **Removal:** if removing the action would not change the approved goal, a
+  necessary decision, the actionable next package, code, data, behavior, a run,
+  a measurement, an evaluation, or the paper result, it is overhead.
 
 If neither test yields a concrete change, rewrite or drop the task. Do not open
 a session merely to discuss the mismatch.
@@ -411,10 +416,11 @@ Use separate bounded roles. None is a standing review committee.
   `blocked` state after its purpose has ended is a lifecycle failure: archive
   its native session ID in `OLD_HISTORY.md` and close it. History lives in the
   file, not in an idle pane.
-- Only Human Orchestrator, Operations Lead, and background Operations
-  Collaborator are standing model panes while a project exists. Idle standing
-  panes consume no model turns. Do not wake any on a timer, for unchanged
-  status, or merely to acknowledge another agent.
+- Only Human Orchestrator and Operations Lead are standing model panes by
+  default. They share one Orchestrators tab as separate left/right panes. A
+  standing Operations Collaborator is Human-selected only. Idle standing panes
+  consume no model turns. Do not wake any on a timer, for unchanged status, or
+  merely to acknowledge another agent.
 - Native internal subagents are forbidden. All delegated work must be a named,
   visible Herdr session.
 
@@ -441,14 +447,14 @@ REMAINING:
 STOPPED:
 ```
 
-The observed outcome determines the final work class. A report describing no
-changed artifact, behavior, measurement, evaluation, or paper result counts as
-control work regardless of the original label.
+The observed outcome determines the final work class. Judge whether the action
+causally changed the path to the approved goal; never classify it from the role
+or artifact type alone.
 
 Operations Lead starts and ends each round with the frozen
 question, result-level milestone, measured change since the last round,
 predicted-versus-observed differences, next productive tasks, and current
-control-work percentage. The human orchestrator speaks only after a user message,
+overhead/drift percentage when semantically analyzed. The human orchestrator speaks only after a user message,
 material result, material progress finding, or user decision; it never creates
 periodic status turns.
 
@@ -458,7 +464,7 @@ periodic status turns.
   plain. It must first explain the question being answered, what is compared,
   what a successful result means, and the current reality. Only then show the
   next result-level milestone, its independent workstreams, one user decision,
-  and the 90/10 meter.
+  and the 90/10 meter when semantically analyzed.
 - `RESTART_HANDOFF.md` is the compact technical restart source. Update it in
   place after a material result, active-task change, external wait, or decision
   with the goal, current result/code state, what is running, exact next action,
@@ -505,7 +511,7 @@ periodic status turns.
   the project question, current measured evidence, what changed since the last
   update, each active goal in plain language, elapsed time and last verified
   evidence delta, the next observable, external waits, and the productive versus
-  control-work meter. They include at least one concrete example a non-expert
+  overhead/drift meter when semantically analyzed. They include at least one concrete example a non-expert
   can inspect. Update on evidence or a progress-check finding, not on timer
   polls. Follow `/home/user/azirar/.agents/PROGRESS_ARTIFACT_STANDARD.md`.
 - Historical sessions live in `OLD_HISTORY.md`, displayed in one final Herdr
@@ -530,8 +536,10 @@ periodic status turns.
   ledger. `herdr-costs report` shows human task names only, with worker own
   usage, task totals under each suborchestrator, Operations totals, and the
   Human total.
-- The report defaults to the current local day and shows Luna-max and
-  control-role token shares. Run `herdr-costs report --all` for the
+- The report defaults to the current local day and shows Luna-max token share.
+  Semantic overhead and drift remain unclassified until a bounded Luna review
+  checks actual actions against the Human Plan and task goal. Run
+  `herdr-costs report --all` for the
   cross-project per-agent split or add `--all-time` for lifetime totals.
 - Report recorded tokens and model-active time where the harness exposes it;
   mark transcript-span time as approximate. Dollar values are API-equivalent

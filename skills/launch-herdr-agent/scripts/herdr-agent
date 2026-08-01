@@ -21,6 +21,7 @@ launch_dir="${3:-$PWD}"
 script_path="$(readlink -f "${BASH_SOURCE[0]}")"
 script_dir="$(cd "$(dirname "$script_path")" && pwd)"
 launch_env=()
+agent_kind=""
 
 configure_opencode() {
     local model="$1"
@@ -64,6 +65,20 @@ if [ -z "$label" ]; then
     exit 2
 fi
 
+agent_name="$(python3 - "$label" <<'PY'
+import re
+import sys
+import unicodedata
+
+label = unicodedata.normalize("NFKD", sys.argv[1])
+ascii_label = label.encode("ascii", "ignore").decode("ascii").lower()
+name = re.sub(r"[^a-z0-9]+", "-", ascii_label).strip("-")
+if not name or not name[0].isalpha():
+    name = "agent-" + name
+print(name[:32].rstrip("-") or "agent")
+PY
+)"
+
 if [ ! -d "$launch_dir" ]; then
     printf 'Working directory does not exist: %s\n' "$launch_dir" >&2
     exit 2
@@ -89,30 +104,39 @@ case "$surface" in
         configure_opencode openai/gpt-5.6-luna max
         ;;
     codex-low)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=low)
         ;;
     codex)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=medium)
         ;;
     codex-high)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=high)
         ;;
     codex-xhigh)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=xhigh)
         ;;
     codex-max)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-sol -c model_reasoning_effort=max)
         ;;
     terra)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-terra -c model_reasoning_effort=medium)
         ;;
     terra-high)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-terra -c model_reasoning_effort=high)
         ;;
     luna-low)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-luna -c model_reasoning_effort=low)
         ;;
     luna|luna-max)
+        agent_kind="codex"
         launch_argv=(codex -m gpt-5.6-luna -c model_reasoning_effort=max)
         ;;
     claudex|claudex-high)
@@ -190,26 +214,49 @@ cleanup_failed_launch() {
 trap cleanup_failed_launch ERR
 
 herdr pane rename "$pane_id" "$label" >/dev/null
-printf -v launch_command '%q ' "${launch_env[@]}" "${launch_argv[@]}"
-herdr pane run "$pane_id" "${launch_command% }" >/dev/null
-agent_ready=0
-for _ in $(seq 1 100); do
-    if wait_output="$(
-        herdr agent wait "$pane_id" \
-            --until idle --until done --timeout 30000 2>&1
-    )"; then
-        agent_ready=1
-        break
-    fi
-    if ! grep -q '"code":"agent_not_found"' <<<"$wait_output"; then
-        printf '%s\n' "$wait_output" >&2
+if [ -n "$agent_kind" ]; then
+    agent_started=0
+    for _ in $(seq 1 100); do
+        if start_output="$(
+            herdr agent start "$agent_name" --kind "$agent_kind" \
+                --pane "$pane_id" -- "${launch_argv[@]:1}" 2>&1
+        )"; then
+            agent_started=1
+            break
+        fi
+        if ! grep -q '"code":"agent_pane_busy"' <<<"$start_output"; then
+            printf '%s\n' "$start_output" >&2
+            exit 1
+        fi
+        sleep 0.05
+    done
+    if [ "$agent_started" != "1" ]; then
+        printf 'Agent pane did not become available after launch: %s\n' \
+            "$pane_id" >&2
         exit 1
     fi
-    sleep 0.1
-done
-if [ "$agent_ready" != "1" ]; then
-    printf 'Agent did not register after launch: %s\n' "$pane_id" >&2
-    exit 1
+else
+    printf -v launch_command '%q ' "${launch_env[@]}" "${launch_argv[@]}"
+    herdr pane run "$pane_id" "${launch_command% }" >/dev/null
+    agent_ready=0
+    for _ in $(seq 1 100); do
+        if wait_output="$(
+            herdr agent wait "$pane_id" \
+                --until idle --until done --timeout 30000 2>&1
+        )"; then
+            agent_ready=1
+            break
+        fi
+        if ! grep -q '"code":"agent_not_found"' <<<"$wait_output"; then
+            printf '%s\n' "$wait_output" >&2
+            exit 1
+        fi
+        sleep 0.1
+    done
+    if [ "$agent_ready" != "1" ]; then
+        printf 'Agent did not register after launch: %s\n' "$pane_id" >&2
+        exit 1
+    fi
 fi
 
 cost_script="$(readlink -f "$script_dir/../../../runtime/bin/herdr-costs")"

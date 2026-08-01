@@ -44,6 +44,9 @@ complete operating context for one minimal work package.
   user explicitly asks about the system.
 - Standing roles are one native-Codex Sol-high Human Orchestrator and one
   native-Codex Sol-high Operations Lead with sole operational authority.
+- Keep those two roles in one `01 Orchestrators` tab as separate panes: Human
+  on the left and Operations on the right, normally split 50/50. Do not add a
+  standing Operations Collaborator unless the Human explicitly requests one.
 - Cross-pane requests use the installed `herdr-role-message` helper, not native
   model-agent discovery. Human Orchestrator uses
   `herdr-role-message operations`; Operations Lead uses
@@ -98,10 +101,16 @@ complete operating context for one minimal work package.
   and close the Luna packages that do so. Attached reproduction and
   verification belong to the productive task. Detached planning, plan updates,
   advice, checking, status, review, audit, and waiting share at most 10%.
-- Before opening any control role, the Operations Lead must name the productive
-  action it unlocks and check the rolling 90/10 share. At or above 10% control,
-  start the next independent productive task instead, except for immediate
-  safety, an irreversible action, or a required human decision.
+- Classify actual actions against the Human Plan and task goal, never role or
+  model names. Useful Human instruction and task-direct orchestration can be
+  productive; a worker can drift. Overhead does not materially change the next
+  result, while drift advances the wrong goal, violates scope, overengineers,
+  or persists after disconfirming evidence. Leave ambiguity unclassified.
+- Before opening a session expected to produce only support or overhead, the
+  Operations Lead must name the productive action it unlocks and check the
+  rolling 90/10 share. At or above 10% overhead/drift, start the next
+  independent productive task instead, except for immediate safety, an
+  irreversible action, or a required human decision.
 - Judge productivity from the observed output. Do not relabel prose, reviews,
   manifests, or status artifacts as productive work.
 - Do not turn ordinary failures into project-wide stops. Keep diagnosis and
@@ -171,8 +180,9 @@ complete operating context for one minimal work package.
   waiting, submitted, or an agent's completion claim is not completion. Every
   active task always has a current package and next action; external waiting
   states name independent work that continues.
-- `herdr-costs report` shows the human-named hierarchy, Luna-max and control
-  token shares, time, tokens, cache use, and API-equivalent dollars for today.
+- `herdr-costs report` shows the human-named hierarchy, Luna-max share, time,
+  tokens, cache use, and API-equivalent dollars for today. Semantic overhead
+  and drift stay unclassified until bounded Luna transcript analysis.
   Run `herdr-costs report --all` for the cross-project per-agent split and add
   `--all-time` only for lifetime totals. A Usage Analyst is a temporary
   Luna-max diagnostic opened only on explicit Human request; it may use fresh

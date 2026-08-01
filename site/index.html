@@ -263,13 +263,13 @@
           <p>API-equivalent dollars include uncached input, cache reads/writes, long-context rates, and output. Subscription billing is not included.</p>
         </div>
         <div id="today-summary" class="summary-grid"></div>
-        <div class="notice"><strong>Read the drift:</strong><span> Luna is intended to carry most implementation tokens. Control means non-productive overhead such as detached planning, auditing, status, waiting, and review. Task-direct Luna decomposition, dispatch, recovery, integration, and synchronization are productive orchestration.</span></div>
+        <div class="notice"><strong>Read the drift:</strong><span> Luna is intended to carry most implementation tokens. Usefulness is never inferred from a role: Human instruction and orchestration can move the goal, while a worker can drift. Overhead and drift stay unclassified until Luna checks actual chat actions against the Human Plan and task goal.</span></div>
         <div class="section-heading">
           <div>
             <p class="section-kicker">All recorded workspaces</p>
             <h2>Projects and agent split</h2>
           </div>
-          <p>Every project is one compact card. Click a project to expand it across the overview and inspect its agents, time, tokens, cache, dollars, Luna share, and non-productive overhead.</p>
+          <p>Every project is one compact card. Click a project to expand it across the overview and inspect its agents, time, tokens, cache, dollars, Luna share, and semantic-analysis state.</p>
         </div>
         <div id="today-projects" class="project-list"></div>
       </section>
@@ -288,7 +288,7 @@
       <section class="analysis-card" aria-labelledby="analysis-heading">
         <p class="section-kicker">Bounded local action</p>
         <h2 id="analysis-heading">Request a Luna chat analysis</h2>
-        <p class="muted">Choose a project and copy one complete request for a local Luna-max Usage Analyst. The request asks fresh Luna-low readers to inspect bounded current and archived chats for the causes that matter to this site.</p>
+        <p class="muted">Choose a project and copy one complete request for a local Luna-max Usage Analyst. Fresh Luna-low readers classify bounded chat actions by their actual contribution to the approved goal, never by role name.</p>
         <div class="analysis-layout">
           <div class="form-stack">
             <label>Project
@@ -315,13 +315,13 @@
   <script id="herdr-cost-data" type="application/json">
 {
   "schema": "herdr-costs.site.v1",
-  "generated_at": "2026-08-01T17:58:52.214329Z",
+  "generated_at": "2026-08-01T18:21:42.882947Z",
   "period": "2026-08-01",
   "source": {
     "command": "herdr-costs report --all --json",
-    "pricing": "Standard API-equivalent USD with cache and long-context rates; subscription billing and non-token tool charges are not included.",
+    "pricing": "Official standard API-equivalent USD per 1M tokens: GPT-5.6 Sol $5 input/$0.50 cached/$30 output; Terra $2.50/$0.25/$15; Luna $1/$0.10/$6. Cache writes cost 1.25x input; prompts over 272K input cost 2x input and 1.5x output. Claude Opus 5 is $5/$0.50/$25 with $6.25 five-minute and $10 one-hour cache writes. Subscription billing and non-token tool charges are not included.",
     "quota": "Codex token_count.rate_limits.primary from local current and archived JSONL; quota percentages are not converted into dollars.",
-    "control": "Role-classified non-productive overhead lower bound. Task-direct Operations and suborchestrator decomposition, Luna dispatch, recovery, integration, and synchronization count as productive orchestration rather than control."
+    "control": "Not inferred from role or model names. Productive contribution, overhead, drift, and unclear work require bounded Luna transcript analysis against the approved Human Plan and task goal; unanalyzed tokens remain unclassified."
   },
   "thresholds": {
     "luna_majority_pct": 50.0,
@@ -329,33 +329,35 @@
   },
   "aggregate": {
     "project_count": 11,
-    "agent_count": 103,
-    "seconds": 81134.487,
-    "time": "22h32m",
+    "agent_count": 121,
+    "seconds": 90209.512,
+    "time": "25h03m",
     "time_exact": false,
-    "tokens": 94565160,
-    "cached_tokens": 89070962,
-    "cost": 51.22239844,
-    "luna_tokens": 22204047,
-    "luna_share_pct": 23.48,
-    "control_tokens": 21429861,
-    "control_share_pct": 22.661
+    "tokens": 102308964,
+    "cached_tokens": 96675954,
+    "cost": 61.850588,
+    "luna_tokens": 23170203,
+    "luna_share_pct": 22.647,
+    "control_tokens": null,
+    "control_share_pct": null,
+    "control_available": false
   },
   "projects": [
     {
       "label": "DinocularWorldModel",
-      "time": "1h36m",
-      "seconds": 5762.512999999999,
+      "time": "1h59m",
+      "seconds": 7147.581,
       "time_exact": true,
-      "tokens": 7574630,
-      "cached_tokens": 7414272,
-      "cost": 4.62666256,
-      "luna_tokens": 378626,
-      "luna_share_pct": 4.999,
-      "control_tokens": 2212091,
-      "control_share_pct": 29.204,
+      "tokens": 9246953,
+      "cached_tokens": 9061120,
+      "cost": 5.5989684,
+      "luna_tokens": 614308,
+      "luna_share_pct": 6.643,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": false,
+      "control_within_limit": null,
       "agents": [
         {
           "label": "Operations Lead · Orson World Model Recovery",
@@ -363,18 +365,18 @@
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 1540.984,
-          "time": "25m40s",
+          "seconds": 1977.476,
+          "time": "32m57s",
           "time_exact": true,
-          "tokens": 2266230,
-          "cached_tokens": 2235648,
-          "cost": 1.367634,
+          "tokens": 3090575,
+          "cached_tokens": 3052800,
+          "cost": 1.81765,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Human Orchestrator · Mira World Model",
@@ -382,18 +384,18 @@
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 522.555,
-          "time": "8m42s",
+          "seconds": 543.07,
+          "time": "9m03s",
           "time_exact": true,
-          "tokens": 2212091,
-          "cached_tokens": 2112768,
-          "cost": 1.717449,
+          "tokens": 2376808,
+          "cached_tokens": 2276352,
+          "cost": 1.806831,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 2212091,
-          "control_share_pct": 29.204,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Operations Lead · Owen DINOcular Recovery",
@@ -409,10 +411,10 @@
           "cost": 0.687934,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Selene Legacy Recovery",
@@ -428,10 +430,10 @@
           "cost": 0.457218,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Daria Depth Difference",
@@ -447,10 +449,48 @@
           "cost": 0.335459,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Suborchestrator · Della Duplicate Diagnosis",
+          "role": "Suborchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 472.83,
+          "time": "7m52s",
+          "time_exact": true,
+          "tokens": 447579,
+          "cached_tokens": 432896,
+          "cost": 0.367038,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Worker · Petra Provenance Recovery",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 455.231,
+          "time": "7m35s",
+          "time_exact": true,
+          "tokens": 235682,
+          "cached_tokens": 233216,
+          "cost": 0.0280676,
+          "luna_tokens": 235682,
+          "luna_share_pct": 2.549,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Daphne Depth Difference",
@@ -463,13 +503,13 @@
           "time_exact": true,
           "tokens": 211529,
           "cached_tokens": 209664,
-          "cost": 0.00486428,
+          "cost": 0.0243214,
           "luna_tokens": 211529,
-          "luna_share_pct": 2.793,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 2.288,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Lyra LMDB Repair",
@@ -482,13 +522,13 @@
           "time_exact": true,
           "tokens": 167097,
           "cached_tokens": 163584,
-          "cost": 0.00458628,
+          "cost": 0.0229314,
           "luna_tokens": 167097,
-          "luna_share_pct": 2.206,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.807,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Remy Reopen Repair",
@@ -504,27 +544,28 @@
           "cost": 0.051518,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         }
       ]
     },
     {
       "label": "JSC Model Serving",
-      "time": "3h14m",
-      "seconds": 11657.201000000001,
+      "time": "3h59m",
+      "seconds": 14351.168000000001,
       "time_exact": true,
-      "tokens": 6968863,
-      "cached_tokens": 6823424,
-      "cost": 3.6743016,
-      "luna_tokens": 1114137,
-      "luna_share_pct": 15.987,
-      "control_tokens": 2596900,
-      "control_share_pct": 37.264,
+      "tokens": 8135170,
+      "cached_tokens": 7974400,
+      "cost": 4.3590992,
+      "luna_tokens": 1559076,
+      "luna_share_pct": 19.165,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": false,
+      "control_within_limit": null,
       "agents": [
         {
           "label": "Human Orchestrator · Jules Model Serving",
@@ -532,18 +573,18 @@
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 696.189,
-          "time": "11m36s",
+          "seconds": 721.476,
+          "time": "12m01s",
           "time_exact": true,
-          "tokens": 2559386,
-          "cached_tokens": 2513664,
-          "cost": 1.724317,
+          "tokens": 2850964,
+          "cached_tokens": 2801920,
+          "cost": 1.902755,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 2559386,
-          "control_share_pct": 36.726,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Operations Lead · Soren Model Serving Recovery",
@@ -551,18 +592,18 @@
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 3109.108,
-          "time": "51m49s",
+          "seconds": 3800.569,
+          "time": "1h03m",
           "time_exact": true,
-          "tokens": 1795646,
-          "cached_tokens": 1768192,
-          "cost": 1.093291,
+          "tokens": 1680670,
+          "cached_tokens": 1662464,
+          "cost": 0.993062,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Leona Kimi KIT Feasibility",
@@ -570,18 +611,18 @@
           "models": [
             "gpt-5.6-sol/medium"
           ],
-          "seconds": 1213.412,
-          "time": "20m13s",
+          "seconds": 1411.256,
+          "time": "23m31s",
           "time_exact": true,
-          "tokens": 747250,
-          "cached_tokens": 738304,
-          "cost": 0.422407,
+          "tokens": 915598,
+          "cached_tokens": 905984,
+          "cost": 0.510187,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Lena Legacy Recovery",
@@ -597,10 +638,48 @@
           "cost": 0.390177,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Suborchestrator · Omar GLM KIT Execution",
+          "role": "Suborchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 385.86,
+          "time": "6m25s",
+          "time_exact": true,
+          "tokens": 376418,
+          "cached_tokens": 361216,
+          "cost": 0.272268,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Worker · Noor GLM KIT Fit Compatibility",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 727.498,
+          "time": "12m07s",
+          "time_exact": true,
+          "tokens": 195268,
+          "cached_tokens": 193280,
+          "cost": 0.026496,
+          "luna_tokens": 195268,
+          "luna_share_pct": 2.4,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Talia KIT Probe Event Service",
@@ -613,13 +692,13 @@
           "time_exact": true,
           "tokens": 169797,
           "cached_tokens": 167680,
-          "cost": 0.004072,
+          "cost": 0.02036,
           "luna_tokens": 169797,
-          "luna_share_pct": 2.437,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 2.087,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Sana Kimi KIT Compatibility",
@@ -627,18 +706,37 @@
           "models": [
             "gpt-5.6-luna/max"
           ],
+          "seconds": 666.017,
+          "time": "11m06s",
+          "time_exact": true,
+          "tokens": 162174,
+          "cached_tokens": 159488,
+          "cost": 0.0214698,
+          "luna_tokens": 162174,
+          "luna_share_pct": 1.993,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Worker · Imani Kimi KIT Staging",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
           "seconds": 0.0,
           "time": "0s",
           "time_exact": true,
-          "tokens": 147170,
-          "cached_tokens": 140032,
-          "cost": 0.00610224,
-          "luna_tokens": 147170,
-          "luna_share_pct": 2.112,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "tokens": 135811,
+          "cached_tokens": 130816,
+          "cost": 0.0313516,
+          "luna_tokens": 135811,
+          "luna_share_pct": 1.669,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Rhea RC Retirement",
@@ -651,13 +749,13 @@
           "time_exact": true,
           "tokens": 118477,
           "cached_tokens": 116480,
-          "cost": 0.003393,
+          "cost": 0.016965,
           "luna_tokens": 118477,
-          "luna_share_pct": 1.7,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.456,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Ravi KIT Compute Probe",
@@ -670,13 +768,13 @@
           "time_exact": true,
           "tokens": 116444,
           "cached_tokens": 112384,
-          "cost": 0.00516668,
+          "cost": 0.0258334,
           "luna_tokens": 116444,
-          "luna_share_pct": 1.671,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.431,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Cora Command Closure",
@@ -689,13 +787,32 @@
           "time_exact": true,
           "tokens": 104103,
           "cached_tokens": 101120,
-          "cost": 0.003206,
+          "cost": 0.01603,
           "luna_tokens": 104103,
-          "luna_share_pct": 1.494,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.28,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Worker · Elias GLM KIT Live Acceptance",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 98856,
+          "cached_tokens": 96000,
+          "cost": 0.021296,
+          "luna_tokens": 98856,
+          "luna_share_pct": 1.215,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Niko KIT Live Facts",
@@ -708,13 +825,13 @@
           "time_exact": true,
           "tokens": 92213,
           "cached_tokens": 88832,
-          "cost": 0.00361984,
+          "cost": 0.0180992,
           "luna_tokens": 92213,
-          "luna_share_pct": 1.323,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.134,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Talia Kimi Failure Diagnosis",
@@ -727,13 +844,13 @@
           "time_exact": true,
           "tokens": 83660,
           "cached_tokens": 67328,
-          "cost": 0.00540296,
+          "cost": 0.0270148,
           "luna_tokens": 83660,
-          "luna_share_pct": 1.2,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.028,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Mona Monitor Meaning",
@@ -746,13 +863,13 @@
           "time_exact": true,
           "tokens": 79838,
           "cached_tokens": 77568,
-          "cost": 0.00292236,
+          "cost": 0.0146118,
           "luna_tokens": 79838,
-          "luna_share_pct": 1.146,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.981,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Pia KIT Probe Preflight",
@@ -765,13 +882,13 @@
           "time_exact": true,
           "tokens": 60592,
           "cached_tokens": 58112,
-          "cost": 0.00228124,
+          "cost": 0.0114062,
           "luna_tokens": 60592,
-          "luna_share_pct": 0.869,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.745,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Kira Kimi Continuity",
@@ -784,13 +901,13 @@
           "time_exact": true,
           "tokens": 51599,
           "cached_tokens": 49920,
-          "cost": 0.0017782,
+          "cost": 0.008891,
           "luna_tokens": 51599,
-          "luna_share_pct": 0.74,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.634,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Dara Durable Legacy",
@@ -803,13 +920,13 @@
           "time_exact": true,
           "tokens": 48054,
           "cached_tokens": 45824,
-          "cost": 0.00177048,
+          "cost": 0.0088524,
           "luna_tokens": 48054,
-          "luna_share_pct": 0.69,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.591,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Mira KIT Queue History",
@@ -822,13 +939,13 @@
           "time_exact": true,
           "tokens": 42190,
           "cached_tokens": 39680,
-          "cost": 0.0018106,
+          "cost": 0.009053,
           "luna_tokens": 42190,
-          "luna_share_pct": 0.605,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.519,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Watcher · Kimi KIT Real Probe",
@@ -841,13 +958,13 @@
           "time_exact": true,
           "tokens": 37514,
           "cached_tokens": 28160,
-          "cost": 0.002584,
+          "cost": 0.01292,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 37514,
-          "control_share_pct": 0.538,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         }
       ]
     },
@@ -861,10 +978,11 @@
       "cost": 0.0,
       "luna_tokens": 0,
       "luna_share_pct": 0.0,
-      "control_tokens": 0,
-      "control_share_pct": 0.0,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": true,
+      "control_within_limit": null,
       "agents": []
     },
     {
@@ -877,10 +995,11 @@
       "cost": 0.0,
       "luna_tokens": 0,
       "luna_share_pct": 0.0,
-      "control_tokens": 0,
-      "control_share_pct": 0.0,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": true,
+      "control_within_limit": null,
       "agents": []
     },
     {
@@ -890,13 +1009,14 @@
       "time_exact": true,
       "tokens": 1389967,
       "cached_tokens": 1312256,
-      "cost": 1.02802484,
+      "cost": 1.0540762,
       "luna_tokens": 159770,
       "luna_share_pct": 11.495,
-      "control_tokens": 393973,
-      "control_share_pct": 28.344,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": false,
+      "control_within_limit": null,
       "agents": [
         {
           "label": "Operations Lead · Rowan Contact Review Recovery",
@@ -912,10 +1032,10 @@
           "cost": 0.256415,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Lena Legacy Recovery",
@@ -931,10 +1051,10 @@
           "cost": 0.232604,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Human Orchestrator · Reina Contact Review",
@@ -950,10 +1070,10 @@
           "cost": 0.532493,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 393973,
-          "control_share_pct": 28.344,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Iris History Integration",
@@ -966,13 +1086,13 @@
           "time_exact": true,
           "tokens": 129668,
           "cached_tokens": 126720,
-          "cost": 0.004321,
+          "cost": 0.021605,
           "luna_tokens": 129668,
           "luna_share_pct": 9.329,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Mira Memory Inspection",
@@ -985,68 +1105,69 @@
           "time_exact": true,
           "tokens": 30102,
           "cached_tokens": 27392,
-          "cost": 0.00219184,
+          "cost": 0.0109592,
           "luna_tokens": 30102,
           "luna_share_pct": 2.166,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         }
       ]
     },
     {
       "label": "Human Contact Flow Generator",
-      "time": "2h18m",
-      "seconds": 8286.262,
+      "time": "2h53m",
+      "seconds": 10431.19,
       "time_exact": true,
-      "tokens": 6715115,
-      "cached_tokens": 6550784,
-      "cost": 3.68648572,
+      "tokens": 8573348,
+      "cached_tokens": 8369408,
+      "cost": 4.9302384,
       "luna_tokens": 1113641,
-      "luna_share_pct": 16.584,
-      "control_tokens": 2239117,
-      "control_share_pct": 33.344,
+      "luna_share_pct": 12.99,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": false,
+      "control_within_limit": null,
       "agents": [
-        {
-          "label": "Operations Lead · Gabriel Contact Generation Recovery",
-          "role": "Operations Lead",
-          "models": [
-            "gpt-5.6-sol/high"
-          ],
-          "seconds": 2519.512,
-          "time": "41m59s",
-          "time_exact": true,
-          "tokens": 2556950,
-          "cached_tokens": 2522880,
-          "cost": 1.54874,
-          "luna_tokens": 0,
-          "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
-        },
         {
           "label": "Human Orchestrator · Gia Contact Generation",
           "role": "Human Orchestrator",
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 687.66,
-          "time": "11m27s",
+          "seconds": 845.0,
+          "time": "14m05s",
           "time_exact": true,
-          "tokens": 2173680,
-          "cached_tokens": 2121984,
-          "cost": 1.474822,
+          "tokens": 3114140,
+          "cached_tokens": 3044352,
+          "cost": 2.067341,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 2173680,
-          "control_share_pct": 32.37,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Operations Lead · Gabriel Contact Generation Recovery",
+          "role": "Operations Lead",
+          "models": [
+            "gpt-5.6-sol/high"
+          ],
+          "seconds": 3096.64,
+          "time": "51m36s",
+          "time_exact": true,
+          "tokens": 2984739,
+          "cached_tokens": 2938368,
+          "cost": 1.844489,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Ivo Integrated ContactFlow Delivery",
@@ -1054,18 +1175,37 @@
           "models": [
             "gpt-5.6-sol/medium"
           ],
-          "seconds": 391.585,
-          "time": "6m31s",
+          "seconds": 604.78,
+          "time": "10m04s",
           "time_exact": true,
-          "tokens": 347094,
-          "cached_tokens": 295424,
-          "cost": 0.412212,
+          "tokens": 643630,
+          "cached_tokens": 587264,
+          "cost": 0.588537,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Unlabelled agent",
+          "role": "Unlabelled agent",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 1197.265,
+          "time": "19m57s",
+          "time_exact": true,
+          "tokens": 385322,
+          "cached_tokens": 379136,
+          "cost": 0.0501446,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Rana Representative Runs",
@@ -1078,13 +1218,13 @@
           "time_exact": true,
           "tokens": 234753,
           "cached_tokens": 232192,
-          "cost": 0.00638004,
+          "cost": 0.0319002,
           "luna_tokens": 234753,
-          "luna_share_pct": 3.496,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 2.738,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Nadia Native State Inspection",
@@ -1097,13 +1237,13 @@
           "time_exact": true,
           "tokens": 198508,
           "cached_tokens": 194304,
-          "cost": 0.00507988,
+          "cost": 0.0253994,
           "luna_tokens": 198508,
-          "luna_share_pct": 2.956,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 2.315,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Clara Claude Scaling Synthesis",
@@ -1116,13 +1256,13 @@
           "time_exact": true,
           "tokens": 196286,
           "cached_tokens": 193280,
-          "cost": 0.0066778,
+          "cost": 0.033389,
           "luna_tokens": 196286,
-          "luna_share_pct": 2.923,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 2.289,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Lina Lineage Assembly",
@@ -1135,32 +1275,13 @@
           "time_exact": true,
           "tokens": 192133,
           "cached_tokens": 188160,
-          "cost": 0.0063198,
+          "cost": 0.031599,
           "luna_tokens": 192133,
-          "luna_share_pct": 2.861,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
-        },
-        {
-          "label": "Unlabelled agent",
-          "role": "Unlabelled agent",
-          "models": [
-            "gpt-5.6-luna/max"
-          ],
-          "seconds": 0.0,
-          "time": "0s",
-          "time_exact": true,
-          "tokens": 191874,
-          "cached_tokens": 190208,
-          "cost": 0.00428236,
-          "luna_tokens": 0,
-          "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "luna_share_pct": 2.241,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Lucía Legacy Provenance",
@@ -1173,13 +1294,13 @@
           "time_exact": true,
           "tokens": 164923,
           "cached_tokens": 163584,
-          "cost": 0.00381848,
+          "cost": 0.0190924,
           "luna_tokens": 164923,
-          "luna_share_pct": 2.456,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.924,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Suborchestrator · Soren Scalable Claude Value",
@@ -1195,10 +1316,10 @@
           "cost": 0.095108,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Mira Memory Recovery",
@@ -1214,10 +1335,10 @@
           "cost": 0.073964,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Mara Active Restart Handoff",
@@ -1230,13 +1351,13 @@
           "time_exact": true,
           "tokens": 67917,
           "cached_tokens": 65280,
-          "cost": 0.003052,
+          "cost": 0.01526,
           "luna_tokens": 67917,
-          "luna_share_pct": 1.011,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.792,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Plan Orchestrator · Nia Complete Dataset System Plan",
@@ -1252,10 +1373,10 @@
           "cost": 0.044033,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 65437,
-          "control_share_pct": 0.974,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Oren Complete Dataset Handoff",
@@ -1268,68 +1389,69 @@
           "time_exact": true,
           "tokens": 59121,
           "cached_tokens": 57088,
-          "cost": 0.00199636,
+          "cost": 0.0099818,
           "luna_tokens": 59121,
-          "luna_share_pct": 0.88,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.69,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         }
       ]
     },
     {
       "label": "Scaling Experiments",
-      "time": "56m44s",
-      "seconds": 3404.766,
+      "time": "1h19m",
+      "seconds": 4741.56,
       "time_exact": true,
-      "tokens": 2794174,
-      "cached_tokens": 2597376,
-      "cost": 2.0231522,
-      "luna_tokens": 782469,
-      "luna_share_pct": 28.004,
-      "control_tokens": 798471,
-      "control_share_pct": 28.576,
+      "tokens": 4023874,
+      "cached_tokens": 3810048,
+      "cost": 2.8097318,
+      "luna_tokens": 907983,
+      "luna_share_pct": 22.565,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": false,
+      "control_within_limit": null,
       "agents": [
-        {
-          "label": "Human Orchestrator · Selma Scaling Experiments",
-          "role": "Human Orchestrator",
-          "models": [
-            "gpt-5.6-sol/high"
-          ],
-          "seconds": 345.548,
-          "time": "5m45s",
-          "time_exact": true,
-          "tokens": 798471,
-          "cached_tokens": 632320,
-          "cost": 1.27629,
-          "luna_tokens": 0,
-          "luna_share_pct": 0.0,
-          "control_tokens": 798471,
-          "control_share_pct": 28.576,
-          "is_luna_worker": false,
-          "is_control_role": true
-        },
         {
           "label": "Operations Lead · Samson Scaling Recovery",
           "role": "Operations Lead",
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 1462.021,
-          "time": "24m22s",
+          "seconds": 2222.746,
+          "time": "37m02s",
           "time_exact": true,
-          "tokens": 772244,
-          "cached_tokens": 763392,
-          "cost": 0.464656,
+          "tokens": 1248113,
+          "cached_tokens": 1234688,
+          "cost": 0.741019,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Human Orchestrator · Selma Scaling Experiments",
+          "role": "Human Orchestrator",
+          "models": [
+            "gpt-5.6-sol/high"
+          ],
+          "seconds": 391.161,
+          "time": "6m31s",
+          "time_exact": true,
+          "tokens": 1085622,
+          "cached_tokens": 915200,
+          "cost": 1.454485,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Livia Legacy Recovery",
@@ -1345,10 +1467,29 @@
           "cost": 0.224078,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Suborchestrator · Soren KIT Model Scaling",
+          "role": "Suborchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 395.3,
+          "time": "6m35s",
+          "time_exact": true,
+          "tokens": 285044,
+          "cached_tokens": 279808,
+          "cost": 0.179709,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Mira Legacy Source Inspection",
@@ -1361,13 +1502,13 @@
           "time_exact": true,
           "tokens": 175926,
           "cached_tokens": 171776,
-          "cost": 0.00483752,
+          "cost": 0.0241876,
           "luna_tokens": 175926,
-          "luna_share_pct": 6.296,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 4.372,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Greta KIT Table",
@@ -1380,13 +1521,13 @@
           "time_exact": true,
           "tokens": 169595,
           "cached_tokens": 165632,
-          "cost": 0.00440724,
+          "cost": 0.0220362,
           "luna_tokens": 169595,
-          "luna_share_pct": 6.07,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 4.215,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Viola VLA Overlap",
@@ -1399,13 +1540,13 @@
           "time_exact": true,
           "tokens": 160445,
           "cached_tokens": 158464,
-          "cost": 0.00443948,
+          "cost": 0.0221974,
           "luna_tokens": 160445,
-          "luna_share_pct": 5.742,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 3.987,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Cora Claude Export Reconciliation",
@@ -1418,13 +1559,32 @@
           "time_exact": true,
           "tokens": 157933,
           "cached_tokens": 155392,
-          "cost": 0.00419504,
+          "cost": 0.0209752,
           "luna_tokens": 157933,
-          "luna_share_pct": 5.652,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 3.925,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Worker · Rhea Record Recovery",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 125514,
+          "cached_tokens": 123648,
+          "cost": 0.0205908,
+          "luna_tokens": 125514,
+          "luna_share_pct": 3.119,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Talia Transcript Reconciliation",
@@ -1437,13 +1597,13 @@
           "time_exact": true,
           "tokens": 118570,
           "cached_tokens": 115456,
-          "cost": 0.00504992,
+          "cost": 0.0252496,
           "luna_tokens": 118570,
-          "luna_share_pct": 4.243,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 2.947,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Suborchestrator · Rowan Saved Scaling Answers",
@@ -1459,27 +1619,47 @@
           "cost": 0.035199,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Plan Orchestrator · Priya KIT Go Update",
+          "role": "Plan Orchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 135.156,
+          "time": "2m15s",
+          "time_exact": true,
+          "tokens": 56122,
+          "cached_tokens": 55040,
+          "cost": 0.040005,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         }
       ]
     },
     {
       "label": "DINOcular NeurIPS Rebuttal",
-      "time": "~6h29m",
-      "seconds": 23399.828,
+      "time": "~6h30m",
+      "seconds": 23450.275,
       "time_exact": false,
-      "tokens": 55520934,
-      "cached_tokens": 51105394,
-      "cost": 28.94480616,
+      "tokens": 55628573,
+      "cached_tokens": 51200114,
+      "cost": 34.5025368,
       "luna_tokens": 16159577,
-      "luna_share_pct": 29.105,
-      "control_tokens": 9171111,
-      "control_share_pct": 16.518,
+      "luna_share_pct": 29.049,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": false,
+      "control_within_limit": null,
       "agents": [
         {
           "label": "Operations Lead · Owen Rebuttal State",
@@ -1495,10 +1675,10 @@
           "cost": 17.041597,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Luna Read Recent Rebuttal Work",
@@ -1511,13 +1691,13 @@
           "time_exact": true,
           "tokens": 14950883,
           "cached_tokens": 11777536,
-          "cost": 1.31487604,
+          "cost": 6.5743802,
           "luna_tokens": 14950883,
-          "luna_share_pct": 26.928,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 26.876,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Archive · Dana III Export",
@@ -1533,10 +1713,10 @@
           "cost": 4.88784,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 5408595,
-          "control_share_pct": 9.742,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Human Orchestrator · Rhea DINOcular Rebuttal",
@@ -1544,18 +1724,18 @@
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 1084.591,
-          "time": "18m04s",
+          "seconds": 1135.038,
+          "time": "18m55s",
           "time_exact": true,
-          "tokens": 3689353,
-          "cached_tokens": 3597056,
-          "cost": 2.537488,
+          "tokens": 3746126,
+          "cached_tokens": 3647744,
+          "cost": 2.628482,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 3689353,
-          "control_share_pct": 6.645,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Operations Lead · Roman DINOcular Rebuttal Recovery",
@@ -1571,10 +1751,10 @@
           "cost": 1.715009,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Ilya AOT Boundary Repair",
@@ -1590,10 +1770,10 @@
           "cost": 0.348558,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Tessa Training and Scaling",
@@ -1609,10 +1789,10 @@
           "cost": 0.227651,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Imani Inductor Boundary",
@@ -1625,13 +1805,13 @@
           "time_exact": true,
           "tokens": 297328,
           "cached_tokens": 293376,
-          "cost": 0.00850992,
+          "cost": 0.0425496,
           "luna_tokens": 297328,
-          "luna_share_pct": 0.536,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.534,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Suborchestrator · Serena Legacy Recovery",
@@ -1647,10 +1827,10 @@
           "cost": 0.185458,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Anika Runtime and Durable State",
@@ -1663,13 +1843,13 @@
           "time_exact": true,
           "tokens": 244951,
           "cached_tokens": 240384,
-          "cost": 0.00772608,
+          "cost": 0.0386304,
           "luna_tokens": 244951,
-          "luna_share_pct": 0.441,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.44,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Suborchestrator · Mara Inductor Output Repair",
@@ -1685,10 +1865,10 @@
           "cost": 0.160002,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Nika Parallelism Receipts",
@@ -1701,13 +1881,13 @@
           "time_exact": true,
           "tokens": 228779,
           "cached_tokens": 220928,
-          "cost": 0.00611976,
+          "cost": 0.0305988,
           "luna_tokens": 228779,
-          "luna_share_pct": 0.412,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.411,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Livia Leadership Source Reconciliation",
@@ -1720,13 +1900,13 @@
           "time_exact": true,
           "tokens": 175735,
           "cached_tokens": 173824,
-          "cost": 0.00515968,
+          "cost": 0.0257984,
           "luna_tokens": 175735,
-          "luna_share_pct": 0.317,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.316,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Livia AOT Run",
@@ -1739,13 +1919,13 @@
           "time_exact": true,
           "tokens": 149265,
           "cached_tokens": 145152,
-          "cost": 0.00475064,
+          "cost": 0.0237532,
           "luna_tokens": 149265,
-          "luna_share_pct": 0.269,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.268,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Nadia Next Scaling Cost",
@@ -1761,10 +1941,10 @@
           "cost": 0.08241,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Tarek DropPath KeepProb",
@@ -1780,10 +1960,10 @@
           "cost": 0.071958,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Soren DropPath Boundary",
@@ -1799,10 +1979,10 @@
           "cost": 0.068149,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Jasper JUPITER Scaling Repair",
@@ -1818,10 +1998,10 @@
           "cost": 0.071151,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Tomas Native Session Provenance",
@@ -1834,13 +2014,13 @@
           "time_exact": true,
           "tokens": 112636,
           "cached_tokens": 109312,
-          "cost": 0.00435804,
+          "cost": 0.0217902,
           "luna_tokens": 112636,
-          "luna_share_pct": 0.203,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.202,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Otto JUPITER Cache Repair",
@@ -1856,10 +2036,10 @@
           "cost": 0.068284,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Talia Training Continuity",
@@ -1875,10 +2055,29 @@
           "cost": 0.060152,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Worker · Niko DDP Partition Scalar",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 76774,
+          "cached_tokens": 69376,
+          "cost": 0.079178,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Plan Orchestrator · Petra Live Scaling Plan",
@@ -1894,46 +2093,28 @@
           "cost": 0.049157,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 73163,
-          "control_share_pct": 0.132,
-          "is_luna_worker": false,
-          "is_control_role": true
-        },
-        {
-          "label": "Worker · Niko DDP Partition Scalar",
-          "role": "Worker",
-          "models": [
-            "gpt-5.6-sol/medium"
-          ],
-          "seconds": 0.0,
-          "time": "0s",
-          "time_exact": true,
-          "tokens": 25908,
-          "cached_tokens": 25344,
-          "cost": 0.018442,
-          "luna_tokens": 0,
-          "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         }
       ]
     },
     {
       "label": "Paper Reproduction Lab",
-      "time": "4h25m",
-      "seconds": 15933.235,
+      "time": "4h49m",
+      "seconds": 17397.056,
       "time_exact": true,
-      "tokens": 13601477,
-      "cached_tokens": 13267456,
-      "cost": 7.23896536,
-      "luna_tokens": 2495827,
-      "luna_share_pct": 18.35,
-      "control_tokens": 4018198,
-      "control_share_pct": 29.542,
+      "tokens": 15311079,
+      "cached_tokens": 14948608,
+      "cost": 8.5959372,
+      "luna_tokens": 2655848,
+      "luna_share_pct": 17.346,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": false,
+      "control_within_limit": null,
       "agents": [
         {
           "label": "Human Orchestrator · Priya Paper Reproduction",
@@ -1941,18 +2122,18 @@
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 905.463,
-          "time": "15m05s",
+          "seconds": 1053.35,
+          "time": "17m33s",
           "time_exact": true,
-          "tokens": 3954654,
-          "cached_tokens": 3902720,
-          "cost": 2.45833,
+          "tokens": 4696629,
+          "cached_tokens": 4637696,
+          "cost": 2.929363,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 3954654,
-          "control_share_pct": 29.075,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Operations Lead · Perry Paper Reproduction Recovery",
@@ -1960,18 +2141,18 @@
           "models": [
             "gpt-5.6-sol/high"
           ],
-          "seconds": 3901.309,
-          "time": "1h05m",
+          "seconds": 4418.442,
+          "time": "1h13m",
           "time_exact": true,
-          "tokens": 3836715,
-          "cached_tokens": 3650560,
-          "cost": 2.85673,
+          "tokens": 4246842,
+          "cached_tokens": 4057344,
+          "cost": 3.095087,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Felix Five-Paper Feasibility",
@@ -1987,10 +2168,10 @@
           "cost": 1.158882,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Lena Legacy Recovery",
@@ -2006,10 +2187,10 @@
           "cost": 0.283445,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Nora Novel Approach Expansion",
@@ -2025,10 +2206,10 @@
           "cost": 0.198946,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Suborchestrator · Rowan RecGen Official Reproduction",
@@ -2044,10 +2225,10 @@
           "cost": 0.164832,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": false,
-          "is_control_role": false
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Sela RecGen Official Assets",
@@ -2060,13 +2241,13 @@
           "time_exact": true,
           "tokens": 200476,
           "cached_tokens": 197376,
-          "cost": 0.00596452,
+          "cost": 0.0298226,
           "luna_tokens": 200476,
-          "luna_share_pct": 1.474,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.309,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Mira Material Match",
@@ -2079,13 +2260,13 @@
           "time_exact": true,
           "tokens": 189463,
           "cached_tokens": 186112,
-          "cost": 0.00471444,
+          "cost": 0.0235722,
           "luna_tokens": 189463,
-          "luna_share_pct": 1.393,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.237,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Ethan EPIC-Contact Feasibility",
@@ -2098,13 +2279,13 @@
           "time_exact": true,
           "tokens": 177503,
           "cached_tokens": 175872,
-          "cost": 0.00423164,
+          "cost": 0.0211582,
           "luna_tokens": 177503,
-          "luna_share_pct": 1.305,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.159,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Rhea RecGen Container Environment",
@@ -2117,13 +2298,13 @@
           "time_exact": true,
           "tokens": 175771,
           "cached_tokens": 173824,
-          "cost": 0.00468388,
+          "cost": 0.0234194,
           "luna_tokens": 175771,
-          "luna_share_pct": 1.292,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.148,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Riley Release Feasibility",
@@ -2136,13 +2317,13 @@
           "time_exact": true,
           "tokens": 167378,
           "cached_tokens": 162560,
-          "cost": 0.0049158,
+          "cost": 0.024579,
           "luna_tokens": 167378,
-          "luna_share_pct": 1.231,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.093,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Chloe CHOIR Feasibility",
@@ -2155,13 +2336,13 @@
           "time_exact": true,
           "tokens": 164773,
           "cached_tokens": 162560,
-          "cost": 0.0049198,
+          "cost": 0.024599,
           "luna_tokens": 164773,
-          "luna_share_pct": 1.211,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.076,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Aria ARTHOI Feasibility",
@@ -2174,13 +2355,13 @@
           "time_exact": true,
           "tokens": 155406,
           "cached_tokens": 145152,
-          "cost": 0.00528584,
+          "cost": 0.0264292,
           "luna_tokens": 155406,
-          "luna_share_pct": 1.143,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 1.015,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Clara ContactPrompt Feasibility",
@@ -2193,13 +2374,13 @@
           "time_exact": true,
           "tokens": 145191,
           "cached_tokens": 143104,
-          "cost": 0.00359348,
+          "cost": 0.0179674,
           "luna_tokens": 145191,
-          "luna_share_pct": 1.067,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.948,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Tamsin RecGen Official Ex0 Inference",
@@ -2212,13 +2393,13 @@
           "time_exact": true,
           "tokens": 134237,
           "cached_tokens": 131840,
-          "cost": 0.0036032,
+          "cost": 0.018016,
           "luna_tokens": 134237,
-          "luna_share_pct": 0.987,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.877,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Hazel HOWTransfer Feasibility",
@@ -2231,13 +2412,32 @@
           "time_exact": true,
           "tokens": 127405,
           "cached_tokens": 125696,
-          "cost": 0.00327672,
+          "cost": 0.0163836,
           "luna_tokens": 127405,
-          "luna_share_pct": 0.937,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.832,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Worker · Uma Final Canonical Integration",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 502.197,
+          "time": "8m22s",
+          "time_exact": true,
+          "tokens": 127093,
+          "cached_tokens": 124672,
+          "cost": 0.0192582,
+          "luna_tokens": 127093,
+          "luna_share_pct": 0.83,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Alina ArtHOI Official Data",
@@ -2250,13 +2450,13 @@
           "time_exact": true,
           "tokens": 124941,
           "cached_tokens": 122624,
-          "cost": 0.00307488,
+          "cost": 0.0153744,
           "luna_tokens": 124941,
-          "luna_share_pct": 0.919,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.816,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Rita Repository Recovery",
@@ -2269,13 +2469,13 @@
           "time_exact": true,
           "tokens": 112072,
           "cached_tokens": 109312,
-          "cost": 0.00338924,
+          "cost": 0.0169462,
           "luna_tokens": 112072,
-          "luna_share_pct": 0.824,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.732,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Diana DyTact Feasibility",
@@ -2288,13 +2488,13 @@
           "time_exact": true,
           "tokens": 106624,
           "cached_tokens": 104192,
-          "cost": 0.00291524,
+          "cost": 0.0145762,
           "luna_tokens": 106624,
-          "luna_share_pct": 0.784,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.696,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Lucy Legacy List",
@@ -2307,13 +2507,13 @@
           "time_exact": true,
           "tokens": 98390,
           "cached_tokens": 93952,
-          "cost": 0.00386864,
+          "cost": 0.0193432,
           "luna_tokens": 98390,
-          "luna_share_pct": 0.723,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.643,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Fiona Final Waiting State",
@@ -2326,13 +2526,13 @@
           "time_exact": true,
           "tokens": 81376,
           "cached_tokens": 79616,
-          "cost": 0.00265732,
+          "cost": 0.0132866,
           "luna_tokens": 81376,
-          "luna_share_pct": 0.598,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.531,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Ingrid RecGen Main Integration",
@@ -2345,13 +2545,13 @@
           "time_exact": true,
           "tokens": 80166,
           "cached_tokens": 77568,
-          "cost": 0.00258296,
+          "cost": 0.0129148,
           "luna_tokens": 80166,
-          "luna_share_pct": 0.589,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.524,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         },
         {
           "label": "Worker · Chloe Checked Approach Expansion",
@@ -2364,13 +2564,32 @@
           "time_exact": true,
           "tokens": 78634,
           "cached_tokens": 77568,
-          "cost": 0.00179556,
+          "cost": 0.0089778,
           "luna_tokens": 78634,
-          "luna_share_pct": 0.578,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.514,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Suborchestrator · Asha ArtHOI Official RS Path",
+          "role": "Suborchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 76424,
+          "cached_tokens": 73472,
+          "cost": 0.059096,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Irene RecGen Latest-Main Integration",
@@ -2383,13 +2602,51 @@
           "time_exact": true,
           "tokens": 74017,
           "cached_tokens": 72448,
-          "cost": 0.00212176,
+          "cost": 0.0106088,
           "luna_tokens": 74017,
-          "luna_share_pct": 0.544,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.483,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Suborchestrator · Cora ContactPrompt Official Reproduction",
+          "role": "Suborchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 174.16,
+          "time": "2m54s",
+          "time_exact": true,
+          "tokens": 73589,
+          "cached_tokens": 72448,
+          "cost": 0.045979,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Suborchestrator · Remy RecGen sm120 Reproduction",
+          "role": "Suborchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 72373,
+          "cached_tokens": 70400,
+          "cost": 0.051815,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Plan Orchestrator · Paloma Official-Data-First Plan",
@@ -2405,29 +2662,67 @@
           "cost": 0.044459,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 63544,
-          "control_share_pct": 0.467,
-          "is_luna_worker": false,
-          "is_control_role": true
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
-          "label": "Worker · Uma Final Canonical Integration",
-          "role": "Worker",
+          "label": "Suborchestrator · Henry HOPformer Official Evaluation",
+          "role": "Suborchestrator",
           "models": [
-            "gpt-5.6-luna/max"
+            "gpt-5.6-sol/medium"
           ],
           "seconds": 0.0,
           "time": "0s",
           "time_exact": true,
-          "tokens": 61838,
-          "cached_tokens": 48896,
-          "cost": 0.00410132,
-          "luna_tokens": 61838,
-          "luna_share_pct": 0.455,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "tokens": 62371,
+          "cached_tokens": 60160,
+          "cost": 0.078435,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Suborchestrator · Aiden ActionMesh Official Example",
+          "role": "Suborchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 59218,
+          "cached_tokens": 55040,
+          "cost": 0.053635,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
+        },
+        {
+          "label": "Plan Orchestrator · Paula Five-Paper Parallel Authorization",
+          "role": "Plan Orchestrator",
+          "models": [
+            "gpt-5.6-sol/medium"
+          ],
+          "seconds": 122.444,
+          "time": "2m02s",
+          "time_exact": true,
+          "tokens": 53504,
+          "cached_tokens": 51968,
+          "cost": 0.036464,
+          "luna_tokens": 0,
+          "luna_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": false
         },
         {
           "label": "Worker · Clara Consultation Recovery",
@@ -2440,13 +2735,70 @@
           "time_exact": true,
           "tokens": 40166,
           "cached_tokens": 38656,
-          "cost": 0.00164512,
+          "cost": 0.0082256,
           "luna_tokens": 40166,
-          "luna_share_pct": 0.295,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
-          "is_luna_worker": true,
-          "is_control_role": false
+          "luna_share_pct": 0.262,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Worker · Iris ArtHOI RS Exercise",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 39609,
+          "cached_tokens": 36608,
+          "cost": 0.0093118,
+          "luna_tokens": 39609,
+          "luna_share_pct": 0.259,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Worker · Robin RecGen sm120 Repair",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 27665,
+          "cached_tokens": 19200,
+          "cost": 0.01316,
+          "luna_tokens": 27665,
+          "luna_share_pct": 0.181,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
+        },
+        {
+          "label": "Worker · Lila ContactPrompt Official Prediction",
+          "role": "Worker",
+          "models": [
+            "gpt-5.6-luna/max"
+          ],
+          "seconds": 0.0,
+          "time": "0s",
+          "time_exact": true,
+          "tokens": 27492,
+          "cached_tokens": 24320,
+          "cost": 0.007569,
+          "luna_tokens": 27492,
+          "luna_share_pct": 0.18,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
+          "is_luna_worker": true
         }
       ]
     },
@@ -2460,10 +2812,11 @@
       "cost": 0.0,
       "luna_tokens": 0,
       "luna_share_pct": 0.0,
-      "control_tokens": 0,
-      "control_share_pct": 0.0,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": true,
+      "control_within_limit": null,
       "agents": []
     },
     {
@@ -2476,63 +2829,69 @@
       "cost": 0.0,
       "luna_tokens": 0,
       "luna_share_pct": 0.0,
-      "control_tokens": 0,
-      "control_share_pct": 0.0,
+      "control_tokens": null,
+      "control_share_pct": null,
+      "control_available": false,
       "luna_majority": false,
-      "control_within_limit": true,
+      "control_within_limit": null,
       "agents": []
     }
   ],
   "weekly": {
     "account": {
       "available": true,
-      "used_percent": 19.0,
-      "remaining_percent": 81.0,
+      "used_percent": 21.0,
+      "remaining_percent": 79.0,
       "window_minutes": 10080,
       "window_label": "7 days",
       "resets_at": "2026-08-08T08:06:48Z",
       "window_start": "2026-08-01T08:06:48Z",
       "plan_type": "pro",
-      "observed_at": "2026-08-01T17:58:43.316000Z",
+      "observed_at": "2026-08-01T18:21:32.980000Z",
       "opening_used_percent": 1.0,
-      "local_observed_estimate_percent": 18.0,
+      "local_observed_estimate_percent": 20.0,
+      "beech_observed_increase_percent": 20.0,
+      "pre_beech_observation_percent": 1.0,
+      "other_machine_percent": null,
       "other_unassigned_percent": 1.0,
-      "today_delta_percent": 18.0,
+      "today_delta_percent": 20.0,
       "today_delta_supported": true,
-      "snapshot_count": 8166,
-      "attribution": "Local-observed estimate: percentage-point changes first observed during local turns. Opening account usage and anything not safely attributable remain Other / unassigned.",
-      "data_quality": "Concurrent Codex use on another machine can change the account percentage between local snapshots and cannot be separated here. Quota percentages are not converted to dollars."
+      "snapshot_count": 9263,
+      "attribution": "Beech-observed increase: account percentage-point changes first seen in Codex turns on beech. This is not device attribution. Usage before the first beech snapshot is shown separately; exact other-machine usage is unavailable.",
+      "data_quality": "Codex exposes an account-wide percentage without a device identifier. Concurrent use elsewhere can be included in the beech-observed increase, so exact beech-versus-other quota usage cannot be separated. Quota percentages are not converted to dollars."
     },
     "local": {
       "aggregate": {
         "project_count": 11,
-        "agent_count": 102,
-        "seconds": 80747.004,
-        "time": "22h25m",
+        "agent_count": 121,
+        "seconds": 89822.029,
+        "time": "24h57m",
         "time_exact": false,
-        "tokens": 89343452,
-        "cached_tokens": 84049920,
-        "cost": 46.47574584,
-        "luna_tokens": 22210393,
-        "luna_share_pct": 24.86,
-        "control_tokens": 16196476,
-        "control_share_pct": 18.128
+        "tokens": 96963719,
+        "cached_tokens": 91537152,
+        "cost": 56.8970226,
+        "luna_tokens": 23222725,
+        "luna_share_pct": 23.95,
+        "control_tokens": null,
+        "control_share_pct": null,
+        "control_available": false
       },
       "projects": [
         {
           "label": "DinocularWorldModel",
-          "time": "1h35m",
-          "seconds": 5755.534999999999,
+          "time": "1h59m",
+          "seconds": 7140.603,
           "time_exact": true,
-          "tokens": 7575485,
-          "cached_tokens": 7416320,
-          "cost": 4.62202156,
-          "luna_tokens": 378626,
-          "luna_share_pct": 4.998,
-          "control_tokens": 2212091,
-          "control_share_pct": 29.201,
+          "tokens": 9250874,
+          "cached_tokens": 9065216,
+          "cost": 5.6002414,
+          "luna_tokens": 614308,
+          "luna_share_pct": 6.641,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": false,
+          "control_within_limit": null,
           "agents": [
             {
               "label": "Operations Lead · Orson World Model Recovery",
@@ -2540,18 +2899,18 @@
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 1540.984,
-              "time": "25m40s",
+              "seconds": 1977.476,
+              "time": "32m57s",
               "time_exact": true,
-              "tokens": 2267085,
-              "cached_tokens": 2237696,
-              "cost": 1.362993,
+              "tokens": 3094496,
+              "cached_tokens": 3056896,
+              "cost": 1.818923,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Human Orchestrator · Mira World Model",
@@ -2559,18 +2918,18 @@
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 522.555,
-              "time": "8m42s",
+              "seconds": 543.07,
+              "time": "9m03s",
               "time_exact": true,
-              "tokens": 2212091,
-              "cached_tokens": 2112768,
-              "cost": 1.717449,
+              "tokens": 2376808,
+              "cached_tokens": 2276352,
+              "cost": 1.806831,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 2212091,
-              "control_share_pct": 29.201,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Operations Lead · Owen DINOcular Recovery",
@@ -2586,10 +2945,10 @@
               "cost": 0.687934,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Selene Legacy Recovery",
@@ -2605,10 +2964,10 @@
               "cost": 0.457218,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Daria Depth Difference",
@@ -2624,10 +2983,48 @@
               "cost": 0.335459,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Suborchestrator · Della Duplicate Diagnosis",
+              "role": "Suborchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 472.83,
+              "time": "7m52s",
+              "time_exact": true,
+              "tokens": 447579,
+              "cached_tokens": 432896,
+              "cost": 0.367038,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Worker · Petra Provenance Recovery",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 455.231,
+              "time": "7m35s",
+              "time_exact": true,
+              "tokens": 235682,
+              "cached_tokens": 233216,
+              "cost": 0.0280676,
+              "luna_tokens": 235682,
+              "luna_share_pct": 2.548,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Daphne Depth Difference",
@@ -2640,13 +3037,13 @@
               "time_exact": true,
               "tokens": 211529,
               "cached_tokens": 209664,
-              "cost": 0.00486428,
+              "cost": 0.0243214,
               "luna_tokens": 211529,
-              "luna_share_pct": 2.792,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 2.287,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Lyra LMDB Repair",
@@ -2659,13 +3056,13 @@
               "time_exact": true,
               "tokens": 167097,
               "cached_tokens": 163584,
-              "cost": 0.00458628,
+              "cost": 0.0229314,
               "luna_tokens": 167097,
-              "luna_share_pct": 2.206,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.806,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Remy Reopen Repair",
@@ -2681,27 +3078,28 @@
               "cost": 0.051518,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             }
           ]
         },
         {
           "label": "JSC Model Serving",
-          "time": "3h14m",
-          "seconds": 11657.201000000001,
+          "time": "3h59m",
+          "seconds": 14351.168000000001,
           "time_exact": true,
-          "tokens": 6968863,
-          "cached_tokens": 6823424,
-          "cost": 3.6743016,
-          "luna_tokens": 1114137,
-          "luna_share_pct": 15.987,
-          "control_tokens": 2596900,
-          "control_share_pct": 37.264,
+          "tokens": 8137313,
+          "cached_tokens": 7983616,
+          "cost": 4.3721922,
+          "luna_tokens": 1559076,
+          "luna_share_pct": 19.16,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": false,
+          "control_within_limit": null,
           "agents": [
             {
               "label": "Human Orchestrator · Jules Model Serving",
@@ -2709,18 +3107,18 @@
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 696.189,
-              "time": "11m36s",
+              "seconds": 721.476,
+              "time": "12m01s",
               "time_exact": true,
-              "tokens": 2559386,
-              "cached_tokens": 2513664,
-              "cost": 1.724317,
+              "tokens": 2850964,
+              "cached_tokens": 2801920,
+              "cost": 1.902755,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 2559386,
-              "control_share_pct": 36.726,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Operations Lead · Soren Model Serving Recovery",
@@ -2728,18 +3126,18 @@
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 3109.108,
-              "time": "51m49s",
+              "seconds": 3800.569,
+              "time": "1h03m",
               "time_exact": true,
-              "tokens": 1795646,
-              "cached_tokens": 1768192,
-              "cost": 1.093291,
+              "tokens": 1680670,
+              "cached_tokens": 1662464,
+              "cost": 0.993062,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Leona Kimi KIT Feasibility",
@@ -2747,18 +3145,18 @@
               "models": [
                 "gpt-5.6-sol/medium"
               ],
-              "seconds": 1213.412,
-              "time": "20m13s",
+              "seconds": 1411.256,
+              "time": "23m31s",
               "time_exact": true,
-              "tokens": 747250,
-              "cached_tokens": 738304,
-              "cost": 0.422407,
+              "tokens": 915598,
+              "cached_tokens": 905984,
+              "cost": 0.510187,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Lena Legacy Recovery",
@@ -2774,10 +3172,48 @@
               "cost": 0.390177,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Suborchestrator · Omar GLM KIT Execution",
+              "role": "Suborchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 385.86,
+              "time": "6m25s",
+              "time_exact": true,
+              "tokens": 378561,
+              "cached_tokens": 370432,
+              "cost": 0.285361,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Worker · Noor GLM KIT Fit Compatibility",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 727.498,
+              "time": "12m07s",
+              "time_exact": true,
+              "tokens": 195268,
+              "cached_tokens": 193280,
+              "cost": 0.026496,
+              "luna_tokens": 195268,
+              "luna_share_pct": 2.4,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Talia KIT Probe Event Service",
@@ -2790,13 +3226,13 @@
               "time_exact": true,
               "tokens": 169797,
               "cached_tokens": 167680,
-              "cost": 0.004072,
+              "cost": 0.02036,
               "luna_tokens": 169797,
-              "luna_share_pct": 2.437,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 2.087,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Sana Kimi KIT Compatibility",
@@ -2804,18 +3240,37 @@
               "models": [
                 "gpt-5.6-luna/max"
               ],
+              "seconds": 666.017,
+              "time": "11m06s",
+              "time_exact": true,
+              "tokens": 162174,
+              "cached_tokens": 159488,
+              "cost": 0.0214698,
+              "luna_tokens": 162174,
+              "luna_share_pct": 1.993,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Worker · Imani Kimi KIT Staging",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
               "seconds": 0.0,
               "time": "0s",
               "time_exact": true,
-              "tokens": 147170,
-              "cached_tokens": 140032,
-              "cost": 0.00610224,
-              "luna_tokens": 147170,
-              "luna_share_pct": 2.112,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "tokens": 135811,
+              "cached_tokens": 130816,
+              "cost": 0.0313516,
+              "luna_tokens": 135811,
+              "luna_share_pct": 1.669,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Rhea RC Retirement",
@@ -2828,13 +3283,13 @@
               "time_exact": true,
               "tokens": 118477,
               "cached_tokens": 116480,
-              "cost": 0.003393,
+              "cost": 0.016965,
               "luna_tokens": 118477,
-              "luna_share_pct": 1.7,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.456,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Ravi KIT Compute Probe",
@@ -2847,13 +3302,13 @@
               "time_exact": true,
               "tokens": 116444,
               "cached_tokens": 112384,
-              "cost": 0.00516668,
+              "cost": 0.0258334,
               "luna_tokens": 116444,
-              "luna_share_pct": 1.671,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.431,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Cora Command Closure",
@@ -2866,13 +3321,32 @@
               "time_exact": true,
               "tokens": 104103,
               "cached_tokens": 101120,
-              "cost": 0.003206,
+              "cost": 0.01603,
               "luna_tokens": 104103,
-              "luna_share_pct": 1.494,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.279,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Worker · Elias GLM KIT Live Acceptance",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 98856,
+              "cached_tokens": 96000,
+              "cost": 0.021296,
+              "luna_tokens": 98856,
+              "luna_share_pct": 1.215,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Niko KIT Live Facts",
@@ -2885,13 +3359,13 @@
               "time_exact": true,
               "tokens": 92213,
               "cached_tokens": 88832,
-              "cost": 0.00361984,
+              "cost": 0.0180992,
               "luna_tokens": 92213,
-              "luna_share_pct": 1.323,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.133,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Talia Kimi Failure Diagnosis",
@@ -2904,13 +3378,13 @@
               "time_exact": true,
               "tokens": 83660,
               "cached_tokens": 67328,
-              "cost": 0.00540296,
+              "cost": 0.0270148,
               "luna_tokens": 83660,
-              "luna_share_pct": 1.2,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.028,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Mona Monitor Meaning",
@@ -2923,13 +3397,13 @@
               "time_exact": true,
               "tokens": 79838,
               "cached_tokens": 77568,
-              "cost": 0.00292236,
+              "cost": 0.0146118,
               "luna_tokens": 79838,
-              "luna_share_pct": 1.146,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.981,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Pia KIT Probe Preflight",
@@ -2942,13 +3416,13 @@
               "time_exact": true,
               "tokens": 60592,
               "cached_tokens": 58112,
-              "cost": 0.00228124,
+              "cost": 0.0114062,
               "luna_tokens": 60592,
-              "luna_share_pct": 0.869,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.745,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Kira Kimi Continuity",
@@ -2961,13 +3435,13 @@
               "time_exact": true,
               "tokens": 51599,
               "cached_tokens": 49920,
-              "cost": 0.0017782,
+              "cost": 0.008891,
               "luna_tokens": 51599,
-              "luna_share_pct": 0.74,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.634,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Dara Durable Legacy",
@@ -2980,13 +3454,13 @@
               "time_exact": true,
               "tokens": 48054,
               "cached_tokens": 45824,
-              "cost": 0.00177048,
+              "cost": 0.0088524,
               "luna_tokens": 48054,
-              "luna_share_pct": 0.69,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.591,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Mira KIT Queue History",
@@ -2999,13 +3473,13 @@
               "time_exact": true,
               "tokens": 42190,
               "cached_tokens": 39680,
-              "cost": 0.0018106,
+              "cost": 0.009053,
               "luna_tokens": 42190,
-              "luna_share_pct": 0.605,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.518,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Watcher · Kimi KIT Real Probe",
@@ -3018,13 +3492,13 @@
               "time_exact": true,
               "tokens": 37514,
               "cached_tokens": 28160,
-              "cost": 0.002584,
+              "cost": 0.01292,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 37514,
-              "control_share_pct": 0.538,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             }
           ]
         },
@@ -3038,10 +3512,11 @@
           "cost": 0.0,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": true,
+          "control_within_limit": null,
           "agents": []
         },
         {
@@ -3054,10 +3529,11 @@
           "cost": 0.0,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": true,
+          "control_within_limit": null,
           "agents": []
         },
         {
@@ -3067,13 +3543,14 @@
           "time_exact": true,
           "tokens": 1389967,
           "cached_tokens": 1312256,
-          "cost": 1.02802484,
+          "cost": 1.0540762,
           "luna_tokens": 159770,
           "luna_share_pct": 11.495,
-          "control_tokens": 393973,
-          "control_share_pct": 28.344,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": false,
+          "control_within_limit": null,
           "agents": [
             {
               "label": "Operations Lead · Rowan Contact Review Recovery",
@@ -3089,10 +3566,10 @@
               "cost": 0.256415,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Lena Legacy Recovery",
@@ -3108,10 +3585,10 @@
               "cost": 0.232604,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Human Orchestrator · Reina Contact Review",
@@ -3127,10 +3604,10 @@
               "cost": 0.532493,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 393973,
-              "control_share_pct": 28.344,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Iris History Integration",
@@ -3143,13 +3620,13 @@
               "time_exact": true,
               "tokens": 129668,
               "cached_tokens": 126720,
-              "cost": 0.004321,
+              "cost": 0.021605,
               "luna_tokens": 129668,
               "luna_share_pct": 9.329,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Mira Memory Inspection",
@@ -3162,68 +3639,69 @@
               "time_exact": true,
               "tokens": 30102,
               "cached_tokens": 27392,
-              "cost": 0.00219184,
+              "cost": 0.0109592,
               "luna_tokens": 30102,
               "luna_share_pct": 2.166,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             }
           ]
         },
         {
           "label": "Human Contact Flow Generator",
-          "time": "2h18m",
-          "seconds": 8286.262,
+          "time": "2h53m",
+          "seconds": 10431.19,
           "time_exact": true,
-          "tokens": 6890325,
-          "cached_tokens": 6723584,
-          "cost": 3.80846072,
+          "tokens": 8573348,
+          "cached_tokens": 8369408,
+          "cost": 4.9302384,
           "luna_tokens": 1113641,
-          "luna_share_pct": 16.162,
-          "control_tokens": 2414327,
-          "control_share_pct": 35.039,
+          "luna_share_pct": 12.99,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": false,
+          "control_within_limit": null,
           "agents": [
-            {
-              "label": "Operations Lead · Gabriel Contact Generation Recovery",
-              "role": "Operations Lead",
-              "models": [
-                "gpt-5.6-sol/high"
-              ],
-              "seconds": 2519.512,
-              "time": "41m59s",
-              "time_exact": true,
-              "tokens": 2556950,
-              "cached_tokens": 2522880,
-              "cost": 1.54874,
-              "luna_tokens": 0,
-              "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
-            },
             {
               "label": "Human Orchestrator · Gia Contact Generation",
               "role": "Human Orchestrator",
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 687.66,
-              "time": "11m27s",
+              "seconds": 845.0,
+              "time": "14m05s",
               "time_exact": true,
-              "tokens": 2348890,
-              "cached_tokens": 2294784,
-              "cost": 1.596797,
+              "tokens": 3114140,
+              "cached_tokens": 3044352,
+              "cost": 2.067341,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 2348890,
-              "control_share_pct": 34.09,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Operations Lead · Gabriel Contact Generation Recovery",
+              "role": "Operations Lead",
+              "models": [
+                "gpt-5.6-sol/high"
+              ],
+              "seconds": 3096.64,
+              "time": "51m36s",
+              "time_exact": true,
+              "tokens": 2984739,
+              "cached_tokens": 2938368,
+              "cost": 1.844489,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Ivo Integrated ContactFlow Delivery",
@@ -3231,18 +3709,37 @@
               "models": [
                 "gpt-5.6-sol/medium"
               ],
-              "seconds": 391.585,
-              "time": "6m31s",
+              "seconds": 604.78,
+              "time": "10m04s",
               "time_exact": true,
-              "tokens": 347094,
-              "cached_tokens": 295424,
-              "cost": 0.412212,
+              "tokens": 643630,
+              "cached_tokens": 587264,
+              "cost": 0.588537,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Unlabelled agent",
+              "role": "Unlabelled agent",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 1197.265,
+              "time": "19m57s",
+              "time_exact": true,
+              "tokens": 385322,
+              "cached_tokens": 379136,
+              "cost": 0.0501446,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Rana Representative Runs",
@@ -3255,13 +3752,13 @@
               "time_exact": true,
               "tokens": 234753,
               "cached_tokens": 232192,
-              "cost": 0.00638004,
+              "cost": 0.0319002,
               "luna_tokens": 234753,
-              "luna_share_pct": 3.407,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 2.738,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Nadia Native State Inspection",
@@ -3274,13 +3771,13 @@
               "time_exact": true,
               "tokens": 198508,
               "cached_tokens": 194304,
-              "cost": 0.00507988,
+              "cost": 0.0253994,
               "luna_tokens": 198508,
-              "luna_share_pct": 2.881,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 2.315,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Clara Claude Scaling Synthesis",
@@ -3293,13 +3790,13 @@
               "time_exact": true,
               "tokens": 196286,
               "cached_tokens": 193280,
-              "cost": 0.0066778,
+              "cost": 0.033389,
               "luna_tokens": 196286,
-              "luna_share_pct": 2.849,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 2.289,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Lina Lineage Assembly",
@@ -3312,32 +3809,13 @@
               "time_exact": true,
               "tokens": 192133,
               "cached_tokens": 188160,
-              "cost": 0.0063198,
+              "cost": 0.031599,
               "luna_tokens": 192133,
-              "luna_share_pct": 2.788,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
-            },
-            {
-              "label": "Unlabelled agent",
-              "role": "Unlabelled agent",
-              "models": [
-                "gpt-5.6-luna/max"
-              ],
-              "seconds": 0.0,
-              "time": "0s",
-              "time_exact": true,
-              "tokens": 191874,
-              "cached_tokens": 190208,
-              "cost": 0.00428236,
-              "luna_tokens": 0,
-              "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "luna_share_pct": 2.241,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Lucía Legacy Provenance",
@@ -3350,13 +3828,13 @@
               "time_exact": true,
               "tokens": 164923,
               "cached_tokens": 163584,
-              "cost": 0.00381848,
+              "cost": 0.0190924,
               "luna_tokens": 164923,
-              "luna_share_pct": 2.394,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.924,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Suborchestrator · Soren Scalable Claude Value",
@@ -3372,10 +3850,10 @@
               "cost": 0.095108,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Mira Memory Recovery",
@@ -3391,10 +3869,10 @@
               "cost": 0.073964,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Mara Active Restart Handoff",
@@ -3407,13 +3885,13 @@
               "time_exact": true,
               "tokens": 67917,
               "cached_tokens": 65280,
-              "cost": 0.003052,
+              "cost": 0.01526,
               "luna_tokens": 67917,
-              "luna_share_pct": 0.986,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.792,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Plan Orchestrator · Nia Complete Dataset System Plan",
@@ -3429,10 +3907,10 @@
               "cost": 0.044033,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 65437,
-              "control_share_pct": 0.95,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Oren Complete Dataset Handoff",
@@ -3445,68 +3923,69 @@
               "time_exact": true,
               "tokens": 59121,
               "cached_tokens": 57088,
-              "cost": 0.00199636,
+              "cost": 0.0099818,
               "luna_tokens": 59121,
-              "luna_share_pct": 0.858,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.69,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             }
           ]
         },
         {
           "label": "Scaling Experiments",
-          "time": "56m44s",
-          "seconds": 3404.766,
+          "time": "1h19m",
+          "seconds": 4741.56,
           "time_exact": true,
-          "tokens": 2794174,
-          "cached_tokens": 2597376,
-          "cost": 2.0231522,
-          "luna_tokens": 782469,
-          "luna_share_pct": 28.004,
-          "control_tokens": 798471,
-          "control_share_pct": 28.576,
+          "tokens": 4023874,
+          "cached_tokens": 3810048,
+          "cost": 2.8097318,
+          "luna_tokens": 907983,
+          "luna_share_pct": 22.565,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": false,
+          "control_within_limit": null,
           "agents": [
-            {
-              "label": "Human Orchestrator · Selma Scaling Experiments",
-              "role": "Human Orchestrator",
-              "models": [
-                "gpt-5.6-sol/high"
-              ],
-              "seconds": 345.548,
-              "time": "5m45s",
-              "time_exact": true,
-              "tokens": 798471,
-              "cached_tokens": 632320,
-              "cost": 1.27629,
-              "luna_tokens": 0,
-              "luna_share_pct": 0.0,
-              "control_tokens": 798471,
-              "control_share_pct": 28.576,
-              "is_luna_worker": false,
-              "is_control_role": true
-            },
             {
               "label": "Operations Lead · Samson Scaling Recovery",
               "role": "Operations Lead",
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 1462.021,
-              "time": "24m22s",
+              "seconds": 2222.746,
+              "time": "37m02s",
               "time_exact": true,
-              "tokens": 772244,
-              "cached_tokens": 763392,
-              "cost": 0.464656,
+              "tokens": 1248113,
+              "cached_tokens": 1234688,
+              "cost": 0.741019,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Human Orchestrator · Selma Scaling Experiments",
+              "role": "Human Orchestrator",
+              "models": [
+                "gpt-5.6-sol/high"
+              ],
+              "seconds": 391.161,
+              "time": "6m31s",
+              "time_exact": true,
+              "tokens": 1085622,
+              "cached_tokens": 915200,
+              "cost": 1.454485,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Livia Legacy Recovery",
@@ -3522,10 +4001,29 @@
               "cost": 0.224078,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Suborchestrator · Soren KIT Model Scaling",
+              "role": "Suborchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 395.3,
+              "time": "6m35s",
+              "time_exact": true,
+              "tokens": 285044,
+              "cached_tokens": 279808,
+              "cost": 0.179709,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Mira Legacy Source Inspection",
@@ -3538,13 +4036,13 @@
               "time_exact": true,
               "tokens": 175926,
               "cached_tokens": 171776,
-              "cost": 0.00483752,
+              "cost": 0.0241876,
               "luna_tokens": 175926,
-              "luna_share_pct": 6.296,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 4.372,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Greta KIT Table",
@@ -3557,13 +4055,13 @@
               "time_exact": true,
               "tokens": 169595,
               "cached_tokens": 165632,
-              "cost": 0.00440724,
+              "cost": 0.0220362,
               "luna_tokens": 169595,
-              "luna_share_pct": 6.07,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 4.215,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Viola VLA Overlap",
@@ -3576,13 +4074,13 @@
               "time_exact": true,
               "tokens": 160445,
               "cached_tokens": 158464,
-              "cost": 0.00443948,
+              "cost": 0.0221974,
               "luna_tokens": 160445,
-              "luna_share_pct": 5.742,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 3.987,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Cora Claude Export Reconciliation",
@@ -3595,13 +4093,32 @@
               "time_exact": true,
               "tokens": 157933,
               "cached_tokens": 155392,
-              "cost": 0.00419504,
+              "cost": 0.0209752,
               "luna_tokens": 157933,
-              "luna_share_pct": 5.652,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 3.925,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Worker · Rhea Record Recovery",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 125514,
+              "cached_tokens": 123648,
+              "cost": 0.0205908,
+              "luna_tokens": 125514,
+              "luna_share_pct": 3.119,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Talia Transcript Reconciliation",
@@ -3614,13 +4131,13 @@
               "time_exact": true,
               "tokens": 118570,
               "cached_tokens": 115456,
-              "cost": 0.00504992,
+              "cost": 0.0252496,
               "luna_tokens": 118570,
-              "luna_share_pct": 4.243,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 2.947,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Suborchestrator · Rowan Saved Scaling Answers",
@@ -3636,27 +4153,47 @@
               "cost": 0.035199,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Plan Orchestrator · Priya KIT Go Update",
+              "role": "Plan Orchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 135.156,
+              "time": "2m15s",
+              "time_exact": true,
+              "tokens": 56122,
+              "cached_tokens": 55040,
+              "cost": 0.040005,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             }
           ]
         },
         {
           "label": "DINOcular NeurIPS Rebuttal",
-          "time": "~6h23m",
-          "seconds": 23019.323,
+          "time": "~6h24m",
+          "seconds": 23069.77,
           "time_exact": false,
-          "tokens": 50116815,
-          "cached_tokens": 45894144,
-          "cost": 24.08249616,
+          "tokens": 50220037,
+          "cached_tokens": 45995008,
+          "cost": 29.5806188,
           "luna_tokens": 16159577,
-          "luna_share_pct": 32.244,
-          "control_tokens": 3762516,
-          "control_share_pct": 7.507,
+          "luna_share_pct": 32.178,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": true,
+          "control_within_limit": null,
           "agents": [
             {
               "label": "Operations Lead · Owen Rebuttal State",
@@ -3672,10 +4209,10 @@
               "cost": 17.041597,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Luna Read Recent Rebuttal Work",
@@ -3688,13 +4225,13 @@
               "time_exact": true,
               "tokens": 14950883,
               "cached_tokens": 11777536,
-              "cost": 1.31487604,
+              "cost": 6.5743802,
               "luna_tokens": 14950883,
-              "luna_share_pct": 29.832,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 29.771,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Human Orchestrator · Rhea DINOcular Rebuttal",
@@ -3702,18 +4239,18 @@
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 1084.591,
-              "time": "18m04s",
+              "seconds": 1135.038,
+              "time": "18m55s",
               "time_exact": true,
-              "tokens": 3689353,
-              "cached_tokens": 3597056,
-              "cost": 2.537488,
+              "tokens": 3746126,
+              "cached_tokens": 3647744,
+              "cost": 2.628482,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 3689353,
-              "control_share_pct": 7.362,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Operations Lead · Roman DINOcular Rebuttal Recovery",
@@ -3729,10 +4266,10 @@
               "cost": 1.715009,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Ilya AOT Boundary Repair",
@@ -3748,10 +4285,10 @@
               "cost": 0.348558,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Tessa Training and Scaling",
@@ -3767,10 +4304,10 @@
               "cost": 0.227651,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Imani Inductor Boundary",
@@ -3783,13 +4320,13 @@
               "time_exact": true,
               "tokens": 297328,
               "cached_tokens": 293376,
-              "cost": 0.00850992,
+              "cost": 0.0425496,
               "luna_tokens": 297328,
-              "luna_share_pct": 0.593,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.592,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Suborchestrator · Serena Legacy Recovery",
@@ -3805,10 +4342,10 @@
               "cost": 0.185458,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Anika Runtime and Durable State",
@@ -3821,13 +4358,13 @@
               "time_exact": true,
               "tokens": 244951,
               "cached_tokens": 240384,
-              "cost": 0.00772608,
+              "cost": 0.0386304,
               "luna_tokens": 244951,
-              "luna_share_pct": 0.489,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.488,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Suborchestrator · Mara Inductor Output Repair",
@@ -3843,10 +4380,10 @@
               "cost": 0.160002,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Nika Parallelism Receipts",
@@ -3859,13 +4396,13 @@
               "time_exact": true,
               "tokens": 228779,
               "cached_tokens": 220928,
-              "cost": 0.00611976,
+              "cost": 0.0305988,
               "luna_tokens": 228779,
               "luna_share_pct": 0.456,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Livia Leadership Source Reconciliation",
@@ -3878,13 +4415,13 @@
               "time_exact": true,
               "tokens": 175735,
               "cached_tokens": 173824,
-              "cost": 0.00515968,
+              "cost": 0.0257984,
               "luna_tokens": 175735,
-              "luna_share_pct": 0.351,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.35,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Livia AOT Run",
@@ -3897,13 +4434,13 @@
               "time_exact": true,
               "tokens": 149265,
               "cached_tokens": 145152,
-              "cost": 0.00475064,
+              "cost": 0.0237532,
               "luna_tokens": 149265,
-              "luna_share_pct": 0.298,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.297,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Nadia Next Scaling Cost",
@@ -3919,10 +4456,10 @@
               "cost": 0.08241,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Tarek DropPath KeepProb",
@@ -3938,10 +4475,10 @@
               "cost": 0.071958,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Soren DropPath Boundary",
@@ -3957,10 +4494,10 @@
               "cost": 0.068149,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Jasper JUPITER Scaling Repair",
@@ -3976,10 +4513,10 @@
               "cost": 0.071151,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Tomas Native Session Provenance",
@@ -3992,13 +4529,13 @@
               "time_exact": true,
               "tokens": 112636,
               "cached_tokens": 109312,
-              "cost": 0.00435804,
+              "cost": 0.0217902,
               "luna_tokens": 112636,
-              "luna_share_pct": 0.225,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.224,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Otto JUPITER Cache Repair",
@@ -4014,10 +4551,10 @@
               "cost": 0.068284,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Talia Training Continuity",
@@ -4033,10 +4570,29 @@
               "cost": 0.060152,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Worker · Niko DDP Partition Scalar",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 76833,
+              "cached_tokens": 75520,
+              "cost": 0.0451,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Plan Orchestrator · Petra Live Scaling Plan",
@@ -4052,46 +4608,28 @@
               "cost": 0.049157,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 73163,
-              "control_share_pct": 0.146,
-              "is_luna_worker": false,
-              "is_control_role": true
-            },
-            {
-              "label": "Worker · Niko DDP Partition Scalar",
-              "role": "Worker",
-              "models": [
-                "gpt-5.6-sol/medium"
-              ],
-              "seconds": 0.0,
-              "time": "0s",
-              "time_exact": true,
-              "tokens": 30384,
-              "cached_tokens": 25344,
-              "cost": 0.043972,
-              "luna_tokens": 0,
-              "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             }
           ]
         },
         {
           "label": "Paper Reproduction Lab",
-          "time": "4h25m",
-          "seconds": 15933.235,
+          "time": "4h49m",
+          "seconds": 17397.056,
           "time_exact": true,
-          "tokens": 13607823,
-          "cached_tokens": 13282816,
-          "cost": 7.23728876,
-          "luna_tokens": 2502173,
-          "luna_share_pct": 18.388,
-          "control_tokens": 4018198,
-          "control_share_pct": 29.529,
+          "tokens": 15368306,
+          "cached_tokens": 15001600,
+          "cost": 8.5499238,
+          "luna_tokens": 2708370,
+          "luna_share_pct": 17.623,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": false,
+          "control_within_limit": null,
           "agents": [
             {
               "label": "Human Orchestrator · Priya Paper Reproduction",
@@ -4099,18 +4637,18 @@
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 905.463,
-              "time": "15m05s",
+              "seconds": 1053.35,
+              "time": "17m33s",
               "time_exact": true,
-              "tokens": 3954654,
-              "cached_tokens": 3902720,
-              "cost": 2.45833,
+              "tokens": 4696629,
+              "cached_tokens": 4637696,
+              "cost": 2.929363,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 3954654,
-              "control_share_pct": 29.062,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Operations Lead · Perry Paper Reproduction Recovery",
@@ -4118,18 +4656,18 @@
               "models": [
                 "gpt-5.6-sol/high"
               ],
-              "seconds": 3901.309,
-              "time": "1h05m",
+              "seconds": 4418.442,
+              "time": "1h13m",
               "time_exact": true,
-              "tokens": 3836715,
-              "cached_tokens": 3650560,
-              "cost": 2.85673,
+              "tokens": 4246842,
+              "cached_tokens": 4057344,
+              "cost": 3.095087,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Felix Five-Paper Feasibility",
@@ -4145,10 +4683,10 @@
               "cost": 1.158882,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Lena Legacy Recovery",
@@ -4164,10 +4702,10 @@
               "cost": 0.283445,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Nora Novel Approach Expansion",
@@ -4183,10 +4721,10 @@
               "cost": 0.198946,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Suborchestrator · Rowan RecGen Official Reproduction",
@@ -4202,10 +4740,10 @@
               "cost": 0.164832,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": false,
-              "is_control_role": false
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Sela RecGen Official Assets",
@@ -4218,13 +4756,13 @@
               "time_exact": true,
               "tokens": 200476,
               "cached_tokens": 197376,
-              "cost": 0.00596452,
+              "cost": 0.0298226,
               "luna_tokens": 200476,
-              "luna_share_pct": 1.473,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.304,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Mira Material Match",
@@ -4237,13 +4775,13 @@
               "time_exact": true,
               "tokens": 189463,
               "cached_tokens": 186112,
-              "cost": 0.00471444,
+              "cost": 0.0235722,
               "luna_tokens": 189463,
-              "luna_share_pct": 1.392,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.233,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Ethan EPIC-Contact Feasibility",
@@ -4256,13 +4794,13 @@
               "time_exact": true,
               "tokens": 177503,
               "cached_tokens": 175872,
-              "cost": 0.00423164,
+              "cost": 0.0211582,
               "luna_tokens": 177503,
-              "luna_share_pct": 1.304,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.155,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Rhea RecGen Container Environment",
@@ -4275,13 +4813,13 @@
               "time_exact": true,
               "tokens": 175771,
               "cached_tokens": 173824,
-              "cost": 0.00468388,
+              "cost": 0.0234194,
               "luna_tokens": 175771,
-              "luna_share_pct": 1.292,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.144,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Riley Release Feasibility",
@@ -4294,13 +4832,13 @@
               "time_exact": true,
               "tokens": 167378,
               "cached_tokens": 162560,
-              "cost": 0.0049158,
+              "cost": 0.024579,
               "luna_tokens": 167378,
-              "luna_share_pct": 1.23,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.089,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Chloe CHOIR Feasibility",
@@ -4313,13 +4851,13 @@
               "time_exact": true,
               "tokens": 164773,
               "cached_tokens": 162560,
-              "cost": 0.0049198,
+              "cost": 0.024599,
               "luna_tokens": 164773,
-              "luna_share_pct": 1.211,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.072,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Aria ARTHOI Feasibility",
@@ -4332,13 +4870,13 @@
               "time_exact": true,
               "tokens": 155406,
               "cached_tokens": 145152,
-              "cost": 0.00528584,
+              "cost": 0.0264292,
               "luna_tokens": 155406,
-              "luna_share_pct": 1.142,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 1.011,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Clara ContactPrompt Feasibility",
@@ -4351,13 +4889,13 @@
               "time_exact": true,
               "tokens": 145191,
               "cached_tokens": 143104,
-              "cost": 0.00359348,
+              "cost": 0.0179674,
               "luna_tokens": 145191,
-              "luna_share_pct": 1.067,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.945,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Tamsin RecGen Official Ex0 Inference",
@@ -4370,13 +4908,13 @@
               "time_exact": true,
               "tokens": 134237,
               "cached_tokens": 131840,
-              "cost": 0.0036032,
+              "cost": 0.018016,
               "luna_tokens": 134237,
-              "luna_share_pct": 0.986,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.873,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Hazel HOWTransfer Feasibility",
@@ -4389,13 +4927,32 @@
               "time_exact": true,
               "tokens": 127405,
               "cached_tokens": 125696,
-              "cost": 0.00327672,
+              "cost": 0.0163836,
               "luna_tokens": 127405,
-              "luna_share_pct": 0.936,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.829,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Worker · Uma Final Canonical Integration",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 502.197,
+              "time": "8m22s",
+              "time_exact": true,
+              "tokens": 127093,
+              "cached_tokens": 124672,
+              "cost": 0.0192582,
+              "luna_tokens": 127093,
+              "luna_share_pct": 0.827,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Alina ArtHOI Official Data",
@@ -4408,13 +4965,13 @@
               "time_exact": true,
               "tokens": 124941,
               "cached_tokens": 122624,
-              "cost": 0.00307488,
+              "cost": 0.0153744,
               "luna_tokens": 124941,
-              "luna_share_pct": 0.918,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.813,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Rita Repository Recovery",
@@ -4427,13 +4984,13 @@
               "time_exact": true,
               "tokens": 112072,
               "cached_tokens": 109312,
-              "cost": 0.00338924,
+              "cost": 0.0169462,
               "luna_tokens": 112072,
-              "luna_share_pct": 0.824,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.729,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Diana DyTact Feasibility",
@@ -4446,13 +5003,13 @@
               "time_exact": true,
               "tokens": 106624,
               "cached_tokens": 104192,
-              "cost": 0.00291524,
+              "cost": 0.0145762,
               "luna_tokens": 106624,
-              "luna_share_pct": 0.784,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.694,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Lucy Legacy List",
@@ -4465,13 +5022,13 @@
               "time_exact": true,
               "tokens": 98390,
               "cached_tokens": 93952,
-              "cost": 0.00386864,
+              "cost": 0.0193432,
               "luna_tokens": 98390,
-              "luna_share_pct": 0.723,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.64,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Fiona Final Waiting State",
@@ -4484,13 +5041,13 @@
               "time_exact": true,
               "tokens": 81376,
               "cached_tokens": 79616,
-              "cost": 0.00265732,
+              "cost": 0.0132866,
               "luna_tokens": 81376,
-              "luna_share_pct": 0.598,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.53,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Ingrid RecGen Main Integration",
@@ -4503,13 +5060,13 @@
               "time_exact": true,
               "tokens": 80166,
               "cached_tokens": 77568,
-              "cost": 0.00258296,
+              "cost": 0.0129148,
               "luna_tokens": 80166,
-              "luna_share_pct": 0.589,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.522,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
               "label": "Worker · Chloe Checked Approach Expansion",
@@ -4522,13 +5079,32 @@
               "time_exact": true,
               "tokens": 78634,
               "cached_tokens": 77568,
-              "cost": 0.00179556,
+              "cost": 0.0089778,
               "luna_tokens": 78634,
-              "luna_share_pct": 0.578,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.512,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Suborchestrator · Asha ArtHOI Official RS Path",
+              "role": "Suborchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 76538,
+              "cached_tokens": 75520,
+              "cost": 0.045,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Irene RecGen Latest-Main Integration",
@@ -4541,32 +5117,70 @@
               "time_exact": true,
               "tokens": 74017,
               "cached_tokens": 72448,
-              "cost": 0.00212176,
+              "cost": 0.0106088,
               "luna_tokens": 74017,
-              "luna_share_pct": 0.544,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.482,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             },
             {
-              "label": "Worker · Uma Final Canonical Integration",
-              "role": "Worker",
+              "label": "Suborchestrator · Cora ContactPrompt Official Reproduction",
+              "role": "Suborchestrator",
               "models": [
-                "gpt-5.6-luna/max"
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 174.16,
+              "time": "2m54s",
+              "time_exact": true,
+              "tokens": 73589,
+              "cached_tokens": 72448,
+              "cost": 0.045979,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Suborchestrator · Remy RecGen sm120 Reproduction",
+              "role": "Suborchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
               ],
               "seconds": 0.0,
               "time": "0s",
               "time_exact": true,
-              "tokens": 68184,
-              "cached_tokens": 64256,
-              "cost": 0.00242472,
-              "luna_tokens": 68184,
-              "luna_share_pct": 0.501,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "tokens": 72472,
+              "cached_tokens": 71424,
+              "cost": 0.042727,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Suborchestrator · Henry HOPformer Official Evaluation",
+              "role": "Suborchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 64494,
+              "cached_tokens": 62208,
+              "cost": 0.051084,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Plan Orchestrator · Paloma Official-Data-First Plan",
@@ -4582,10 +5196,67 @@
               "cost": 0.044459,
               "luna_tokens": 0,
               "luna_share_pct": 0.0,
-              "control_tokens": 63544,
-              "control_share_pct": 0.467,
-              "is_luna_worker": false,
-              "is_control_role": true
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Suborchestrator · Aiden ActionMesh Official Example",
+              "role": "Suborchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 61587,
+              "cached_tokens": 59136,
+              "cost": 0.044248,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
+            },
+            {
+              "label": "Worker · Iris ArtHOI RS Exercise",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 55100,
+              "cached_tokens": 52992,
+              "cost": 0.0081772,
+              "luna_tokens": 55100,
+              "luna_share_pct": 0.359,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Plan Orchestrator · Paula Five-Paper Parallel Authorization",
+              "role": "Plan Orchestrator",
+              "models": [
+                "gpt-5.6-sol/medium"
+              ],
+              "seconds": 122.444,
+              "time": "2m02s",
+              "time_exact": true,
+              "tokens": 53504,
+              "cached_tokens": 51968,
+              "cost": 0.036464,
+              "luna_tokens": 0,
+              "luna_share_pct": 0.0,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": false
             },
             {
               "label": "Worker · Clara Consultation Recovery",
@@ -4598,13 +5269,70 @@
               "time_exact": true,
               "tokens": 40166,
               "cached_tokens": 38656,
-              "cost": 0.00164512,
+              "cost": 0.0082256,
               "luna_tokens": 40166,
-              "luna_share_pct": 0.295,
-              "control_tokens": 0,
-              "control_share_pct": 0.0,
-              "is_luna_worker": true,
-              "is_control_role": false
+              "luna_share_pct": 0.261,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Worker · Lila ContactPrompt Official Prediction",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 37820,
+              "cached_tokens": 26368,
+              "cost": 0.0165838,
+              "luna_tokens": 37820,
+              "luna_share_pct": 0.246,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Worker · Robin RecGen sm120 Repair",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 30545,
+              "cached_tokens": 26368,
+              "cost": 0.0107088,
+              "luna_tokens": 30545,
+              "luna_share_pct": 0.199,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
+            },
+            {
+              "label": "Worker · Hugo HOPformer Evaluation Replay",
+              "role": "Worker",
+              "models": [
+                "gpt-5.6-luna/max"
+              ],
+              "seconds": 0.0,
+              "time": "0s",
+              "time_exact": true,
+              "tokens": 23823,
+              "cached_tokens": 18176,
+              "cost": 0.0084796,
+              "luna_tokens": 23823,
+              "luna_share_pct": 0.155,
+              "control_tokens": null,
+              "control_share_pct": null,
+              "control_available": false,
+              "is_luna_worker": true
             }
           ]
         },
@@ -4618,10 +5346,11 @@
           "cost": 0.0,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": true,
+          "control_within_limit": null,
           "agents": []
         },
         {
@@ -4634,10 +5363,11 @@
           "cost": 0.0,
           "luna_tokens": 0,
           "luna_share_pct": 0.0,
-          "control_tokens": 0,
-          "control_share_pct": 0.0,
+          "control_tokens": null,
+          "control_share_pct": null,
+          "control_available": false,
           "luna_majority": false,
-          "control_within_limit": true,
+          "control_within_limit": null,
           "agents": []
         }
       ]
@@ -4666,7 +5396,7 @@
         return String(Math.round(number));
       };
       const formatCost = (value) => "$" + Number(value || 0).toFixed(3);
-      const formatPercent = (value) => Number(value || 0).toFixed(1) + "%";
+      const formatPercent = (value) => value === null || value === undefined ? "—" : Number(value).toFixed(1) + "%";
       const formatDate = (value) => {
         if (!value) return "—";
         const date = new Date(value);
@@ -4717,9 +5447,8 @@
         addMetric(root, "Tokens", formatTokens(aggregate.tokens), formatTokens(aggregate.cached_tokens) + " cached.");
         addMetric(root, "API-equivalent dollars", formatCost(aggregate.cost), "Cache-adjusted estimate; no subscription billing.", "warn");
         const lunaTone = aggregate.luna_share_pct > DATA.thresholds.luna_majority_pct ? "good" : "bad";
-        addMetric(root, "Luna max share", formatPercent(aggregate.luna_share_pct), "Target: majority of worker tokens.", lunaTone);
-        const controlTone = aggregate.control_share_pct <= DATA.thresholds.control_max_pct ? "good" : "bad";
-        addMetric(root, "Non-productive control", formatPercent(aggregate.control_share_pct), "Role-classified overhead lower bound; task-direct orchestration is productive.", controlTone);
+        addMetric(root, "Luna max share", formatPercent(aggregate.luna_share_pct), "Target: majority of all tracked tokens.", lunaTone);
+        addMetric(root, "Goal contribution", "Not analyzed", "Run bounded Luna analysis; no role or model is assumed useful, overhead, or drift.");
       };
       const renderProject = (project) => {
         const article = make("article", "project-card");
@@ -4736,7 +5465,7 @@
           addStatus(statuses, "No usage", "neutral");
         } else {
           addStatus(statuses, project.luna_majority ? "Luna majority" : "Luna below majority", project.luna_majority ? "good" : "bad");
-          addStatus(statuses, project.control_within_limit ? "Overhead ≤ 10%" : "Overhead > 10%", project.control_within_limit ? "good" : "bad");
+          addStatus(statuses, project.control_available ? (project.control_within_limit ? "Overhead ≤ 10%" : "Overhead > 10%") : "Contribution not analyzed", project.control_available ? (project.control_within_limit ? "good" : "bad") : "neutral");
         }
         head.append(statuses);
         article.append(head);
@@ -4747,11 +5476,10 @@
         addProjectMetric(metrics, "Cache", formatTokens(project.cached_tokens));
         addProjectMetric(metrics, "Dollars", formatCost(project.cost));
         addProjectMetric(metrics, "Luna", formatPercent(project.luna_share_pct), project.luna_majority ? "safe" : "alert");
-        addProjectMetric(metrics, "Overhead", formatPercent(project.control_share_pct), project.control_within_limit ? "safe" : "alert");
+        addProjectMetric(metrics, "Goal contribution", project.control_available ? formatPercent(100 - project.control_share_pct) : "Not analyzed");
         article.append(metrics);
         const shares = make("div", "share-strip");
         makeShare(shares, "Luna worker share", project.luna_share_pct, DATA.thresholds.luna_majority_pct, false);
-        makeShare(shares, "Non-productive overhead", project.control_share_pct, DATA.thresholds.control_max_pct, true);
         article.append(shares);
 
         const details = make("details", "agent-details");
@@ -4761,7 +5489,7 @@
           const scroll = make("div", "agent-scroll");
           const table = make("div", "agent-table");
           const header = make("div", "agent-grid header");
-          ["Agent", "Model / effort", "Time", "Tokens", "Cache", "Dollars", "Luna share", "Overhead"].forEach((label) => header.append(make("div", "", label)));
+          ["Agent", "Model / effort", "Time", "Tokens", "Cache", "Dollars", "Luna share", "Contribution"].forEach((label) => header.append(make("div", "", label)));
           table.append(header);
           project.agents.forEach((agent) => {
             const row = make("div", "agent-grid row");
@@ -4769,7 +5497,6 @@
             agentCell.append(make("div", "agent-name", agent.label));
             const tags = make("div", "agent-tags");
             if (agent.is_luna_worker) tags.append(make("span", "tag luna", "Luna worker"));
-            if (agent.is_control_role) tags.append(make("span", "tag bad", "Overhead role"));
             agentCell.append(tags);
             row.append(agentCell);
             row.append(make("div", "agent-model", agent.models.join(", ")));
@@ -4778,7 +5505,7 @@
             row.append(make("div", "", formatTokens(agent.cached_tokens)));
             row.append(make("div", "", formatCost(agent.cost)));
             row.append(make("div", "", agent.luna_share_pct ? formatPercent(agent.luna_share_pct) : "—"));
-            row.append(make("div", "", agent.control_share_pct ? formatPercent(agent.control_share_pct) : "—"));
+            row.append(make("div", "", agent.control_available ? formatPercent(100 - agent.control_share_pct) : "Not analyzed"));
             table.append(row);
           });
           scroll.append(table);
@@ -4845,22 +5572,23 @@
           details.append(detail);
         });
         accountHero.append(details);
-        accountHero.append(make("div", "attribution-title", "Account-used attribution · honest labels only"));
+        accountHero.append(make("div", "attribution-title", "Account usage observed from beech"));
         const bar = make("div", "attribution-bar");
         const other = make("span", "attribution-other");
         other.style.width = Math.min(100, Math.max(0, Number(account.other_unassigned_percent || 0))) + "%";
-        other.title = "Other / unassigned, including opening account usage";
+        other.title = "Usage before the first beech snapshot; device unknown";
         const localEstimate = make("span", "attribution-local");
         localEstimate.style.width = Math.min(100, Math.max(0, Number(account.local_observed_estimate_percent || 0))) + "%";
-        localEstimate.title = "Local-observed estimate";
+        localEstimate.title = "Account increase observed during beech Codex turns; not exact device attribution";
         bar.append(other, localEstimate);
         accountHero.append(bar);
         const legend = make("div", "attribution-legend");
-        legend.append(make("span", "", "■ Other / unassigned " + formatPercent(account.other_unassigned_percent) + " (opening " + formatPercent(account.opening_used_percent) + ")"));
+        legend.append(make("span", "", "■ Before first beech snapshot " + formatPercent(account.pre_beech_observation_percent ?? account.other_unassigned_percent)));
         legend.lastChild.style.color = "#9aa7b7";
-        legend.append(make("span", "", "■ Local-observed estimate " + formatPercent(account.local_observed_estimate_percent)));
+        legend.append(make("span", "", "■ Beech-observed increase " + formatPercent(account.beech_observed_increase_percent ?? account.local_observed_estimate_percent)));
         legend.lastChild.style.color = "var(--cyan)";
         accountHero.append(legend);
+        accountHero.append(make("p", "quality-note", "Exact other-machine usage: unknown. The account telemetry has no device identifier, so concurrent use elsewhere may be inside the beech-observed increase."));
         top.append(accountHero);
 
         const localCard = make("section", "local-card");
@@ -4877,7 +5605,7 @@
         top.append(localCard);
         root.append(top);
         if (account.today_delta_supported) {
-          root.append(make("div", "account-callout", "Today used " + formatPercent(account.today_delta_percent) + " percentage points of the weekly account limit. This is a local-observed account-snapshot change, not a dollar amount."));
+          root.append(make("div", "account-callout", "Today the account rose by " + formatPercent(account.today_delta_percent) + " percentage points in snapshots observed on beech. This is not exact device attribution or a dollar amount."));
         }
         const quality = make("p", "quality-note");
         quality.textContent = account.data_quality + " The account percentage can include activity from another machine; local tokens and dollars below remain limited to safely tracked local Herdr sessions.";
@@ -4887,7 +5615,7 @@
         headingIdentity.append(make("p", "section-kicker", "Inner/local breakdown"));
         headingIdentity.append(make("h2", "", "Weekly projects and agents"));
         heading.append(headingIdentity);
-        heading.append(make("p", "", "The account panel is the whole quota. Click a project card to expand its local agent breakdown. Non-productive overhead excludes task-direct Luna orchestration."));
+        heading.append(make("p", "", "The account panel is the whole quota. Click a project card to expand its local agent breakdown. Goal contribution remains unclassified until Luna checks actual actions; role names are never used as a proxy."));
         root.append(heading);
         const projects = make("div", "project-list");
         renderProjects(projects, local.projects);
@@ -4911,14 +5639,13 @@
           "1. Run the herdr-costs report first for the selected workspace and use its measured time, tokens, cache, and API-equivalent dollars as the accounting baseline.",
           "2. Read only the relevant HUMAN_PLAN.md, compact RESTART_HANDOFF.md, and bounded current or archived transcript batches for this project. Do not dump full transcripts.",
           "3. For disjoint bounded transcript batches, launch fresh native-Codex Luna-low Usage Reader sessions; close each reader after its compact return. Do not create a dashboard, report file, watcher, or polling loop.",
-          "4. Explain, by project/task/agent, the largest:",
-          "   - excessive token use, cache/context growth, or avoidable long turns;",
-          "   - leaks, context explosion, repeated rereading, or repeated work;",
-          "   - drift from HUMAN_PLAN.md or the approved project question;",
-          "   - idle, waiting, or polling behavior;",
-          "   - role violations, wrong model selection, unsafe delegation, or boundary crossings;",
-          "   - productive contribution and what directly moved the project goal.",
-          "5. Return one compact causal diagnosis, the largest measured contributors, one root improvement, and any uncertainty caused by missing or concurrent transcript data to the assigning Operations Lead or Architect through local Herdr messaging.",
+          "4. Classify each reviewed action from what it actually did, never from its role, model, or session label:",
+          "   - productive contribution: necessary action that causally advanced the approved goal, including implementation, experiments, useful Human instruction or clarification, decisions, decomposition, dispatch, recovery, integration, synchronization, or closure;",
+          "   - overhead: repetition, detached planning, status-only turns, waiting or polling, duplicate reading, or unnecessary checking that did not materially change the next action or result;",
+          "   - drift/waste: work toward a different goal, role or scope violation, unnecessary overengineering, or continuing a failed path after disconfirming evidence;",
+          "   - unclear: insufficient context to classify honestly.",
+          "5. Report classified token coverage and the four shares only over reviewed material. Do not extrapolate to unread or unclear tokens. Explain by project/task/agent the largest cost, repetition, context growth, drift, idle behavior, and productive contribution.",
+          "6. Return one compact causal diagnosis, the largest measured contributors, one root improvement, and any uncertainty caused by missing or concurrent transcript data to the assigning Operations Lead or Architect through local Herdr messaging.",
           "",
           "Do not implement, edit files, use Git, launch unbounded work, monitor continuously, create a dashboard/report artifact, dump full transcripts, or contact the Human directly.",
           "The deployed private Site cannot read local Herdr transcripts or execute this command. Copying this text is the handoff; local Herdr execution is the real boundary.",

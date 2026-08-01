@@ -97,7 +97,9 @@ required. If it shows “Messages to be submitted after next tool call,” the
 message is queued rather than accepted: do not claim delivery or duplicate it.
 
 Use `herdr-agent` for every normal launch so cost registration arms before the
-first model turn. If a launcher must create a model pane directly in another
+first model turn. For native Codex, Terra, and Luna it uses Herdr's built-in
+`agent start` readiness path rather than shell-run plus lifecycle polling. If a
+launcher must create a model pane directly in another
 workspace, it must immediately arm the same registration before sending the
 task:
 
@@ -117,10 +119,14 @@ OpenCode is an explicit alternate-provider choice for one productive task.
 
 Create these standing roles in `01 Orchestrators`:
 
-Place the Human Orchestrator physically in the left pane and Operations Lead
-in the right pane. After any move, read the returned layout and correct it with
-`herdr pane swap` if the Human pane x-coordinate is not smaller than the
-Operations pane x-coordinate.
+`01 Orchestrators` contains exactly two standing panes by default in one
+roughly 50/50 horizontal split: the Human Orchestrator in its own left pane and
+the Operations Lead in its own right pane. Create the second pane with
+`herdr pane split --direction right --ratio 0.5`; do not create separate Human
+and Operations tabs. After any move, read the returned layout and correct it
+with `herdr pane swap` if the Human pane x-coordinate is not smaller than the
+Operations pane x-coordinate. Do not add a standing Operations Collaborator
+unless the Human explicitly requests one.
 
 1. `Human Orchestrator · PersonName Goal` — native Codex Sol high. This is the
    project's only normal conversation with the human. Confirm the goal and its
@@ -180,18 +186,31 @@ polish standing-role status. Native integration owns status. A standing pane in
 
 Operations Lead classifies observed outputs, not role names:
 
-- productive work changes code, data, an experiment, an evaluation, accepted
-  research evidence, or intended paper content;
-- all orchestration, collaborative planning, plan writing, advice,
-  verification, status, review, audit, and waiting are control work;
+- productive contribution is an observed action whose result is necessary and
+  causally advances the approved goal. It includes implementation, runs,
+  measurement, evaluation, integration, and the minimum useful human
+  instruction, clarification, decision, decomposition, dispatch, recovery,
+  synchronization, or closure needed to move that work;
+- overhead consumes time or tokens without materially changing the next
+  action or result, such as repetition, detached planning, status-only turns,
+  waiting or polling, duplicate reading, and unnecessary checking or review;
+- drift or waste advances a different goal, violates the assigned role or
+  scope, overengineers beyond the requested result, or continues a failed path
+  after disconfirming evidence. Leave genuinely ambiguous work unclassified;
 - attached reproduction and verification remain part of the productive task.
 
-Before opening a Plan Orchestrator, advisor, verifier,
-or other control role, Operations Lead checks the rolling share of active task
-slots and agent-hours. At or above 10% control, launch the next independent
+No role, model, or session label is inherently productive or overhead. A Human
+Orchestrator can make a productive clarification, and a Worker can drift. Use a
+bounded Luna transcript analysis against `HUMAN_PLAN.md` and the frozen task
+goal for semantic percentages; the deterministic cost ledger must leave
+unanalyzed work unclassified instead of using a role-name proxy.
+
+Before opening a session expected to produce only support or overhead,
+Operations Lead checks the rolling share of active task slots and agent-hours.
+At or above 10% overhead/drift, launch the next independent
 productive task instead. Exceed 10% only for immediate safety, an irreversible
-action, or a human decision that truly prevents productive work. Every control
-launch must name the productive action it directly unlocks. Idle standing roles
+action, or a human decision that truly prevents productive work. Every proposed
+overhead action must name the productive action it directly unlocks. Idle standing roles
 consume no turns and must not be woken for routine status.
 
 Do not put the Human Orchestrator in `00 Human Plan`. That tab contains exactly
@@ -242,6 +261,9 @@ other independent work. The child reports with `herdr-role-message`, which
 wakes or steers the parent, and stops without waiting for acknowledgement.
 Closing the child pane disarms the emergency wake. Never run `herdr agent wait`,
 `sleep`, or a polling loop in Operations Lead or a suborchestrator.
+When maximum silence actually fires, the emergency helper also uses Herdr's
+native notification surface before waking the owning role; no messenger model
+or polling watcher is needed for that alert.
 If Herdr reports an implausible lifecycle state, use `herdr agent explain` to
 inspect the active detection rule without spending a model turn on self-diagnosis.
 
@@ -266,7 +288,8 @@ another suborchestrator, or add a review turn after every successful task.
 
 Do not launch standing advisors, watchers, reviewers, progress checkers, Plan
 Orchestrators, verifiers, or suborchestrators. Open each only for its immediate
-bounded purpose and only within the 10% control budget.
+bounded purpose; classify the actual action rather than charging the role by
+name.
 
 When the Human explicitly asks where time or tokens went, open one temporary
 native-Codex Luna-max `Usage Analyst · PersonName Project Usage` in
@@ -292,8 +315,9 @@ waiting pane.
 
 `herdr-agent` registers every session automatically. The lightweight
 terminal command `herdr-costs report` shows today's human-named hierarchy with
-own and aggregate time, Luna-max/control token shares, tokens, and
-API-equivalent cost. `herdr-costs report --all` adds every used agent across
+own and aggregate time, Luna-max token share, tokens, and API-equivalent cost.
+It labels semantic overhead/drift unavailable until bounded Luna transcript
+analysis is run. `herdr-costs report --all` adds every used agent across
 projects; `--all-time` is the explicit lifetime view. Do not
 launch an agent to measure usage and do not create a manual dashboard.
 

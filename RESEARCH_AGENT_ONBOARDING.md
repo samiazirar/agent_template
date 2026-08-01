@@ -14,22 +14,24 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   and why the assigned task moves that result before acting.
 - Prefer measured behavior, runs, evaluations, artifacts with reproduction,
   source/data, then plans or prior agent statements—in that order.
-- Detached prose, planning, approvals, status, auditing, and waiting are
-  control work, not scientific progress. Keep control work below 10% of task
-  slots and agent-hours. Task-direct decomposition, Luna dispatch or recovery,
-  result integration, synchronization, and worker closure are productive
-  orchestration.
-- Classify the action rather than the role. Operations and suborchestrator
-  turns that directly move a concrete Luna package count as productive; their
-  detached planning, status, review, or waiting does not. Research is
-  productive only when it creates accepted goal-relevant evidence. At 10%
-  control, launch the next independent productive task unless safety,
+- Productive contribution is any observed action whose result is necessary and
+  causally advances the approved goal, including useful Human instruction or
+  clarification and minimum task-direct decomposition, Luna dispatch or
+  recovery, integration, synchronization, and closure. Overhead is repetition,
+  detached planning, status-only turns, waiting, polling, duplicate reading,
+  or unnecessary checking that does not materially change the next result.
+- Classify the action rather than the role. No Human, orchestrator, or worker is
+  inherently productive or overhead; workers can drift, and Human or
+  orchestration turns can directly move the goal. Work toward a different goal,
+  role or scope violations, unnecessary overengineering, and persisting after
+  disconfirming evidence are drift or waste. Leave ambiguity unclassified. At
+  10% overhead/drift, launch the next independent productive task unless safety,
   irreversibility, or a required human decision prevents it.
-- Every control launch must name the productive action it directly unlocks.
+- Every proposed overhead action must name the productive action it directly
+  unlocks.
   Idle standing roles consume no turns and stay asleep for routine status.
-- Never create work whose only output is a plan, report, permission record,
-  “gate,” or explanation that work cannot proceed. Every admitted task has a
-  direct observable benefit.
+- Never create a plan, report, permission record, “gate,” or explanation merely
+  to restate known state. Every admitted task has a direct observable benefit.
 - Until the user says otherwise, optimize for fast goal movement: implement or
   run the smallest useful change, record the observed result, commit and sync
   the coherent chunk, and return to the user. Do not schedule test suites,
@@ -201,12 +203,14 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
 
 - `HUMAN_PLAN.md` and `OLD_HISTORY.md` are displayed with Frogmouth. History is
   one final pane and one `OLD_HISTORY.md` file, not a collection of idle agents.
-- Only the Human Orchestrator, Operations Lead, and background Operations
-  Collaborator are standing model panes while the project exists. Every other
-  pane closes as soon as its final short result and native session reference
-  are captured. Integration happens afterward from the saved artifact or
-  worktree. If a correction is needed, resume the same task in a new pane and
-  close it again when it stops.
+- By default, only the Human Orchestrator and Operations Lead are standing
+  model panes. They share `01 Orchestrators` as a 50/50 horizontal split, with
+  Human in its own left pane and Operations in its own right pane for easy
+  phone monitoring. Add a standing Operations Collaborator only when the Human
+  explicitly requests one. Every other pane closes as soon as its final short
+  result and native session reference are captured. Integration happens
+  afterward from the saved artifact or worktree. If a correction is needed,
+  resume the same task in a new pane and close it again when it stops.
 - A finished, idle, or stalled transient pane is a lifecycle defect. Preserve
   useful state, close it, and keep its worktree only until merge, rejection, or
   an explicitly continuing maintenance purpose.
@@ -309,7 +313,7 @@ STOPPED:
 
 Orchestrators begin each round with goal, measured state, decomposition, and
 plan; they end with observed change, next productive tasks, and the rolling
-control-work percentage.
+overhead/drift percentage only when actual actions were semantically analyzed.
 
 ## 7. Result routing and human communication
 
@@ -420,8 +424,9 @@ control-work percentage.
 - Let worker messages and the emergency helper wake parent orchestrators.
   Watch scheduler/process state externally. Never occupy an orchestrator turn
   with `herdr agent wait`, `sleep`, or polling unchanged state.
-- Run `herdr-costs report` for today's own and aggregate time,
-  Luna-max/control token shares, and API-equivalent dollars by human task name.
+- Run `herdr-costs report` for today's own and aggregate time, Luna-max share,
+  and API-equivalent dollars by human task name. Overhead and drift remain
+  unclassified until bounded Luna transcript analysis.
   Run `herdr-costs report --all` for today's cross-project per-agent split and
   add `--all-time` only when lifetime totals are requested. The private
   ledger and terminal report replace manual usage files or dashboards.

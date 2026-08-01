@@ -44,6 +44,9 @@ print(f"{label} is still {status}")
 
   export HERDR_WORKSPACE_ID="$workspace_id"
   local message="Emergency wake after ${seconds}s: ${summary}. ${recovery} Do not wait or poll inside this turn."
+  herdr notification show "Herdr task needs attention" \
+    --body "${summary}. ${recovery}" --position top-right --sound request \
+    >/dev/null 2>&1 || true
   if [[ "$mode" == "operations" ]]; then
     herdr-role-message operations "$message"
   else

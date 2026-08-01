@@ -322,10 +322,15 @@ def main() -> None:
         pane["pane_id"]: pane["rect"]
         for pane in layout["result"]["layout"]["panes"]
     }
-    human_x = rectangles[liaisons[0]["pane_id"]]["x"]
-    operations_x = rectangles[operations[0]["pane_id"]]["x"]
+    human_rect = rectangles[liaisons[0]["pane_id"]]
+    operations_rect = rectangles[operations[0]["pane_id"]]
+    human_x = human_rect["x"]
+    operations_x = operations_rect["x"]
     if human_x >= operations_x:
         fail("Human Orchestrator must be left of Operations Lead")
+    combined_width = human_rect["width"] + operations_rect["width"]
+    if abs(human_rect["width"] - operations_rect["width"]) > max(2, combined_width * 0.1):
+        fail("Human Orchestrator and Operations Lead must use a roughly 50/50 split")
 
     transient_tabs = (
         "02 Strategic Council",
