@@ -1,4 +1,4 @@
 interface:
   display_name: "Restart Research Team"
   short_description: "Rebuild productive Herdr research teams"
-  default_prompt: "Use $restart-research-team to restore the Human Plan viewer, left-side Human and right-side Operations leadership, default non-coding Sol-medium task owners, and fresh Luna-max sessions for frozen atomic worker packages."
+  default_prompt: "Use $restart-research-team to restore the Human Plan viewer, left-side Human and right-side Operations leadership, default quiet non-coding Sol-medium task owners, fresh Luna-max sessions for frozen atomic packages, and direct Luna-max only for tiny atomic tasks."

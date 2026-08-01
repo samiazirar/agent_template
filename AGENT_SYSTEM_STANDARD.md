@@ -85,7 +85,8 @@ orchestration contracts provide the detailed rules.
 | Operations Lead | Native Codex | Sol, high |
 | Default task owner and decomposer | Native Codex | Sol, medium |
 | Default atomic implementation below that owner | Native Codex | Luna, max |
-| Explicit direct or harder-worker exception | Native Codex | Sol, medium |
+| Explicit direct tiny atomic implementation | Native Codex | Luna, max |
+| Failed or harder-package escalation | Native Codex | Sol, medium |
 | Ambiguous repair or cross-task integration | Native Codex | Sol, medium |
 | Bounded difficult implementation or decision | Native Codex | Sol, high |
 | One bounded strategic question | Native Codex | Sol, xhigh |
@@ -107,9 +108,10 @@ model. Native Claude is selected separately when Opus 5 is wanted.
 The default productive path is Operations to one native-Codex Sol-medium
 suborchestrator, then one fresh native-Codex Luna-max worker per frozen atomic
 package. The suborchestrator never edits code or executes the package itself.
-A direct Sol-medium worker is an explicit exception for a tiny immediate task
-where creating a task owner would cost more than the work, or for a harder
-package after Luna cannot complete one coherent attempt. Select Sol
+A direct Luna-max worker is an explicit exception for a tiny immediate atomic
+task where creating a task owner would cost more than the work. Use a fresh
+Sol-medium worker only for a harder package after Luna cannot complete one
+coherent attempt. Select Sol
 low through max for bounded research or data crunching according to actual
 difficulty; do not inherit a high effort merely because the parent task is
 important. Luna support, watcher classification, or supervision never exceeds
@@ -126,7 +128,7 @@ Vertex; Gemini routes use the OpenCode API-key provider.
 - Launch every independent agent as a named visible Herdr session with
   `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
 - `luna-max` is the default bounded coding worker below a Sol-medium
-  suborchestrator. `codex` is the Sol-medium
+  suborchestrator and the direct tiny-task worker. `codex` is the Sol-medium
   suborchestrator, Plan Orchestrator, and harder-worker route. `codex-high` is
   used for both standing orchestrators.
 - `opencode` is an explicitly selected alternate-provider route, primarily for
@@ -252,8 +254,9 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   helper, which may close only its own current workspace. Never stop the shared
   Herdr server or named session, and never treat inactivity as permission.
 - One worker owns exactly one frozen minimal concrete work package, branch, worktree,
-  and fresh native chat. Native Codex Luna-max is allowed only when a
-  Sol-medium suborchestrator owns the task and the package can be stated as one deliverable, one
+  and fresh native chat. Native Codex Luna-max is the normal worker below a
+  Sol-medium suborchestrator and may also be launched directly by Operations
+  for one genuinely tiny atomic task. The package must be stated as one deliverable, one
   reproduction or run, one done check, and normally no more than three tightly
   coupled files or one experiment stage.
   Independent packages use concurrent workers. When a worker finishes,
@@ -266,11 +269,12 @@ Vertex; Gemini routes use the OpenCode API-key provider.
 - Suborchestrators are the default task owners. They use native Codex Sol
   medium, own exactly one meaningful task, and do no coding, file editing, or
   experiment execution. Each states the task goal and finish condition, turns
-  only the next useful work into a frozen atomic card, launches a new fresh
+  only the next useful work into a frozen atomic card, launches a fresh
   native-Codex Luna-max session for every normal package or native
   Codex Sol-medium worker for
-  a harder package, absorbs compact results, and closes when the task ends. An
-  atomic task goes directly from Operations to one native-Codex Sol-medium
+  a harder package, stays quiet while the worker runs, absorbs compact results,
+  and closes when the task ends. An
+  atomic task goes directly from Operations to one native-Codex Luna-max
   worker only as an explicit tiny-task exception. A suborchestrator may not
   create another suborchestrator or add a review turn after every successful
   package.

@@ -121,8 +121,9 @@ meaning and remove process that does not help reach the goal.
   session for it, closes that worker after its result, and then issues the next
   card to another fresh Luna session. It absorbs compact
   results, reports only to Operations Lead, and creates no further
-  orchestration layer. Direct Sol-medium workers are explicit tiny-task or
-  harder-worker exceptions.
+  orchestration layer and stays quiet while a worker is active. Operations may
+  launch Luna-max directly for an explicit tiny atomic task. Direct Sol-medium
+  coding workers are harder-package escalations only after Luna.
 - Use Sol at the lowest sufficient effort, from low through max, for bounded
   research or data crunching. Select Terra-medium by default for open-ended
   research requiring synthesis or interpretation. Luna support or supervision

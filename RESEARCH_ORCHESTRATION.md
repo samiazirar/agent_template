@@ -157,9 +157,11 @@ alone cannot complete an empirical milestone.
   condition. It does no coding, file editing, or experiment execution. It
   freezes only the next useful atomic card, launches one fresh Luna-max chat
   for that card, reconciles the result, and repeats with a new chat until the
-  task ends. It cannot create another suborchestrator. Operations uses a direct
-  Sol-medium worker only as an explicit tiny-task or harder-worker exception.
-- Native Codex Luna max is used only below a Sol-medium suborchestrator and implements or executes exactly one
+  task ends. It stays quiet while the worker runs and cannot create another
+  suborchestrator. Operations uses a direct Luna-max worker only as an explicit
+  tiny-task exception. Sol-medium coding is a harder-worker escalation.
+- Native Codex Luna max is normally used below a Sol-medium suborchestrator,
+  or directly by Operations for one tiny atomic task, and implements or executes exactly one
   clear package. A Luna-sized package has one deliverable, one reproduction or
   run, one done check, and normally no more than three tightly coupled files or
   one experiment stage. Workers reproduce first, make the change or run,

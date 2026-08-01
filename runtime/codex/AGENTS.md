@@ -19,8 +19,9 @@ complete operating context for one minimal work package.
 - Create one Sol-medium suborchestrator by default for one meaningful task.
   It owns the task goal and finish condition, does no coding, issues only the
   next useful package, launches fresh workers, and may not spawn another
-  suborchestrator. Use a direct worker only for an explicit tiny-task or
-  harder-worker exception.
+  suborchestrator. It stays quiet while its worker runs. Use a direct Luna-max
+  worker only for an explicit tiny atomic task; use Sol-medium coding only as
+  a harder-worker escalation after Luna.
 - More sessions are welcome when they perform independent productive work.
   Never create sessions merely for status, waiting, routine review, or advice.
 - Keep `HUMAN_PLAN.md` at milestone/workstream level. Exact worker tasks and
@@ -113,8 +114,9 @@ complete operating context for one minimal work package.
   success, failure, maximum silence, owner, and the recovery action fired when
   silence expires. A watcher closes on its terminal event.
 - Operations normally sends a task to a native Codex Sol-medium
-  suborchestrator. Only that owner launches a fresh Luna-max session for each
-  frozen atomic package. A direct Sol-medium worker is an explicit exception.
+  suborchestrator. That owner launches a fresh Luna-max session for each frozen
+  atomic package. Operations may launch Luna-max directly only for one tiny
+  atomic task. Sol-medium coding is an escalation after Luna.
   Luna support or supervision may use low but never higher. Use Sol medium for harder coding. Select Sol low through
   max for bounded research or data crunching according to actual difficulty;
   use Terra medium for open-ended research.
@@ -138,7 +140,7 @@ complete operating context for one minimal work package.
   deliverable and reproducible done check, normally within three tightly
   coupled files or one experiment stage. Escalate the same task to Sol medium
   after one failed coherent repair, material ambiguity, scope expansion, or a
-  non-reproducible result. Direct Operations-owned workers use Sol medium.
+  non-reproducible result. Direct tiny Operations-owned workers use Luna max.
   Opus 5 and OpenCode GLM 5.2 remain explicitly selectable worker-only
   alternatives. Terra-high remains human-selected only.
 - Bounded research and data crunching use Sol at the lowest sufficient effort;

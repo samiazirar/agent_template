@@ -1,6 +1,6 @@
 ---
 name: restart-research-team
-description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and one native-Codex Sol-high Operations Lead, reconstruct the lightweight standard layout with default non-coding Sol-medium task suborchestrators, fresh Luna-max sessions for frozen atomic worker packages, and non-blocking child wake-ups under the 90/10 budget, and wait for user plan discussion without resuming research.
+description: Restore paused Herdr research projects from compact current RESTART_HANDOFF.md files, onboard one native-Codex Human Orchestrator and one native-Codex Sol-high Operations Lead, reconstruct the lightweight standard layout with default quiet non-coding Sol-medium task suborchestrators, fresh Luna-max sessions for frozen atomic worker packages or direct tiny tasks, and non-blocking child wake-ups under the 90/10 budget, and wait for user plan discussion without resuming research.
 ---
 
 # Restart Research Team
@@ -121,8 +121,8 @@ only the raw evidence needed to verify current reality. Ask it to:
    enabling infrastructure;
 4. assign each meaningful productive task to one named native-Codex Sol-medium
    suborchestrator that does no coding and later emits only the next useful
-   frozen atomic worker cards and fresh Luna-max sessions; use direct workers
-   only as an explicit exception;
+   frozen atomic worker cards and fresh Luna-max sessions; use a direct
+   Luna-max worker only for an explicit tiny atomic exception;
 5. keep at least 90% of task slots and agent-hours directly productive and
    classify every control-role turn honestly;
 6. use a native-Codex Sol-medium suborchestrator by default, Luna-max for each
@@ -209,7 +209,8 @@ After either strategic answer is durably captured, close that pane immediately.
   condition, performs no coding or experiment execution, issues only the next
   useful packages, launches one fresh native-Codex Luna-max worker per normal coding package
   or native-Codex Sol-medium worker for a harder package, absorbs compact results, integrates
-  its task for Operations Lead, and closes when the task ends. It may not create
+  its task for Operations Lead, stays quiet while a worker runs, and closes when
+  the task ends. It may not create
   another suborchestrator or add a review turn after every successful package.
 - Claudex may use relevant native workflows and short-lived helpers inside one
   named pane's assigned task and worktree. Independent work with its own task

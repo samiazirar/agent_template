@@ -107,9 +107,12 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   does no coding, file editing, or experiment execution. It freezes one atomic
   task card, launches a fresh Luna-max session for it, absorbs the result, then
   launches a new Luna-max session for the next atomic card until the task ends.
-  It may not create another suborchestrator layer. A direct Sol-medium worker is
-  allowed only as an explicit tiny-task or harder-worker exception.
-- Only a Sol-medium suborchestrator may launch native Codex `gpt-5.6-luna` max.
+  It stays quiet while a worker is active and may not create another
+  suborchestrator layer. Operations may launch a direct Luna-max worker only
+  for an explicit tiny atomic task. Sol-medium coding is a harder-worker
+  escalation after Luna.
+- Normally only a Sol-medium suborchestrator launches native Codex
+  `gpt-5.6-luna` max; Operations may launch it directly for one tiny task.
   Give Luna one clear package
   with one deliverable, one reproduction or run, and one done check. A harder
   package uses Sol medium. Luna support or supervision may use low but never
