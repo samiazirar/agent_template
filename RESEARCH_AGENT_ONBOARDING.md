@@ -92,6 +92,13 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   Never use `send-text` for a prompt. A “Messages to be submitted after next
   tool call” banner means queued, not processed; wait for its turn and never
   duplicate it.
+- A launched process is not a started task. Require the first real model
+  response or task action and reject authentication, provider, permission, or
+  immediate-exit output as a failed launch. Retry the same surface once after
+  the causal repair. If Human action or an outside event is required, update
+  `RESTART_HANDOFF.md` with the preserved state and exact recovery action and
+  use one bounded event watcher; never leave the task represented only by an
+  assumption that it will resume.
 - Treat “do,” “go,” or “continue” as a real instruction when the next action
   was already discussed. Forward it and start; do not bounce it back to the
   user or respond with readiness alone.

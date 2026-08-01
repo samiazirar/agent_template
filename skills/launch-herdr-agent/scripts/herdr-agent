@@ -36,6 +36,22 @@ configure_opencode() {
         printf 'OpenCode has no OpenAI OAuth login. Run opencode, use /connect, and select OpenAI then ChatGPT Plus/Pro.\n' >&2
         exit 2
     fi
+    if ! python3 - "${XDG_DATA_HOME:-${HOME}/.local/share}/opencode/auth.json" <<'PY'
+import json
+import sys
+import time
+
+try:
+    auth = json.load(open(sys.argv[1], encoding="utf-8"))["openai"]
+    valid = auth.get("type") == "oauth" and int(auth.get("expires", 0)) > int(time.time() * 1000) + 60_000
+except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+    valid = False
+raise SystemExit(0 if valid else 1)
+PY
+    then
+        printf 'OpenCode OpenAI OAuth is expired or incomplete. Run: opencode auth login -p openai\n' >&2
+        exit 2
+    fi
     printf -v config \
         '{"agent":{"build":{"mode":"primary","model":"%s","variant":"%s","permission":{"task":{"*":"deny"}}}}}' \
         "$model" "$effort"
@@ -180,11 +196,13 @@ herdr wait agent-status "$pane_id" --status idle --timeout 30000 >/dev/null
 
 cost_script="$(readlink -f "$script_dir/../../../runtime/bin/herdr-costs")"
 if [ -x "$cost_script" ]; then
-    "$cost_script" register \
+    if ! "$cost_script" register \
         --workspace "$HERDR_WORKSPACE_ID" \
         --pane "$pane_id" \
         --parent-pane "$HERDR_PANE_ID" \
-        --surface "$surface" >/dev/null
+        --surface "$surface" >/dev/null; then
+        printf 'Cost registration is deferred until the first model turn exposes a native session.\n' >&2
+    fi
 fi
 
 trap - ERR

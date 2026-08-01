@@ -405,6 +405,13 @@ accepted prompt. If a launch fails, close only the failed tab, retry once with
 the same surface, and report the concrete launch failure if the retry also
 fails.
 
+Do not count a process, TUI, or `working` transition as a successful start by
+itself. Inspect the first real model response or task action. Authentication,
+provider, permission, and immediate-exit messages are failed launches. Repair
+the cause and retry once. If recovery requires the Human or an outside event,
+save the current state and exact recovery action in `RESTART_HANDOFF.md` and
+attach one bounded event watcher instead of assuming the work will resume.
+
 All three agents inherit the global execution standard. OpenCode and Codex load
 shared personal skills directly from `~/.agents/skills`; native Claude and
 Claudex load the same skill directories through `~/.claude/skills`.
