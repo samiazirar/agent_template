@@ -25,6 +25,12 @@ orchestration contracts provide the detailed rules.
 - One task owns one branch, worktree, and named Herdr session. Accepted chunks
   are merged in dependency order; after integration, the canonical checkout
   and GitHub represent the same code.
+- A Git worktree is filesystem isolation, not a new Herdr project. Create the
+  branch/worktree first, then launch its named worker as a visible tab in the
+  owning project's existing Herdr workspace. Never use `herdr worktree create`
+  for a worker: it creates a separate workspace and leaves an empty shell after
+  the worker closes. A separate Herdr workspace is only for a Human-requested
+  separate project.
 - Reuse before writing. Search the existing project, official upstream
   repository, installed tools, and known working neighboring implementations
   for the needed path. Extend or repair the best existing implementation

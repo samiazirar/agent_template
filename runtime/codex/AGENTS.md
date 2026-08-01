@@ -16,6 +16,11 @@ complete operating context for one minimal work package.
   independent tasks.
 - One worker owns one minimal work package and one worktree. Close it after the
   package report; a later package or correction gets a fresh chat.
+- Keep every suborchestrator and worker visible inside its owning project
+  workspace. Create filesystem isolation with Git, then run `herdr-agent` from
+  the project workspace with the worktree path. Do not use
+  `herdr worktree create` for workers; it creates a separate Herdr workspace
+  and leaves an empty shell after the worker closes.
 - Create one Sol-medium suborchestrator by default for one meaningful task.
   It owns the task goal and finish condition, does no coding, issues only the
   next useful package, launches fresh workers, and may not spawn another

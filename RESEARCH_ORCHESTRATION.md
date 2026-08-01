@@ -389,6 +389,11 @@ Use separate bounded roles. None is a standing review committee.
   is the only role that edits `HUMAN_PLAN.md`, from meaning accepted by Human
   Orchestrator and evidence checked by Operations Lead. It is an orchestrator,
   not a worker.
+- The worktree is only the role's filesystem checkout. Create it with Git and
+  launch the role into a tab of the owning project's current Herdr workspace.
+  Do not use `herdr worktree create` for workers or suborchestrators because it
+  creates a separate Herdr workspace and leaves an empty shell after closure.
+  Separate Herdr workspaces are reserved for separate Human-requested projects.
 - Commit each coherent completed chunk with a human-readable message.
   Operations Lead integrates in dependency order and immediately pushes the
   canonical branch. Worktrees may differ only while their tasks are active;

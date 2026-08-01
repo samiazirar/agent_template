@@ -249,6 +249,13 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   branch and Git worktree, or a dedicated repository when the work is a
   standalone project. A read-only role uses a separate checkout of the exact
   evidence it inspects.
+- Here, “workspace” means the agent's filesystem checkout. It does not mean a
+  new Herdr project. Create task worktrees with Git, then launch every named
+  role as a visible tab in the owning project's current Herdr workspace. Never
+  use `herdr worktree create` for a task role; that command creates a separate
+  Herdr workspace and leaves an empty root shell when the actual role closes.
+  Use a separate Herdr workspace only when the Human requested a separate
+  project.
 - Never implement or maintain a plan from the shared root checkout. One task,
   one writable workspace. Publish intentional plan/status changes back to the
   canonical project document only after verifying the diff.
