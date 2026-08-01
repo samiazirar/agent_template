@@ -192,7 +192,25 @@ trap cleanup_failed_launch ERR
 herdr pane rename "$pane_id" "$label" >/dev/null
 printf -v launch_command '%q ' "${launch_env[@]}" "${launch_argv[@]}"
 herdr pane run "$pane_id" "${launch_command% }" >/dev/null
-herdr agent wait "$pane_id" --until idle --until done --timeout 30000 >/dev/null
+agent_ready=0
+for _ in $(seq 1 100); do
+    if wait_output="$(
+        herdr agent wait "$pane_id" \
+            --until idle --until done --timeout 30000 2>&1
+    )"; then
+        agent_ready=1
+        break
+    fi
+    if ! grep -q '"code":"agent_not_found"' <<<"$wait_output"; then
+        printf '%s\n' "$wait_output" >&2
+        exit 1
+    fi
+    sleep 0.1
+done
+if [ "$agent_ready" != "1" ]; then
+    printf 'Agent did not register after launch: %s\n' "$pane_id" >&2
+    exit 1
+fi
 
 cost_script="$(readlink -f "$script_dir/../../../runtime/bin/herdr-costs")"
 if [ -x "$cost_script" ]; then
