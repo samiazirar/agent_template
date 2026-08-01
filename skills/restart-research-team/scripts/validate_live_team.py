@@ -201,7 +201,8 @@ def main() -> None:
         )
     claude_text = claude_path.read_text(encoding="utf-8")
     if (
-        "RESEARCH_AGENT_ONBOARDING.md" not in claude_text
+        "AGENT_SYSTEM_STANDARD.md" not in claude_text
+        and "RESEARCH_AGENT_ONBOARDING.md" not in claude_text
         and "RESEARCH_ORCHESTRATION.md" not in claude_text
     ):
         fail(f"{claude_path} does not import the canonical research instructions")
@@ -305,7 +306,7 @@ def main() -> None:
             "Operations Lead"
         )
     for pane in leadership:
-        if pane.get("agent") not in {"codex", "opencode"}:
+        if pane.get("agent") != "codex":
             fail(f"standing leadership pane is not an agent: {pane['label']}")
         allowed_states = (
             {"idle", "done", "working"}
@@ -314,7 +315,7 @@ def main() -> None:
         )
         if pane.get("agent_status") not in allowed_states:
             fail(f"standing leadership is not waiting: {pane['label']}")
-    require_opencode_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
+    require_model(operations[0], "Operations Lead", "gpt-5.6-sol", "high")
     require_model(liaisons[0], "Human Orchestrator", "gpt-5.6-sol", "high")
 
     transient_tabs = (
@@ -351,7 +352,6 @@ def main() -> None:
         "standing_agents": [
             liaisons[0]["label"],
             operations[0]["label"],
-            collaborators[0]["label"],
         ],
         "active_agents": len(active),
     }, indent=2))
