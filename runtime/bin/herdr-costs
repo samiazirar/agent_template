@@ -974,13 +974,9 @@ def normalized_parent(record: dict[str, Any], records: list[dict[str, Any]]) -> 
     return operations
 
 
-CONTROL_ROLES = {
+CONTROL_OVERHEAD_ROLES = {
     "Human Orchestrator",
-    "Operations Lead",
-    "Operations Orchestrator",
-    "Orchestrator",
     "Operations Collaborator",
-    "Suborchestrator",
     "Plan Orchestrator",
     "Advisor",
     "Strategic Advisor",
@@ -1026,7 +1022,10 @@ def usage_summary(
             time_exact = time_exact and bool(metrics["time_exact"])
     total_tokens = sum(by_model.values())
     luna_max = luna_worker_tokens
-    control = sum(tokens for name, tokens in by_role.items() if name in CONTROL_ROLES)
+    control = sum(
+        tokens for name, tokens in by_role.items()
+        if name in CONTROL_OVERHEAD_ROLES
+    )
     return {
         "tokens": total_tokens,
         "cost": total_cost,
@@ -1108,7 +1107,7 @@ def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
             model_key = f'{metrics["model"]}/{metrics["effort"]}'
             if role(record["label"]) == "Worker" and model_key == "gpt-5.6-luna/max":
                 item["luna_tokens"] += tokens
-            if role(record["label"]) in CONTROL_ROLES:
+            if role(record["label"]) in CONTROL_OVERHEAD_ROLES:
                 item["control_tokens"] += tokens
         rows.append({
             "label": workspace.get("label") or workspace_id,
@@ -1277,6 +1276,7 @@ def report_all_json(since: datetime | None) -> int:
             + (" --all-time" if since is None else ""),
             "pricing": "Standard API-equivalent USD with cache and long-context rates; subscription billing and non-token tool charges are not included.",
             "quota": "Codex token_count.rate_limits.primary from local current and archived JSONL; quota percentages are not converted into dollars.",
+            "control": "Role-classified non-productive overhead lower bound. Task-direct Operations and suborchestrator decomposition, Luna dispatch, recovery, integration, and synchronization count as productive orchestration rather than control.",
         },
         "thresholds": {
             "luna_majority_pct": 50.0,

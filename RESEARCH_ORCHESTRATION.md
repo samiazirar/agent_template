@@ -16,15 +16,18 @@ are mandatory; this document supplies the detailed execution contract.
 - Optimize for changed code, data, experiments, evaluations, results, or paper
   content that moves that finish condition.
 - Keep control work below 10% of rolling task slots and agent-hours. Control
-  work is planning, orchestration, advice, audits, reports, status, handoffs,
-  and waiting. Productive verification attached to an implementation or run
-  counts with that productive task.
+  work is detached planning, advice, broad audits or reviews, reports, status,
+  handoffs, and waiting. Task-direct package decomposition, Luna dispatch or
+  recovery, result integration, synchronization, and worker closure are
+  productive orchestration. Productive verification attached to an
+  implementation or run counts with that productive task.
 - If control work reaches 10%, do not create another control task. Dispatch or
   perform the next productive task.
-- Human Orchestrator, Operations Lead, Plan
-  Orchestrator, advisor, verifier, review, status, and wait turns are always
-  control work. Research counts as productive only when it creates accepted
-  goal-relevant evidence.
+- Classify the action rather than the role. Operations Lead and
+  suborchestrator turns are productive when they directly dispatch, recover,
+  integrate, synchronize, or close a concrete Luna package; their detached
+  planning, status, checking, or waiting remains control. Research counts as
+  productive only when it creates accepted goal-relevant evidence.
 - Every control task names the productive action it directly unlocks. Exceed
   10% only for immediate safety, an irreversible action, or a human decision
   that truly prevents productive work. Idle standing roles stay asleep.

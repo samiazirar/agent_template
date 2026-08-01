@@ -14,14 +14,17 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   and why the assigned task moves that result before acting.
 - Prefer measured behavior, runs, evaluations, artifacts with reproduction,
   source/data, then plans or prior agent statements—in that order.
-- Prose, planning, approvals, status, auditing, and waiting are control work,
-  not scientific progress. Keep control work below 10% of task slots and
-  agent-hours.
-- Every Human Orchestrator, Operations Lead, Plan
-  Orchestrator, advisor, verifier, review, status, and wait turn is control
-  work. Research is productive only when it creates accepted goal-relevant
-  evidence. At 10% control, launch the next independent productive task unless
-  safety, irreversibility, or a required human decision prevents it.
+- Detached prose, planning, approvals, status, auditing, and waiting are
+  control work, not scientific progress. Keep control work below 10% of task
+  slots and agent-hours. Task-direct decomposition, Luna dispatch or recovery,
+  result integration, synchronization, and worker closure are productive
+  orchestration.
+- Classify the action rather than the role. Operations and suborchestrator
+  turns that directly move a concrete Luna package count as productive; their
+  detached planning, status, review, or waiting does not. Research is
+  productive only when it creates accepted goal-relevant evidence. At 10%
+  control, launch the next independent productive task unless safety,
+  irreversibility, or a required human decision prevents it.
 - Every control launch must name the productive action it directly unlocks.
   Idle standing roles consume no turns and stay asleep for routine status.
 - Never create work whose only output is a plan, report, permission record,

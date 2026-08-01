@@ -94,9 +94,10 @@ complete operating context for one minimal work package.
   `/home/user/azirar/.codex/skills/restart-research-team/scripts/validate_task_card.py`.
 - At least 90% of active task slots and agent-hours must directly change code,
   data, an experiment, an evaluation, accepted evidence, or intended paper
-  content. Attached reproduction and verification belong to the productive
-  task. All orchestration, collaborative planning, plan updates, advice,
-  checking, status, review, audit, and waiting share at most 10%.
+  content, or directly decompose, dispatch, recover, integrate, synchronize,
+  and close the Luna packages that do so. Attached reproduction and
+  verification belong to the productive task. Detached planning, plan updates,
+  advice, checking, status, review, audit, and waiting share at most 10%.
 - Before opening any control role, the Operations Lead must name the productive
   action it unlocks and check the rolling 90/10 share. At or above 10% control,
   start the next independent productive task instead, except for immediate

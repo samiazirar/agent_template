@@ -61,9 +61,11 @@ orchestration contracts provide the detailed rules.
 - Productive work directly changes code, data, an experiment, an evaluation,
   accepted research evidence, or intended paper content. Attached reproduction
   and verification belong to that productive task.
-- Every orchestrator turn, collaborative-planning turn, plan update, advisor,
-  verifier, review, status message, audit, and wait is control work. A role name
-  never changes that classification.
+- Classify the observed action, not the model or role name. Task-direct
+  decomposition into a frozen package, Luna dispatch or recovery, result
+  integration, synchronization, and worker closure are productive
+  orchestration. Detached planning, collaborative planning, plan updates,
+  advice, broad review, status, audit, and waiting are control work.
 - Operations Lead tracks the rolling share by active task slots and agent-hours
   before opening control work. At or above 10%, open the next independent
   productive task instead. Exceed 10% only for an immediate safety issue,
