@@ -16,10 +16,10 @@ human-language status, and session-rollover rules are mandatory.
   independent tasks.
 - One worker owns one task and one worktree. Reuse that session while the same
   task is being corrected; close it when the task is verified.
-- Create a suborchestrator only for an independent track with at least three
-  productive tasks. Give it one measurable workstream; it decomposes that
-  stream into approximately one-hour workers. Suborchestrators may not spawn
-  further suborchestrators.
+- Create a Sol-high suborchestrator only for an independent track expected to
+  need at least three Luna-sized productive pieces. Give it one measurable
+  workstream; it issues only the next useful bounded pieces and may not spawn a
+  further suborchestrator.
 - More sessions are welcome when they perform independent productive work.
   Never create sessions merely for status, waiting, routine review, or advice.
 - Keep `HUMAN_PLAN.md` at milestone/workstream level. Exact worker tasks and
@@ -104,9 +104,9 @@ human-language status, and session-rollover rules are mandatory.
   direct Herdr-control access. Trusted service code may wake one named visible
   Sol-medium verifier when an event is genuinely unusual.
 - Do not issue repeated model turns to poll unchanged state.
-- Default to medium reasoning for productive workers. Use high or xhigh only
-  for a bounded difficult implementation, scientific decision, or milestone
-  review.
+- Default bounded productive workers to Luna low. Use Sol medium for ambiguity,
+  a failed bounded repair, or cross-task integration; use high or xhigh only
+  for decomposition, a difficult decision, or a milestone review.
 - Roll over leadership before automatic context compaction. Preserve the live
   state in `HUMAN_PLAN.md`, archive the native session ID, and continue fresh.
 - Replace leadership immediately when compaction already occurred, its
@@ -123,15 +123,17 @@ human-language status, and session-rollover rules are mandatory.
 
 - Reproduce first, implement or run, verify, then compare the expected and
   observed state.
-- Normal workers use Sol medium. Opus 5 and OpenCode GLM 5.2 are selectable
-  productive alternatives. Terra and Luna normally handle research,
-  interpretation, and observation. Terra-high may be a productive worker only
-  when the human explicitly selects it for one bounded task.
-- Research defaults to one Terra-medium Researcher. It may direct Luna-low
-  read-only observers. A Verifier is optional, Sol medium, minimal, and opened
+- Normal workers use Luna low for one clear, repeatable task with one
+  deliverable and reproducible done check, normally within three tightly
+  coupled files or one experiment stage. Escalate the same task to Sol medium
+  after one failed coherent repair, material ambiguity, scope expansion, or a
+  non-reproducible result. Opus 5 and OpenCode GLM 5.2 remain selectable
+  alternatives. Terra-high remains human-selected only.
+- Routine source finding and transformation also use Luna low; open-ended
+  research uses one Terra-medium Researcher. A Verifier is optional, Sol medium, minimal, and opened
   only for one consequential anomaly that routine self-verification cannot
-  settle. Suborchestrators use Sol high for independent workstreams with at
-  least three productive tasks; advisors use Sol xhigh for one sparse bounded
+  settle. Suborchestrators use Sol high for independent workstreams expected to
+  need at least three Luna-sized productive pieces; advisors use Sol xhigh for one sparse bounded
   decision.
 - Commit every coherent completed chunk, integrate it in dependency order, and
   push the canonical branch immediately so accepted code matches GitHub.

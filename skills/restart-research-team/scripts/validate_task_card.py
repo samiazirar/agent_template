@@ -10,6 +10,7 @@ FIELDS = (
     "PROJECT QUESTION",
     "MILESTONE RESULT",
     "OUTCOME CLASS",
+    "MODEL",
     "TASK",
     "CURRENT STATE",
     "EXPECTED STATE",
@@ -72,6 +73,9 @@ def validate(text: str) -> list[str]:
             + ", ".join(sorted(OUTCOME_CLASSES))
         )
 
+    if len(values["MODEL"].split()) < 2:
+        errors.append("MODEL must name the selected model and effort or route")
+
     current = re.sub(r"\s+", " ", values["CURRENT STATE"].lower()).strip()
     expected = re.sub(r"\s+", " ", values["EXPECTED STATE"].lower()).strip()
     if current == expected:
@@ -103,6 +107,7 @@ def self_test() -> int:
 PROJECT QUESTION: Does measured depth improve robot planning?
 MILESTONE RESULT: One resumed GPU rehearsal produces measured progress.
 OUTCOME CLASS: run
+MODEL: GPT-5.6 Luna low
 TASK: Resume one short training run from its saved checkpoint.
 CURRENT STATE: The program has no verified resumed GPU step.
 EXPECTED STATE: The program advances at least one step after checkpoint reload.

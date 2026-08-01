@@ -75,15 +75,16 @@ orchestration contracts provide the detailed rules.
 | Human orchestration | Claudex | Sol, high |
 | Operations Lead | Codex | Sol, high |
 | Background operations collaboration | Native Claude | Opus 5, medium |
-| Normal implementation or execution | Codex or Claudex | Sol, medium |
+| Normal bounded implementation or execution | Codex | Luna, low |
+| Ambiguous repair or cross-task integration | Codex or Claudex | Sol, medium |
 | Bounded difficult implementation or decision | Codex or Claudex | Sol, high |
 | One bounded strategic question | Codex or Claudex | Sol, xhigh |
 | Temporary Plan Orchestrator | Codex or Claudex | Sol, medium |
 | Independent alternative productive worker | Native Claude | Opus 5 |
 | Mechanical or context-heavy alternative worker | OpenCode | GLM 5.2 |
-| Researcher | Codex or Claudex | Terra, medium |
+| Open-ended researcher | Codex or Claudex | Terra, medium |
 | Human-selected bounded productive worker | Codex | Terra, high |
-| Cheap research observation | Codex or Claudex | Luna |
+| Routine source finding or extraction | Codex | Luna, low |
 | Permanent event classification | OpenCode API key | Gemini 3.6 Flash |
 | Optional minimal verification | Visible Codex or Claudex | Sol, medium |
 | Human message drafting | OpenCode API key | Gemini 3.6 Flash |
@@ -92,17 +93,18 @@ Claudex is the Claude Code interface backed by the local Codex gateway. It is
 not native Anthropic Claude. Launch it through `claudex` with an explicit Codex
 model. Native Claude is selected separately when Opus 5 is wanted.
 
-Terra and Luna normally serve research, interpretation, and observation.
-Terra-high may be a productive worker only when the human explicitly selects
-it for one bounded task; launch it as a Worker with normal worktree, commit,
-reporting, and closure rules. Never use Vertex; Gemini routes use the OpenCode
-API-key provider.
+Luna-low is the default productive worker when the task has one concrete
+deliverable, one reproducible done check, and a narrow action boundary. Terra
+handles open-ended research and interpretation. Terra-high may be a productive
+worker only when the human explicitly selects it for one bounded task. Never
+use Vertex; Gemini routes use the OpenCode API-key provider.
 
 ## Native Herdr launch
 
 - Launch every independent agent as a named visible Herdr session with
   `herdr-agent <surface> "Role · PersonName Goal" [directory]`.
-- `codex` and `claudex` use the synchronized GPT-5.6 Sol medium default.
+- `luna` is the normal bounded worker. `codex` and `claudex` remain the Sol
+  medium escalation route for ambiguity, failed bounded repair, or integration.
   `claude` selects native Claude Opus 5 at medium effort by default.
 - Never replace these sessions with hidden subagents or ordinary background
   subprocesses. Open a separate session only for independent productive work.
@@ -212,17 +214,22 @@ API-key provider.
   After Operations confirms readiness, the Human Orchestrator runs the guarded
   helper, which may close only its own current workspace. Never stop the shared
   Herdr server or named session, and never treat inactivity as permission.
-- One worker owns exactly one concrete subtask, branch, and worktree.
+- One worker owns exactly one concrete subtask, branch, and worktree. Luna-low
+  is the default when the task can be stated as one deliverable, one
+  reproduction or run, one done check, and normally no more than three tightly
+  coupled files or one experiment stage.
   Independent subtasks use concurrent workers. When a worker finishes,
   Operations Lead captures its short result and native session reference,
   closes the pane immediately, and then integrates or rejects the saved work.
   Workers receive
   tasks from and report only to Operations Lead or their one owning
   suborchestrator.
-- Suborchestrators exist only for independent multi-step workstreams containing
-  at least three productive subtasks. Each owns one workstream, launches one
-  temporary worker per subtask, and closes when the stream ends. It may not
-  create another suborchestrator.
+- Suborchestrators use Sol high for independent multi-step workstreams expected
+  to contain at least three Luna-sized productive pieces. Each owns one
+  measurable workstream, turns only the next useful pieces into bounded cards,
+  launches one Luna worker per piece, absorbs compact results, and closes when
+  the stream ends. It may not create another suborchestrator or add a review
+  turn after every successful Luna task.
 - Strategic advisors are sparse temporary Sol-xhigh sessions. Give one advisor
   only the context for one bounded question, preferably yes/no or one concrete
   recommendation. Operations Lead launches it and receives its answer; it never
@@ -230,11 +237,12 @@ API-key provider.
 - For consequential strategic planning or plan validation, the responsible
   orchestrator uses `consult-chatgpt-pro` with one compact question, then
   reconciles the advice against project evidence.
-- Research defaults to one Terra-medium Researcher for a bounded evidence
-  question. Terra may direct Luna read-only observers when cheaper parallel
-  observation helps. Luna reports to Terra; Terra reports to Operations Lead
-  for project work or the Architect for agent-system research. Research counts
-  as productive only when it creates accepted goal-relevant evidence.
+- Routine source finding, extraction, classification, transformation, and
+  structured summaries default to Luna-low. Use a Terra-medium Researcher only
+  when the question is open-ended or requires synthesis and interpretation.
+  Research reports to Operations Lead for project work or the Architect for
+  agent-system research. Research counts as productive only when it creates
+  accepted goal-relevant evidence.
 - Explicitly selected Terra-high productive work uses one bounded named Worker,
   one worktree, and the normal worker completion and closure rules.
 

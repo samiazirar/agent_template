@@ -22,11 +22,12 @@
   Orchestration, collaborative planning, plan writing, advice, checking,
   status, review, audit, and waiting share at most 10%. Every control action
   must name the productive action it directly unlocks.
-- Sol medium is the normal Codex/Claudex worker. Native Claude Opus 5 and
-  OpenCode GLM 5.2 are selectable productive alternatives. Terra and Luna
-  normally handle research, interpretation, and observation. Terra-high may
-  be a productive worker only when the human explicitly selects it for one
-  bounded task.
+- Luna low is the normal worker for one clear, repeatable task with one
+  deliverable and reproducible done check, normally within three tightly
+  coupled files or one experiment stage. Sol medium handles material ambiguity,
+  a failed coherent Luna repair, or cross-task integration. Native Claude Opus
+  5 and OpenCode GLM 5.2 remain selectable alternatives. Terra-high remains
+  human-selected only.
 - Long-running observation uses an external service with read-only API-key
   `opencode/gemini-3.6-flash`, or Luna for research observation. Never use
   Vertex. The watcher cannot inspect or modify code and trusted service code
@@ -79,7 +80,8 @@
   approval step.
 - A temporary Sol-medium Plan Orchestrator edits only `HUMAN_PLAN.md`, reports
   only to the Operations Lead, and closes after one plan-only commit. Terra
-  medium is the default Researcher; Luna is its read-only observer. An
+  medium handles open-ended research; Luna-low handles routine source finding
+  and transformation as well as bounded productive work. An
   explicitly selected Terra-high productive Worker follows the normal
   one-task, worktree, commit, and closure rules. Sol-medium Verifiers are
   optional and minimal. Sol-high suborchestrators exist only for independent

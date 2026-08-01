@@ -95,13 +95,18 @@ is accepted. Detailed execution rules remain in
   at least three productive tasks. It decomposes that one stream and closes
   when the stream ends. It launches one temporary worker per subtask and may
   not create another suborchestrator layer.
-- Workers and subworkers normally use `gpt-5.6-sol` medium. Use Sol high only
-  for a bounded difficult implementation or scientific decision.
+- Workers and subworkers normally use `gpt-5.6-luna` low. Give Luna one clear,
+  repeatable piece with one deliverable, one reproduction or run, one done
+  check, and normally no more than three tightly coupled files or one
+  experiment stage. Use Sol medium when ambiguity, cross-task integration, or
+  a failed bounded repair requires more judgment; use Sol high only for a
+  difficult decision or decomposition boundary.
 - Claude Opus 5 and OpenCode GLM 5.2 are selectable productive workers when
   their separate context materially benefits the assigned task. Name the
   selected model in the task card; do not treat either as a hidden fallback.
-- Research defaults to Terra-medium. A Terra Researcher may direct Luna-low
-  read-only observers. They are not normal implementation workers.
+- Luna-low also handles routine source finding, extraction, classification,
+  transformation, and structured summaries. Use Terra-medium for open-ended
+  research that needs synthesis or interpretation.
 - When the human explicitly selects Terra-high for productive work, it may be
   one bounded named Worker with the normal one-task, worktree, commit, routing,
   and closure rules. Launch it with `herdr-agent terra-high`; do not relabel a
@@ -114,6 +119,11 @@ is accepted. Detailed execution rules remain in
   one assigned task. The owning named pane remains accountable for their
   outputs, validates them against its done check, and includes them in its
   evidence report.
+- A Luna worker self-verifies against its task's attached done check and stops.
+  Escalate the same task to Sol medium when Luna cannot choose between two
+  materially different approaches, the first coherent repair fails, the work
+  expands beyond its bounded subsystem, or the result cannot be reproduced.
+  Do not add a separate verifier or Sol turn after every successful Luna task.
 - Sol xhigh is a short-lived advisor for one consequential scientific,
   architecture, budget, or irreversible decision.
 - For consequential strategic planning or plan validation, the responsible

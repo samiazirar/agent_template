@@ -93,6 +93,7 @@ No session starts without a semantic task card:
 PROJECT QUESTION:
 MILESTONE RESULT:
 OUTCOME CLASS: build | run | measure | evaluate | integrate | control
+MODEL:
 TASK:
 CURRENT STATE:
 EXPECTED STATE:
@@ -159,13 +160,23 @@ alone cannot complete an empirical milestone.
   preserves the parent question and milestone, reconciles
   predicted-versus-observed differences within its track, and closes when the
   track ends.
-- Workers normally use Sol medium and implement or execute exactly one task.
-  They reproduce first, make the change or run, compare expected versus
-  observed state, report only to Operations Lead or their one owning
-  suborchestrator, commit, sync, and stop.
-- Opus 5 and OpenCode GLM 5.2 are alternative productive workers selected when
-  a separate context clearly helps. Research defaults to one Terra-medium
-  Researcher; Luna-low is its read-only observer when useful.
+- Workers normally use Luna low and implement or execute exactly one clear,
+  repeatable task. A Luna-sized task has one deliverable, one reproduction or
+  run, one done check, and normally no more than three tightly coupled files or
+  one experiment stage. Workers reproduce first, make the change or run,
+  compare expected versus observed state, report only to Operations Lead or
+  their one owning suborchestrator, commit, sync, and stop.
+- Sol medium, Opus 5, and OpenCode GLM 5.2 are alternative productive workers
+  selected when a separate context clearly helps. Research defaults to one
+  Terra-medium Researcher for open-ended synthesis; Luna-low handles routine
+  source finding, extraction, classification, transformation, and structured
+  summaries.
+- Escalate a Luna task to Sol medium when it cannot choose between two
+  materially different approaches, its first coherent repair fails, the task
+  expands beyond its bounded subsystem, tool results contradict the task's
+  premise, or the promised result cannot be reproduced. Keep the correction
+  inside the same task. Do not create routine Sol supervision or a verifier for
+  every successful Luna result.
 - Terra-high is also an allowed productive Worker when the human explicitly
   selects it. It owns one bounded task and worktree under the normal worker
   rules; it is not a Researcher for that task.

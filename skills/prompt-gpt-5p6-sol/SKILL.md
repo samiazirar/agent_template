@@ -90,6 +90,16 @@ meaning and remove process that does not help reach the goal.
   results and `herdr-role-message collaborator "..."` for the bounded
   background collaborator. A received user confirmation must start the named
   next action, not produce another acknowledgement.
+- Make Luna-low the default worker for a clear, repeatable piece with one
+  deliverable, one reproduction or run, one done check, and normally no more
+  than three tightly coupled files or one experiment stage. Operations Lead or
+  a Sol-high suborchestrator defines that boundary once; Luna self-verifies and
+  returns a compact result. Do not spend a Sol turn supervising every tool call
+  or rechecking every successful Luna result.
+- Escalate the same task to Sol medium when Luna faces materially different
+  approaches, its first coherent repair fails, the work expands beyond the
+  assigned subsystem, tool results contradict the task premise, or the result
+  cannot be reproduced.
 - For a Plan Orchestrator, provide the Human Orchestrator's accepted meaning
   through Operations Lead, restrict it to `HUMAN_PLAN.md`, and require one
   plan-only commit and immediate handoff only to Operations Lead. Treat this as
@@ -97,12 +107,13 @@ meaning and remove process that does not help reach the goal.
 - For a worker, require one task from Operations Lead or its owning
   suborchestrator, one result back to that owner, and no contact with the Human
   Orchestrator or user.
-- For a suborchestrator, assign one independent multi-step workstream, one
-  worker per subtask, reporting only to Operations Lead, and no further
-  orchestration layer.
-- For a Researcher, select Terra-medium by default, assign one bounded evidence
-  question, permit Luna observers only when useful, and report accepted
-  evidence to Operations Lead.
+- For a suborchestrator, assign one independent multi-step workstream expected
+  to need at least three Luna-sized pieces. It issues only the next useful
+  bounded pieces, absorbs compact results, reports only to Operations Lead,
+  and creates no further orchestration layer.
+- Use Luna-low for routine source finding, extraction, classification,
+  transformation, and structured summaries. Select Terra-medium only for
+  open-ended research requiring synthesis or interpretation.
 - If the human explicitly selects Terra-high as a productive worker, preserve
   that choice and give it one bounded deliverable and the normal worker
   worktree, commit, reporting, and closure rules.

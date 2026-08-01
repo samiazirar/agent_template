@@ -55,33 +55,29 @@ def validate(text: str) -> list[str]:
         errors.append("SESSION NAME must start with 'Watcher · '")
     if len(values["SESSION NAME"].split()) < 4:
         errors.append("SESSION NAME must include a person and goal-derived task")
-    if values["MODEL"].lower() != "gpt-5.6-luna":
-        errors.append("MODEL must be gpt-5.6-luna")
-    if values["EFFORT"].lower() != "low":
-        errors.append("EFFORT must be low")
+    model = values["MODEL"].lower()
+    if model not in {"opencode/gemini-3.6-flash", "gpt-5.6-luna"}:
+        errors.append(
+            "MODEL must be opencode/gemini-3.6-flash or gpt-5.6-luna"
+        )
+    expected_effort = "none" if model == "opencode/gemini-3.6-flash" else "low"
+    if values["EFFORT"].lower() != expected_effort:
+        errors.append(f"EFFORT must be {expected_effort} for {model}")
     if values["ONE WATCHER VERIFIED"].lower() != "true":
         errors.append("ONE WATCHER VERIFIED must be true")
 
     event_driven = values["EVENT DRIVEN"].lower()
-    if event_driven not in {"true", "false"}:
-        errors.append("EVENT DRIVEN must be true or false")
+    if event_driven != "true":
+        errors.append("EVENT DRIVEN must be true")
     try:
         poll_seconds = int(values["POLL SECONDS"])
-        if event_driven != "true" and poll_seconds < 600:
-            errors.append(
-                "non-event-driven watcher must poll no faster than every 600 seconds"
-            )
-        if poll_seconds < 0:
-            errors.append("POLL SECONDS must be non-negative")
+        if poll_seconds != 0:
+            errors.append("POLL SECONDS must be 0 for the event-driven service")
     except ValueError:
         errors.append("POLL SECONDS must be an integer")
 
-    due = {
-        int(item)
-        for item in re.findall(r"\d+", values["DUE CHECK MINUTES"])
-    }
-    if not {25, 50}.issubset(due):
-        errors.append("DUE CHECK MINUTES must include 25 and 50")
+    if values["DUE CHECK MINUTES"].lower() != "none":
+        errors.append("DUE CHECK MINUTES must be none; unchanged state stays silent")
     if len(values["WATCHED CONDITION"].split()) < 5:
         errors.append("WATCHED CONDITION is too short to identify one exact event")
     if len(values["TERMINAL EVENT"].split()) < 4:
@@ -101,16 +97,18 @@ SESSION NAME: Watcher · Wanda Training-Resume
 PROJECT GOAL: Resume one saved training run and verify new training evidence.
 WATCHED CONDITION: Worker completion, process state change, or due evidence check.
 OWNER: Orchestrator · Clara ContactFlow Results
-MODEL: gpt-5.6-luna
-EFFORT: low
+MODEL: opencode/gemini-3.6-flash
+EFFORT: none
 EVENT DRIVEN: true
 POLL SECONDS: 0
-DUE CHECK MINUTES: 25, 50
+DUE CHECK MINUTES: none
 TIMEOUT: 90 minutes
 TERMINAL EVENT: Active project batch ends.
 ONE WATCHER VERIFIED: true
 """
-    invalid = valid.replace("MODEL: gpt-5.6-luna", "MODEL: gpt-5.6-sol")
+    invalid = valid.replace(
+        "MODEL: opencode/gemini-3.6-flash", "MODEL: gpt-5.6-sol"
+    )
     if validate(valid):
         print(f"self-test valid card failed: {validate(valid)}", file=sys.stderr)
         return 1
