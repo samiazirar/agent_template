@@ -141,8 +141,7 @@ Create these standing roles in `01 Orchestrators`:
    integration, commits, synchronization, technical state, and the rolling
    90/10 budget. Be the sole operational authority and normal bridge between
    the Human Orchestrator and every technical role.
-   Use `herdr-role-message human "..."` for human questions or material results
-   and `herdr-role-message collaborator "..."` for the bounded collaborator.
+   Use `herdr-role-message human "..."` for human questions or material results.
    When a forwarded confirmation arrives, start the named action instead of
    acknowledging it again.
 Normal communication must follow:
