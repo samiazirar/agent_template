@@ -6035,6 +6035,8 @@
         const localMetrics = make("div", "local-metrics");
         addMetric(localMetrics, "Lifetime tokens", formatTokens(beech.lifetime.tokens), "Beech-observed local total.");
         addMetric(localMetrics, "Quota-window tokens", formatTokens(beech.quota_window.tokens), "Exact transcript range from the current quota-window start.");
+        addMetric(localMetrics, "Lifetime estimated cost", formatCost(beech.lifetime.cost), formatTokens(beech.lifetime.cached_tokens) + " cached tokens; standard API-equivalent rates.", "warn");
+        addMetric(localMetrics, "Quota-window estimated cost", formatCost(beech.quota_window.cost), formatTokens(beech.quota_window.cached_tokens) + " cached tokens; standard API-equivalent rates.", "warn");
         addMetric(localMetrics, "Unique transcripts", String(beech.lifetime.transcript_count), "Current plus archived Codex transcripts counted once.");
         localCard.append(localMetrics);
         localCard.append(make("p", "local-note", "Beech-observed activity includes non-Herdr local work and is not a claim about activity on another machine."));
@@ -6042,8 +6044,10 @@
         localCard.append(make("h3", "local-title", "Registered Herdr work"));
         localCard.append(make("p", "local-subtitle", "Native session IDs from open and closed workspaces, deduplicated before project totals."));
         const herdrMetrics = make("div", "local-metrics");
-        addMetric(herdrMetrics, "Quota-window tokens", formatTokens(local.aggregate.tokens), formatTokens(local.aggregate.cached_tokens) + " cached; API-equivalent dollars are separate.");
+        addMetric(herdrMetrics, "Quota-window tokens", formatTokens(local.aggregate.tokens), formatTokens(local.aggregate.cached_tokens) + " cached.");
+        addMetric(herdrMetrics, "Quota-window estimated cost", formatCost(local.aggregate.cost), "Cache-adjusted standard API-equivalent rates.", "warn");
         addMetric(herdrMetrics, "Lifetime tokens", formatTokens((herdr.lifetime || {}).tokens || 0), "All registered Herdr sessions in the ledger.");
+        addMetric(herdrMetrics, "Lifetime estimated cost", formatCost((herdr.lifetime || {}).cost || 0), formatTokens((herdr.lifetime || {}).cached_tokens || 0) + " cached tokens.", "warn");
         addMetric(herdrMetrics, "Projects", String(local.aggregate.project_count), "Projects with registered Herdr sessions in this window.");
         addMetric(herdrMetrics, "Agent rows", String(local.aggregate.agent_count), "Nonzero deduplicated session rows.");
         localCard.append(herdrMetrics);
@@ -6051,7 +6055,7 @@
         top.append(localCard);
         root.append(top);
         const quality = make("p", "quality-note");
-        quality.textContent = account.data_quality + " The three quantities above are intentionally kept separate: account activity, all beech-observed transcripts, and registered Herdr sessions.";
+        quality.textContent = account.data_quality + " Cost is estimated only where local transcripts expose model, cached-input, uncached-input, and output usage. The account feed has only aggregate tokens, so no account-wide dollar estimate is invented.";
         root.append(quality);
         const heading = make("div", "section-heading");
         const headingIdentity = make("div");
