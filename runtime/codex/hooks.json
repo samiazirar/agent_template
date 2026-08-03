@@ -29,6 +29,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "python3 '/home/user/azirar/.codex/hooks/herdr-role-policy.py'",
+            "statusMessage": "Checking completion against the assigned result",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
     ]
   }
 }

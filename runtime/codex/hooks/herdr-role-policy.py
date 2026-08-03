@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import re
 import subprocess
@@ -84,6 +85,149 @@ def plan_context(cwd: str, role: str) -> str:
     )
 
 
+def task_state_path(suffix: str) -> Path | None:
+    workspace = os.environ.get("HERDR_WORKSPACE_ID")
+    pane = os.environ.get("HERDR_PANE_ID")
+    if not workspace or not pane:
+        return None
+    root = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state"))
+    return root / "herdr" / "task-cards" / workspace / f"{pane}.{suffix}"
+
+
+def git_text(cwd: str, *args: str) -> str:
+    try:
+        return subprocess.run(
+            ["git", "-C", cwd, *args],
+            check=True,
+            text=True,
+            capture_output=True,
+            timeout=3,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def stop_risks(payload: dict[str, object], role: str) -> list[str]:
+    risks: list[str] = []
+    message = str(payload.get("last_assistant_message") or "")
+    lowered_message = message.casefold()
+    continuing_job = re.search(
+        r"\b(?:submitted|queued|running|sbatch|job(?:\s+id)?\s*[:#=]?\s*\d+)\b",
+        lowered_message,
+    )
+    continuity = re.search(
+        r"\b(?:watch(?:er|ing)?|wake|terminal event|completion event|"
+        r"terminal owner|event-driven|next action owner)\b",
+        lowered_message,
+    )
+    terminal = re.search(
+        r"\b(?:completed|finished|failed|cancelled|canceled|timed out|timeout|"
+        r"stopped|exited|terminal)\b",
+        lowered_message,
+    )
+    if (
+        role in {"Worker", "Suborchestrator", "Operations Lead"}
+        and continuing_job
+        and not continuity
+        and not terminal
+    ):
+        risks.append(
+            "A continuing job is reported without a named terminal wake path. "
+            "Arrange one event-driven wake owner before stopping; do not poll."
+        )
+
+    if role != "Worker":
+        return risks
+
+    card_path = task_state_path("card")
+    base_path = task_state_path("base")
+    if not card_path or not base_path or not card_path.is_file() or not base_path.is_file():
+        return risks
+
+    card = card_path.read_text(encoding="utf-8", errors="replace").casefold()
+    base = base_path.read_text(encoding="utf-8", errors="replace").strip()
+    cwd = str(payload.get("cwd") or ".")
+    head = git_text(cwd, "rev-parse", "HEAD").strip()
+    if not base or not head:
+        return risks
+
+    changed = set(git_text(cwd, "diff", "--name-only", f"{base}..{head}").splitlines())
+    status = git_text(cwd, "status", "--porcelain")
+    changed.update(line[3:] for line in status.splitlines() if len(line) > 3)
+    changed.discard("")
+    if not changed:
+        return risks
+
+    example_surface = re.compile(
+        r"(?:^|/)(?:examples?|fixtures?|samples?|tests?)(?:/|$)|"
+        r"(?:^|/)(?:example|fixture|sample|test)[^/]*\.[^/]+$",
+        re.IGNORECASE,
+    )
+    task_targets_example = re.search(
+        r"\b(?:example|fixture|sample|test|documentation|docs)\b", card
+    )
+    if not task_targets_example and all(example_surface.search(path) for path in changed):
+        risks.append(
+            "Only example, fixture, sample, or test surfaces changed although the task asks "
+            "for general behavior. Recheck the shared execution path behind the example."
+        )
+
+    dependency_files = {
+        "package.json", "pyproject.toml", "requirements.txt", "cargo.toml",
+        "go.mod", "environment.yml", "environment.yaml",
+    }
+    if any(Path(path).name.casefold() in dependency_files for path in changed) and not re.search(
+        r"\b(?:dependency|package|environment)\b", card
+    ):
+        risks.append(
+            "The change adds or alters dependency configuration although the task does not "
+            "require a dependency. Prefer the existing implementation path."
+        )
+
+    name_status = git_text(cwd, "diff", "--name-status", f"{base}..{head}")
+    added_files = [line for line in name_status.splitlines() if line.startswith("A\t")]
+    if len(added_files) > 3:
+        risks.append(
+            f"The task added {len(added_files)} files. Confirm they are all necessary for the "
+            "single requested result; remove scaffolding or parallel paths that are not."
+        )
+
+    added_diff = git_text(cwd, "diff", "--unified=0", f"{base}..{head}")
+    added_lines = "\n".join(
+        line[1:] for line in added_diff.splitlines()
+        if line.startswith("+") and not line.startswith("+++")
+    ).casefold()
+    if re.search(r"\b(?:workaround|special[ -]?case|temporary fix|hotfix|hack)\b", added_lines):
+        risks.append(
+            "The patch describes a workaround or special case. Reproduce the original failure "
+            "and confirm the change repairs its shared causal source rather than that one input."
+        )
+    return risks
+
+
+def guard_stop(payload: dict[str, object], role: str) -> int:
+    risks = stop_risks(payload, role)
+    if not risks:
+        return 0
+    head = git_text(str(payload.get("cwd") or "."), "rev-parse", "HEAD").strip()
+    signature = hashlib.sha256((role + head + "\n".join(risks)).encode()).hexdigest()[:20]
+    seen = task_state_path(f"stop-{signature}")
+    if seen and seen.exists():
+        return 0
+    if seen:
+        seen.parent.mkdir(parents=True, exist_ok=True)
+        seen.touch(mode=0o600)
+    prompt = (
+        "Before stopping, resolve this bounded completion risk:\n- "
+        + "\n- ".join(risks)
+        + "\nIf the signal is false, state the concrete reason once. Otherwise make the "
+        "smallest root-level correction and rerun only the assigned done check. "
+        "Do not broaden the task, add a review round, or create support artifacts."
+    )
+    print(prompt, file=sys.stderr)
+    return 2
+
+
 def main() -> int:
     payload = json.load(sys.stdin)
     event = payload.get("hook_event_name", "")
@@ -99,6 +243,9 @@ def main() -> int:
                 }
             }))
         return 0
+
+    if event == "Stop":
+        return guard_stop(payload, role)
 
     if event != "PreToolUse" or not role:
         return 0

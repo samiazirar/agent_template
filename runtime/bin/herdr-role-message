@@ -40,7 +40,7 @@ message="$*"
 
 case "$target" in
   "Operations Lead")
-    message="Role reminder: dispatch technical work to a Sol-medium suborchestrator or Luna worker; do not inspect, debug, implement, run experiments, or SSH. Keep child roles visible in this project workspace: create filesystem worktrees with Git, never with 'herdr worktree create'. If the goal is incomplete and no productive child is active, dispatch the next package before ending. Message: $message"
+    message="Role reminder: dispatch technical work to a Sol-medium suborchestrator or Luna worker; do not inspect, debug, implement, run experiments, or SSH. Keep child roles visible in this project workspace: create filesystem worktrees with Git, never with 'herdr worktree create'. If the goal is incomplete and no productive child is active, dispatch the next package before ending. A continuing external job needs a terminal wake owner before you end the turn. Message: $message"
     ;;
   "Human Orchestrator")
     message="Role reminder: handle only Human conversation and plan meaning; route technical action to Operations and do not manage execution. Message: $message"
@@ -80,4 +80,23 @@ print(matches[0])
 
 # Herdr 0.7.5 submits agent prompts atomically and refuses stale/non-agent
 # targets instead of silently typing into whatever now owns the pane.
-herdr agent prompt "$pane_id" "$message" >/dev/null
+sent=0
+for delay in 0 1 2; do
+  if (( delay > 0 )); then
+    sleep "$delay"
+  fi
+  if herdr agent prompt "$pane_id" "$message" >/dev/null 2>&1; then
+    sent=1
+    break
+  fi
+done
+if [[ "$sent" != "1" ]]; then
+  herdr notification show "Herdr message delivery failed" \
+    --body "Could not wake ${target}; the armed emergency wake remains active." \
+    --position top-right --sound request >/dev/null 2>&1 || true
+  printf 'Could not deliver message to %s after bounded retries.\n' "$target" >&2
+  exit 1
+fi
+if [[ "${HERDR_WAKE_NO_DISARM:-}" != "1" ]] && command -v herdr-emergency-wake >/dev/null 2>&1; then
+  herdr-emergency-wake disarm "$HERDR_PANE_ID" >/dev/null 2>&1 || true
+fi

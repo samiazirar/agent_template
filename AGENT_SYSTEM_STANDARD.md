@@ -231,7 +231,7 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   `herdr-emergency-wake` with the child pane and a task-specific maximum-silence
   interval. The child wakes its parent directly with `herdr-role-message` on
   completion or material trouble. The parent captures the result and closes
-  the child, which disarms the emergency wake. If no child message arrives,
+  the child, which disarms the emergency wake. If no confirmed child message arrives,
   the helper wakes the parent once with the recovery action. No model turn
   remains occupied by waiting.
 - If Herdr's lifecycle state looks wrong, use `herdr agent explain` to inspect

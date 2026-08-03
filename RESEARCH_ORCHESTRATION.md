@@ -248,7 +248,8 @@ loop for a child. After dispatch it arms `herdr-emergency-wake` with the child
 pane, a task-specific maximum-silence interval, and one recovery action, then
 ends the turn after launching any other independent work. The child's
 `herdr-role-message` starts or steers the parent turn. If no message arrives,
-the helper wakes the parent once. Closing the child pane disarms the fallback.
+the helper wakes the parent once. A confirmed child message disarms the
+fallback; closing before confirmation still wakes the parent.
 
 When the user says “do,” “go,” “continue,” or an equivalent confirmation after
 an action was proposed, Human Orchestrator forwards that action immediately.

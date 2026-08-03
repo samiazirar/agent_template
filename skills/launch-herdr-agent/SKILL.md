@@ -262,7 +262,8 @@ The parent never waits inside its model turn. After launching a child, arm
 and one recovery action, then finish the parent turn after dispatching any
 other independent work. The child reports with `herdr-role-message`, which
 wakes or steers the parent, and stops without waiting for acknowledgement.
-Closing the child pane disarms the emergency wake. Never run `herdr agent wait`,
+A confirmed child message disarms the emergency wake; an unconfirmed pane close
+still wakes the parent. Never run `herdr agent wait`,
 `sleep`, or a polling loop in Operations Lead or a suborchestrator.
 When maximum silence actually fires, the emergency helper also uses Herdr's
 native notification surface before waking the owning role; no messenger model

@@ -128,7 +128,8 @@ complete operating context for one minimal work package.
   or needs recovery. Operations and suborchestrators never run `herdr agent wait`,
   `sleep`, or polling loops for child roles. They arm `herdr-emergency-wake`
   before yielding; it wakes the parent once if the child remains open past the
-  task-specific silence interval. Closing the child disarms the fallback.
+  task-specific silence interval. A confirmed child message disarms the
+  fallback; a pane that closes before confirmation still wakes the parent.
 - Use one external event-driven service only for genuinely long processes,
   schedulers, or remote work. It wakes a native-Codex Luna-low watcher only on
   a changed event or maximum-silence event.

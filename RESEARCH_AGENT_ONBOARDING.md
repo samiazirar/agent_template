@@ -104,7 +104,8 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   silence and ends its turn after launching any other independent work. The
   worker wakes the parent directly with `herdr-role-message` when it completes
   or needs recovery. If that message never arrives, the helper wakes the parent
-  once; closing the worker pane disarms it.
+  once; a confirmed worker message disarms it, while an unconfirmed close still
+  wakes the parent.
 - A launched process is not a started task. Require the first real model
   response or task action and reject authentication, provider, permission, or
   immediate-exit output as a failed launch. Retry the same surface once after

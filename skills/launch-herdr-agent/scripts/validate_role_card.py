@@ -64,7 +64,7 @@ CONTRACTS = {
         "OWNS: One meaningful task; its goal; its observed finish condition; decomposition into minimal productive packages",
         "MUST NOT: Inspect or search project code; SSH; diagnose or debug technical behavior; code; edit project files; execute experiments; perform a worker package itself; contact the Human or Human Orchestrator; create another suborchestrator; manage work outside its task",
         "ROUTING RULE: Read only the assigned task, supplied plan or handoff excerpt, and child results. Make the first technical action launch one fresh native-Codex Luna-max session with HERDR_TASK_CARD set to its frozen goal-anchored card, arm herdr-emergency-wake, and end the turn. Close it after its wake message, absorb only the compact result, then launch a new Luna-max session for the next card. Use a Sol-medium worker only with a recorded Luna failure; non-Luna alternatives require the Human's explicit model choice. Report the task result with herdr-role-message operations, then stop.",
-        "WAKE RULE: Never run herdr agent wait, sleep, or a polling loop for a child role. The worker wakes you directly; the emergency wake fires once only if the child remains open past maximum silence.",
+        "WAKE RULE: Never run herdr agent wait, sleep, or a polling loop for a child role. The worker wakes you directly; its confirmed message disarms the emergency wake, while an unconfirmed pane close still wakes you once.",
     ),
     "strategic-advisor": (
         "ROLE: Strategic Advisor",

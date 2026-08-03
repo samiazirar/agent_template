@@ -330,6 +330,14 @@ print(result["root_pane"]["pane_id"])
 tab_id="${created_ids[0]}"
 pane_id="${created_ids[1]}"
 
+if [ -n "${HERDR_TASK_CARD:-}" ] && [ -f "$HERDR_TASK_CARD" ]; then
+    task_state_dir="${XDG_STATE_HOME:-${HOME}/.local/state}/herdr/task-cards/${HERDR_WORKSPACE_ID}"
+    mkdir -p "$task_state_dir"
+    install -m 600 "$HERDR_TASK_CARD" "$task_state_dir/${pane_id}.card"
+    git -C "$launch_dir" rev-parse HEAD >"$task_state_dir/${pane_id}.base" 2>/dev/null || \
+        : >"$task_state_dir/${pane_id}.base"
+fi
+
 cleanup_failed_launch() {
     herdr tab close "$tab_id" >/dev/null 2>&1 || true
 }

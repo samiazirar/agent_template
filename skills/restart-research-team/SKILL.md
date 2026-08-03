@@ -223,7 +223,7 @@ After either strategic answer is durably captured, close that pane immediately.
 - Every completed worker sends its completion envelope to its owning
   orchestrator, waking that parent directly. The parent never runs `herdr agent wait`,
   `sleep`, or a polling loop for a child. It arms `herdr-emergency-wake` after
-  dispatch and ends its turn; closing the child after its message disarms the
+  dispatch and ends its turn; the confirmed child message disarms the
   fallback. Operations Lead routes only an accepted material result, genuine
   decision, or direction change to the Human Orchestrator. Full technical
   detail remains internal; never forward a transcript to the human interface.
