@@ -7,9 +7,11 @@ import argparse
 import json
 import os
 import re
+import selectors
 import sqlite3
 import subprocess
 import sys
+import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -58,112 +60,166 @@ def codex_jsonl_paths() -> list[Path]:
     return paths
 
 
-def latest_primary_rate_limit() -> dict[str, Any] | None:
-    """Read account quota snapshots without turning quota percentages into cost."""
-    windows: dict[tuple[int, int, str], dict[str, Any]] = {}
-    latest: dict[str, Any] | None = None
-    for path in codex_jsonl_paths():
-        try:
-            handle = path.open(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        with handle:
-            for raw in handle:
+def app_server_responses() -> dict[int, dict[str, Any]] | None:
+    """Read authenticated account activity and quota from the Codex app server."""
+    try:
+        process = subprocess.Popen(
+            ["codex", "app-server", "--stdio"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+        )
+    except OSError as exc:
+        print(f"Codex app-server unavailable: {exc}", file=sys.stderr)
+        return None
+
+    selector = selectors.DefaultSelector()
+    try:
+        if process.stdin is None or process.stdout is None:
+            raise RuntimeError("app-server did not expose stdio")
+        selector.register(process.stdout, selectors.EVENT_READ)
+
+        def send(message: dict[str, Any]) -> None:
+            process.stdin.write(json.dumps(message) + "\n")
+            process.stdin.flush()
+
+        def receive(ids: set[int]) -> dict[int, dict[str, Any]]:
+            responses: dict[int, dict[str, Any]] = {}
+            deadline = time.monotonic() + 60.0
+            while ids - responses.keys():
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TimeoutError("app-server response timed out")
+                if not selector.select(remaining):
+                    raise TimeoutError("app-server response timed out")
+                raw = process.stdout.readline()
+                if not raw:
+                    raise RuntimeError("app-server closed its output")
                 try:
-                    item = json.loads(raw)
+                    message = json.loads(raw)
                 except json.JSONDecodeError:
                     continue
-                payload = item.get("payload") or {}
-                if item.get("type") != "event_msg" or payload.get("type") != "token_count":
-                    continue
-                limits = payload.get("rate_limits") or {}
-                primary = limits.get("primary")
-                when = parse_time(item.get("timestamp"))
-                if not isinstance(primary, dict) or when is None:
-                    continue
-                try:
-                    used = float(primary["used_percent"])
-                    window_minutes = int(primary["window_minutes"])
-                    resets_at = int(primary["resets_at"])
-                except (KeyError, TypeError, ValueError):
-                    continue
-                if not 0.0 <= used <= 100.0 or window_minutes <= 0 or resets_at <= 0:
-                    continue
-                plan_type = str(limits.get("plan_type") or "unknown")
-                snapshot = {
-                    "observed_at": when,
-                    "used_percent": used,
-                    "window_minutes": window_minutes,
-                    "resets_at": resets_at,
-                    "plan_type": plan_type,
-                }
-                key = (window_minutes, resets_at, plan_type)
-                window = windows.setdefault(
-                    key,
-                    {"first": snapshot, "latest": snapshot, "count": 0},
-                )
-                window["count"] += 1
-                if when < window["first"]["observed_at"]:
-                    window["first"] = snapshot
-                if when > window["latest"]["observed_at"]:
-                    window["latest"] = snapshot
-                if latest is None or when > latest["observed_at"]:
-                    latest = snapshot
-    if latest is None:
+                message_id = message.get("id")
+                if isinstance(message_id, int) and message_id in ids:
+                    responses[message_id] = message
+            return responses
+
+        send({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "clientInfo": {"name": "herdr-costs", "version": "1"},
+                "capabilities": {"experimentalApi": True},
+            },
+        })
+        initialization = receive({1})[1]
+        if "error" in initialization:
+            raise RuntimeError("app-server initialization failed")
+        send({"jsonrpc": "2.0", "method": "initialized", "params": {}})
+        send({"jsonrpc": "2.0", "id": 2, "method": "account/read", "params": {"refreshToken": False}})
+        send({"jsonrpc": "2.0", "id": 3, "method": "account/rateLimits/read"})
+        send({"jsonrpc": "2.0", "id": 4, "method": "account/usage/read"})
+        return receive({2, 3, 4})
+    except (OSError, RuntimeError, TimeoutError, ValueError) as exc:
+        print(f"Codex app-server account query unavailable: {exc}", file=sys.stderr)
         return None
-    key = (latest["window_minutes"], latest["resets_at"], latest["plan_type"])
-    window = windows[key]
-    first = window["first"]
-    latest_used = float(latest["used_percent"])
-    opening_used = float(first["used_percent"])
-    local_estimate = max(0.0, latest_used - opening_used)
-    other_unassigned = max(0.0, latest_used - local_estimate)
-    local_today = [
-        snapshot
-        for candidate in windows.values()
-        if (
-            candidate["latest"]["window_minutes"] == latest["window_minutes"]
-            and candidate["latest"]["resets_at"] == latest["resets_at"]
-            and candidate["latest"]["plan_type"] == latest["plan_type"]
-        )
-        for snapshot in (candidate["first"], candidate["latest"])
-        if snapshot["observed_at"].astimezone().date() == latest["observed_at"].astimezone().date()
-    ]
-    today_values = sorted(
-        {snapshot["observed_at"]: snapshot for snapshot in local_today}.values(),
-        key=lambda snapshot: snapshot["observed_at"],
+    finally:
+        selector.close()
+        if process.stdin is not None:
+            try:
+                process.stdin.close()
+            except OSError:
+                pass
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+
+
+def latest_primary_rate_limit() -> dict[str, Any] | None:
+    """Return account activity and the current primary quota from app-server data."""
+    responses = app_server_responses()
+    if not responses:
+        return None
+    account_result = responses.get(2, {}).get("result") or {}
+    usage_result = responses.get(4, {}).get("result") or {}
+    rate_result = responses.get(3, {}).get("result") or {}
+    account_info = account_result.get("account") or {}
+    summary = usage_result.get("summary") or {}
+    lifetime = summary.get("lifetimeTokens")
+    if not isinstance(lifetime, int):
+        print("Codex app-server returned no account lifetime token total.", file=sys.stderr)
+        return None
+    rate = rate_result.get("rateLimits") or {}
+    primary = rate.get("primary") or {}
+    used = primary.get("usedPercent")
+    resets_at_value = primary.get("resetsAt")
+    window_minutes = primary.get("windowDurationMins")
+    reset_at = (
+        datetime.fromtimestamp(int(resets_at_value), timezone.utc)
+        if isinstance(resets_at_value, (int, float)) and resets_at_value > 0
+        else None
     )
-    today_delta = None
-    if len(today_values) >= 2:
-        today_delta = max(
-            0.0,
-            float(today_values[-1]["used_percent"])
-            - float(today_values[0]["used_percent"]),
+    window_start = (
+        reset_at - timedelta(minutes=int(window_minutes))
+        if reset_at is not None and isinstance(window_minutes, (int, float)) and window_minutes > 0
+        else None
+    )
+    buckets = []
+    for bucket in usage_result.get("dailyUsageBuckets") or []:
+        start_date = bucket.get("startDate")
+        tokens = bucket.get("tokens")
+        if isinstance(start_date, str) and isinstance(tokens, int):
+            buckets.append({"start_date": start_date, "tokens": tokens})
+    quota_window_tokens = None
+    if window_start is not None:
+        cutoff = window_start.date().isoformat()
+        quota_window_tokens = sum(
+            bucket["tokens"] for bucket in buckets if bucket["start_date"] >= cutoff
         )
-    reset_at = datetime.fromtimestamp(latest["resets_at"], timezone.utc)
-    window_start = reset_at - timedelta(minutes=latest["window_minutes"])
-    return {
+    used_percent = float(used) if isinstance(used, (int, float)) else None
+    account_type = account_info.get("type")
+    plan_type = rate.get("planType") or account_info.get("planType") or "unknown"
+    result = {
         "available": True,
-        "used_percent": round(latest_used, 3),
-        "remaining_percent": round(max(0.0, 100.0 - latest_used), 3),
-        "window_minutes": latest["window_minutes"],
-        "window_label": "7 days" if latest["window_minutes"] == 10080 else f'{latest["window_minutes"]} minutes',
-        "resets_at": reset_at.isoformat().replace("+00:00", "Z"),
-        "window_start": window_start.isoformat().replace("+00:00", "Z"),
-        "plan_type": latest["plan_type"],
-        "observed_at": latest["observed_at"].isoformat().replace("+00:00", "Z"),
-        "opening_used_percent": round(opening_used, 3),
-        "local_observed_estimate_percent": round(local_estimate, 3),
-        "beech_observed_increase_percent": round(local_estimate, 3),
-        "pre_beech_observation_percent": round(other_unassigned, 3),
-        "other_machine_percent": None,
-        "other_unassigned_percent": round(other_unassigned, 3),
-        "today_delta_percent": round(today_delta, 3) if today_delta is not None else None,
-        "today_delta_supported": today_delta is not None,
-        "snapshot_count": int(window["count"]),
-        "attribution": "Beech-observed increase: account percentage-point changes first seen in Codex turns on beech. This is not device attribution. Usage before the first beech snapshot is shown separately; exact other-machine usage is unavailable.",
-        "data_quality": "Codex exposes an account-wide percentage without a device identifier. Concurrent use elsewhere can be included in the beech-observed increase, so exact beech-versus-other quota usage cannot be separated. Quota percentages are not converted to dollars.",
+        "source": "authenticated Codex app-server account/usage/read and account/rateLimits/read",
+        "account_type": account_type,
+        "plan_type": plan_type,
+        "lifetime_tokens": lifetime,
+        "peak_daily_tokens": summary.get("peakDailyTokens"),
+        "daily_usage_buckets": buckets,
+        "quota_window_tokens": quota_window_tokens,
+        "quota_window_tokens_exact": False,
+        "used_percent": round(used_percent, 3) if used_percent is not None else None,
+        "remaining_percent": round(100.0 - used_percent, 3) if used_percent is not None else None,
+        "window_minutes": int(window_minutes) if isinstance(window_minutes, (int, float)) else None,
+        "window_label": (
+            "7 days" if window_minutes == 10080
+            else f"{int(window_minutes)} minutes" if isinstance(window_minutes, (int, float))
+            else "unavailable"
+        ),
+        "resets_at": reset_at.isoformat().replace("+00:00", "Z") if reset_at else None,
+        "window_start": window_start.isoformat().replace("+00:00", "Z") if window_start else None,
+        "observed_at": iso_now(),
+        "attribution": "Account lifetime and daily activity are returned by the authenticated Codex app server. The quota snapshot is account-wide and has no device identifier.",
+        "data_quality": "Account activity is authoritative for the signed-in Codex account. Beech-observed transcripts and Herdr attribution are separate local quantities; no machine residual is inferred.",
     }
+    result["quota"] = {
+        key: result[key]
+        for key in (
+            "used_percent", "remaining_percent", "window_minutes", "window_label",
+            "resets_at", "window_start", "plan_type", "observed_at",
+        )
+    }
+    return result
 
 
 def herdr_pane(pane_id: str) -> dict[str, Any]:
@@ -212,6 +268,28 @@ def load_records(workspace: str) -> list[dict[str, Any]]:
     return list(latest.values())
 
 
+def load_all_records() -> list[dict[str, Any]]:
+    """Load the registered Herdr ledger once per native session, including closed workspaces."""
+    path = state_file()
+    if not path.exists():
+        return []
+    latest: dict[str, dict[str, Any]] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        session = item.get("session")
+        if not session:
+            continue
+        previous = latest.get(session, {})
+        merged = {**previous, **item}
+        if previous.get("registered_at"):
+            merged["registered_at"] = previous["registered_at"]
+        latest[session] = merged
+    return list(latest.values())
+
+
 def current_sessions(workspace: str) -> set[str]:
     try:
         result = subprocess.run(
@@ -253,6 +331,26 @@ def transcript_for(session: str, recorded_path: str | None = None) -> tuple[str,
             if session in candidate.name:
                 return "claude", candidate
     return None
+
+
+def local_transcript_id(path: Path) -> str:
+    match = CODEX_SESSION.search(path.name)
+    if match:
+        return match.group(0).lower()
+    try:
+        with path.open(encoding="utf-8", errors="replace") as handle:
+            for raw in handle:
+                item = json.loads(raw)
+                if item.get("type") != "session_meta":
+                    continue
+                payload = item.get("payload") or {}
+                session = str(payload.get("session_id") or payload.get("id") or "")
+                if CODEX_SESSION.fullmatch(session):
+                    return session.lower()
+                break
+    except (OSError, json.JSONDecodeError):
+        pass
+    return str(path.resolve())
 
 
 ROLE_NAME = re.compile(
@@ -593,6 +691,7 @@ def read_codex(path: Path, since: datetime | None = None) -> dict[str, Any]:
     turn_skills: dict[str, set[str]] = defaultdict(set)
     turn_skill_baselines: dict[tuple[str, str], dict[str, int]] = {}
     skill_paths: dict[str, str] = {}
+    token_events: list[tuple[datetime | None, str, dict[str, int]]] = []
     for raw in path.open(encoding="utf-8", errors="replace"):
         try:
             item = json.loads(raw)
@@ -626,10 +725,11 @@ def read_codex(path: Path, since: datetime | None = None) -> dict[str, Any]:
                             )
                         turn_skills[current_turn].add(name)
         if item.get("type") == "event_msg" and payload.get("type") == "token_count":
-            info = payload.get("info", {})
-            latest_tokens = info.get("total_token_usage", {})
+            info = payload.get("info") or {}
+            if isinstance(info.get("total_token_usage"), dict):
+                latest_tokens = info["total_token_usage"]
             last_tokens = info.get("last_token_usage", {})
-            if current_turn and last_tokens:
+            if last_tokens:
                 per_turn = empty_usage()
                 per_turn["input"] = int(last_tokens.get("input_tokens", 0))
                 per_turn["cached"] = int(last_tokens.get("cached_input_tokens", 0))
@@ -637,9 +737,20 @@ def read_codex(path: Path, since: datetime | None = None) -> dict[str, Any]:
                     last_tokens.get("cache_write_input_tokens", 0)
                 )
                 per_turn["output"] = int(last_tokens.get("output_tokens", 0))
-                per_turn["tokens"] = per_turn["input"] + per_turn["output"]
-                turn_usage[current_turn] = per_turn
-                if when:
+                reported_total = last_tokens.get("total_tokens")
+                per_turn["tokens"] = int(
+                    reported_total
+                    if isinstance(reported_total, (int, float))
+                    else per_turn["input"] + per_turn["output"]
+                )
+                event_model = turn_models.get(current_turn, model)
+                token_events.append((when, event_model, per_turn))
+                if current_turn:
+                    add_usage(
+                        turn_usage.setdefault(current_turn, empty_usage()),
+                        per_turn,
+                    )
+                if current_turn and when:
                     turn_when[current_turn] = when
         if item.get("type") == "event_msg" and payload.get("type") == "task_complete":
             if since is None or (when and when >= since):
@@ -647,24 +758,31 @@ def read_codex(path: Path, since: datetime | None = None) -> dict[str, Any]:
                     payload.get("duration_ms", 0)
                 )
     usage = empty_usage()
-    if since is None:
-        usage["input"] = int(latest_tokens.get("input_tokens", 0))
-        usage["cached"] = int(latest_tokens.get("cached_input_tokens", 0))
-        usage["cache_write"] = int(latest_tokens.get("cache_write_input_tokens", 0))
-        usage["output"] = int(latest_tokens.get("output_tokens", 0))
-        usage["tokens"] = usage["input"] + usage["output"]
-    else:
-        for turn_id, item_usage in turn_usage.items():
-            if turn_when.get(turn_id) and turn_when[turn_id] >= since:
-                add_usage(usage, item_usage)
-    skills: dict[str, dict[str, Any]] = {}
     cost = 0.0
-    for turn_id, item_usage in turn_usage.items():
-        if since is not None and not (
-            turn_when.get(turn_id) and turn_when[turn_id] >= since
-        ):
-            continue
-        cost += openai_cost(turn_models.get(turn_id, model), item_usage)
+    if since is None:
+        if latest_tokens:
+            usage["input"] = int(latest_tokens.get("input_tokens", 0))
+            usage["cached"] = int(latest_tokens.get("cached_input_tokens", 0))
+            usage["cache_write"] = int(latest_tokens.get("cache_write_input_tokens", 0))
+            usage["output"] = int(latest_tokens.get("output_tokens", 0))
+            reported_total = latest_tokens.get("total_tokens")
+            usage["tokens"] = int(
+                reported_total
+                if isinstance(reported_total, (int, float))
+                else usage["input"] + usage["output"]
+            )
+        else:
+            for _when, _event_model, item_usage in token_events:
+                add_usage(usage, item_usage)
+        for _when, event_model, item_usage in token_events:
+            cost += openai_cost(event_model, item_usage)
+    else:
+        for when, event_model, item_usage in token_events:
+            if not (when and when >= since):
+                continue
+            add_usage(usage, item_usage)
+            cost += openai_cost(event_model, item_usage)
+    skills: dict[str, dict[str, Any]] = {}
     for turn_id, names in turn_skills.items():
         if since is not None and not (
             turn_when.get(turn_id) and turn_when[turn_id] >= since
@@ -692,6 +810,43 @@ def read_codex(path: Path, since: datetime | None = None) -> dict[str, Any]:
         "last": last,
         "time_exact": True,
         "skills": skills,
+    }
+
+
+def local_codex_summary(since: datetime | None = None) -> dict[str, Any]:
+    """Count every unique Codex transcript present on beech."""
+    selected: dict[str, Path] = {}
+    for path in codex_jsonl_paths():
+        session = local_transcript_id(path)
+        previous = selected.get(session)
+        try:
+            size = path.stat().st_size
+            previous_size = previous.stat().st_size if previous else -1
+        except OSError:
+            size = 0
+            previous_size = -1
+        if previous is None or size > previous_size:
+            selected[session] = path
+    usage = empty_usage()
+    cost = 0.0
+    seconds = 0.0
+    time_exact = True
+    for path in selected.values():
+        metrics = read_codex(path, since)
+        add_usage(usage, metrics["usage"])
+        cost += float(metrics["cost"])
+        seconds += float(metrics["active_seconds"])
+        time_exact = time_exact and bool(metrics["time_exact"])
+    return {
+        "transcript_count": len(selected),
+        "tokens": int(usage["tokens"]),
+        "cached_tokens": int(usage["cached"]),
+        "cost": round(cost, 9),
+        "seconds": seconds,
+        "time": fmt_duration(seconds, time_exact),
+        "time_exact": time_exact,
+        "source": "unique Codex transcripts in ~/.codex/sessions and ~/.codex/archived_sessions on beech",
+        "deduplication": "native Codex session ID; the larger duplicate transcript is retained",
     }
 
 
@@ -1040,27 +1195,25 @@ def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
     except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
         print("Could not read Herdr workspaces.", file=sys.stderr)
         return None
-    rows = []
+    workspace_labels = {
+        workspace["workspace_id"]: workspace.get("label") or workspace["workspace_id"]
+        for workspace in workspaces
+    }
     for workspace in workspaces:
         workspace_id = workspace["workspace_id"]
-        try:
-            pane_result = subprocess.run(
-                ["herdr", "pane", "list", "--workspace", workspace_id],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            panes = json.loads(pane_result.stdout)["result"]["panes"]
-        except (OSError, subprocess.CalledProcessError, KeyError, json.JSONDecodeError):
-            continue
-        labels = [str(pane.get("label") or "") for pane in panes]
-        if not (
-            any(label.startswith("Human Orchestrator · ") for label in labels)
-            and any(label.startswith("Operations Lead · ") for label in labels)
-        ):
-            continue
         reconcile_workspace(workspace_id)
-        records = load_records(workspace_id)
+    records_by_workspace: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for record in load_all_records():
+        records_by_workspace[str(record["workspace"])].append(record)
+    ordered_workspaces = [workspace["workspace_id"] for workspace in workspaces]
+    ordered_workspaces.extend(
+        workspace_id
+        for workspace_id in sorted(records_by_workspace)
+        if workspace_id not in workspace_labels
+    )
+    rows = []
+    for workspace_id in ordered_workspaces:
+        records = records_by_workspace.get(workspace_id, [])
         if not records:
             continue
         metrics_by_session = {
@@ -1095,7 +1248,7 @@ def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
             if role(record["label"]) == "Worker" and model_key == "gpt-5.6-luna/max":
                 item["luna_tokens"] += tokens
         rows.append({
-            "label": workspace.get("label") or workspace_id,
+            "label": workspace_labels.get(workspace_id, workspace_id),
             "summary": summary,
             "agents": agents,
         })
@@ -1235,19 +1388,25 @@ def report_all_json(since: datetime | None) -> int:
     period = since.astimezone().date().isoformat() if since else "all time"
     daily = rows_to_json(rows)
     account = latest_primary_rate_limit()
+    window_start = parse_time(account["window_start"]) if account and account.get("window_start") else None
+    beech_observed = {
+        "lifetime": local_codex_summary(),
+        "quota_window": local_codex_summary(window_start) if window_start else None,
+    }
     weekly = {
         "account": account,
         "local": None,
+        "beech_observed": beech_observed["quota_window"],
     }
-    if account is not None:
-        weekly_start = parse_time(account["window_start"])
-        if weekly_start is not None:
-            weekly_rows = collect_all_rows(weekly_start)
-            if weekly_rows is not None:
-                weekly["local"] = rows_to_json(weekly_rows)
+    if window_start is not None:
+        weekly_rows = collect_all_rows(window_start)
+        if weekly_rows is not None:
+            weekly["local"] = rows_to_json(weekly_rows)
         weekly["period_start"] = account["window_start"]
         weekly["period_end"] = account["resets_at"]
         weekly["period_label"] = account["window_label"]
+    lifetime_rows = collect_all_rows(None)
+    herdr_lifetime = rows_to_json(lifetime_rows) if lifetime_rows is not None else None
     payload = {
         "schema": "herdr-costs.site.v1",
         "generated_at": iso_now(),
@@ -1256,7 +1415,10 @@ def report_all_json(since: datetime | None) -> int:
             "command": "herdr-costs report --all --json"
             + (" --all-time" if since is None else ""),
             "pricing": "Official standard API-equivalent USD per 1M tokens: GPT-5.6 Sol $5 input/$0.50 cached/$30 output; Terra $2.50/$0.25/$15; Luna $1/$0.10/$6. Cache writes cost 1.25x input; prompts over 272K input cost 2x input and 1.5x output. Claude Opus 5 is $5/$0.50/$25 with $6.25 five-minute and $10 one-hour cache writes. Subscription billing and non-token tool charges are not included.",
-            "quota": "Codex token_count.rate_limits.primary from local current and archived JSONL; quota percentages are not converted into dollars.",
+            "quota": "Authenticated Codex app-server account/rateLimits/read; quota percentages are not converted into dollars.",
+            "account_activity": "Authenticated Codex app-server account/usage/read daily buckets and lifetime summary.",
+            "beech_observed": "Unique local Codex transcripts from current and archived session directories, including non-Herdr work.",
+            "herdr_attribution": "Unique registered Herdr native session IDs across open and closed workspaces.",
             "control": "Not inferred from role or model names. Productive contribution, overhead, drift, and unclear work require bounded Luna transcript analysis against the approved Human Plan and task goal; unanalyzed tokens remain unclassified.",
         },
         "thresholds": {
@@ -1265,6 +1427,14 @@ def report_all_json(since: datetime | None) -> int:
         },
         "aggregate": daily["aggregate"],
         "projects": daily["projects"],
+        "account": account,
+        "beech_observed": beech_observed,
+        "herdr": {
+            "period": daily["aggregate"],
+            "quota_window": weekly["local"]["aggregate"] if weekly["local"] else None,
+            "lifetime": herdr_lifetime["aggregate"] if herdr_lifetime else None,
+            "deduplication": "One row per registered native Herdr session ID; open and closed workspaces are included once.",
+        },
         "weekly": weekly,
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2))
