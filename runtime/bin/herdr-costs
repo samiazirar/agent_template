@@ -1211,11 +1211,47 @@ def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
         for workspace_id in sorted(records_by_workspace)
         if workspace_id not in workspace_labels
     )
-    rows = []
+    known_closed_projects = {
+        "dinocular-neurips-rebuttal": "DINOcular NeurIPS Rebuttal",
+        "paper-reproduction-lab": "Paper Reproduction Lab",
+    }
+
+    def closed_project_label(records: list[dict[str, Any]]) -> str:
+        for record in records:
+            found = transcript_for(record["session"], record.get("transcript_path"))
+            if not found or found[0] != "codex":
+                continue
+            try:
+                with found[1].open(encoding="utf-8") as handle:
+                    for index, line in enumerate(handle):
+                        if index >= 40:
+                            break
+                        item = json.loads(line)
+                        if item.get("type") != "session_meta":
+                            continue
+                        cwd = Path(str((item.get("payload") or {}).get("cwd") or ""))
+                        for part in reversed(cwd.parts):
+                            slug = part.removesuffix("-worktrees")
+                            if slug in known_closed_projects:
+                                return known_closed_projects[slug]
+            except (OSError, json.JSONDecodeError):
+                continue
+        return "Closed Herdr history"
+
+    project_records: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    project_order: list[str] = []
     for workspace_id in ordered_workspaces:
         records = records_by_workspace.get(workspace_id, [])
         if not records:
             continue
+        label = workspace_labels.get(workspace_id) or closed_project_label(records)
+        if label not in project_records:
+            project_order.append(label)
+        project_records[label].extend(records)
+
+    rows = []
+    for project_label in project_order:
+        records = project_records[project_label]
         metrics_by_session = {
             record["session"]: session_metrics(record, since) for record in records
         }
@@ -1248,7 +1284,7 @@ def collect_all_rows(since: datetime | None) -> list[dict[str, Any]] | None:
             if role(record["label"]) == "Worker" and model_key == "gpt-5.6-luna/max":
                 item["luna_tokens"] += tokens
         rows.append({
-            "label": workspace_labels.get(workspace_id, workspace_id),
+            "label": project_label,
             "summary": summary,
             "agents": agents,
         })
