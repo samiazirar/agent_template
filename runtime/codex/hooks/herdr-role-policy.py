@@ -267,7 +267,7 @@ def main() -> int:
                 return 0
             deny("Plan Orchestrator may edit only HUMAN_PLAN.md.")
             return 0
-        if role == "Operations Lead":
+        if role in {"Operations Lead", "Suborchestrator"}:
             paths = re.findall(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", patch, re.MULTILINE)
             resolved = [Path(path).resolve() for path in paths]
             relative = []
