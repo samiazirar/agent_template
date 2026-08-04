@@ -19,6 +19,10 @@ CONTROL_ROLES = {
     "Plan Orchestrator",
     "Suborchestrator",
 }
+TASK_CARD_ROOT = (
+    Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state"))
+    / "herdr" / "task-cards"
+).resolve()
 TECHNICAL_COMMAND = re.compile(
     r"(?:^|[;&|()]\s*)"
     r"(?:ssh|scp|rsync|sbatch|srun|docker|podman|apptainer|pytest|ctest|"
@@ -263,6 +267,20 @@ def main() -> int:
                 return 0
             deny("Plan Orchestrator may edit only HUMAN_PLAN.md.")
             return 0
+        if role == "Operations Lead":
+            paths = re.findall(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", patch, re.MULTILINE)
+            resolved = [Path(path).resolve() for path in paths]
+            relative = []
+            for path in resolved:
+                try:
+                    relative.append(path.relative_to(TASK_CARD_ROOT))
+                except ValueError:
+                    break
+            if paths and len(relative) == len(paths) and all(
+                len(path.parts) == 2 and path.suffix == ".card"
+                for path in relative
+            ):
+                return 0
         if role in CONTROL_ROLES:
             deny(f"{role} may not edit project files; dispatch the package to Luna.")
             return 0
