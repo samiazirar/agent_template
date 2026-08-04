@@ -342,10 +342,12 @@ print(result["root_pane"]["pane_id"])
 tab_id="${created_ids[0]}"
 pane_id="${created_ids[1]}"
 
+archived_card=""
 if [ -n "${HERDR_TASK_CARD:-}" ] && [ -f "$HERDR_TASK_CARD" ]; then
     task_state_dir="${XDG_STATE_HOME:-${HOME}/.local/state}/herdr/task-cards/${HERDR_WORKSPACE_ID}"
     mkdir -p "$task_state_dir"
-    install -m 600 "$HERDR_TASK_CARD" "$task_state_dir/${pane_id}.card"
+    archived_card="$task_state_dir/${pane_id}.card"
+    install -m 600 "$HERDR_TASK_CARD" "$archived_card"
     git -C "$launch_dir" rev-parse HEAD >"$task_state_dir/${pane_id}.base" 2>/dev/null || \
         : >"$task_state_dir/${pane_id}.base"
 fi
@@ -397,6 +399,25 @@ else
     done
     if [ "$agent_ready" != "1" ]; then
         printf 'Agent did not register after launch: %s\n' "$pane_id" >&2
+        exit 1
+    fi
+fi
+
+if [ -n "$archived_card" ]; then
+    task_prompt="Read and execute the validated frozen task card at ${archived_card} now. Follow the ${target_role} role boundary, begin the assigned result immediately, and do not stop at readiness."
+    task_prompted=0
+    task_prompt_output=""
+    for _ in $(seq 1 100); do
+        if task_prompt_output="$(herdr agent prompt "$pane_id" "$task_prompt" 2>&1)"; then
+            task_prompted=1
+            break
+        fi
+        sleep 0.1
+    done
+    if [ "$task_prompted" != "1" ]; then
+        printf '%s\n' "$task_prompt_output" >&2
+        printf 'Agent started but its validated task card could not be submitted: %s\n' \
+            "$pane_id" >&2
         exit 1
     fi
 fi
