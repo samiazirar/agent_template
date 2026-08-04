@@ -89,9 +89,10 @@ rules remain in `RESEARCH_ORCHESTRATION.md`; PaperPilot details remain in
   subagent lookup. Human Orchestrator sends with
   `herdr-role-message operations "..."`; Operations Lead answers with
   `herdr-role-message human "..."`. Human Orchestrator may use this messenger
-  and, only after an explicit Human close request and completed Operations
-  save, `herdr-project-save-close --close`. It may use no other Herdr control
-  command.
+  and, only when Operations is missing, `restore-herdr-operations` through the
+  single `herdr-restore-operations` helper. After an explicit Human close
+  request and completed Operations save it may also run
+  `herdr-project-save-close --close`. It may use no other Herdr control command.
 - Direct prompting uses `herdr agent prompt` after the target is `idle` or
   `done`; initial launch validation uses its bounded `--wait` mode so Herdr
   reports `agent_prompt_stalled` when no lifecycle change occurs.

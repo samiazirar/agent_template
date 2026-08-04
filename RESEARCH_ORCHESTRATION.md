@@ -237,10 +237,12 @@ The bridge is the installed `herdr-role-message` helper, not native model-agent
 discovery. Human Orchestrator sends technical intent with
 `herdr-role-message operations`; Operations Lead sends human questions and
 material results with `herdr-role-message human`; technical roles return
-through `herdr-role-message operations`. The helper is
-the Human Orchestrator's normal Herdr action. Its only exception is the guarded
-`herdr-project-save-close --close` command after an explicit Human close
-request and completed Operations save.
+through `herdr-role-message operations`. The helper is the Human Orchestrator's
+normal Herdr action. If Operations is missing, it may use
+`restore-herdr-operations` through only `herdr-restore-operations`; the skill
+creates a short-lived recovery Launcher and preserves the Human chat. The other
+exception is guarded `herdr-project-save-close --close` after an explicit Human
+close request and completed Operations save.
 
 Worker and suborchestrator completion messages are active wake-ups, not status
 notes. A parent orchestrator never calls `herdr agent wait`, `sleep`, or a polling

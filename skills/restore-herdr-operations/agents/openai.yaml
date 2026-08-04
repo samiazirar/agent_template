@@ -1,0 +1,4 @@
+interface:
+  display_name: "Restore Herdr Operations"
+  short_description: "Restore a missing Operations Lead safely"
+  default_prompt: "Use $restore-herdr-operations to restore this project’s missing Operations Lead without replacing the Human chat."

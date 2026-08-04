@@ -214,7 +214,10 @@ Vertex; Gemini routes use the OpenCode API-key provider.
   `herdr-role-message human`, and
   technical roles use `herdr-role-message operations`. The helper resolves the
   named role inside the current workspace and keeps internal identifiers
-  hidden. Human Orchestrator may use this messenger and the guarded
+  hidden. If Operations is missing, the Human Orchestrator may invoke
+  `restore-herdr-operations` and run only `herdr-restore-operations`; this
+  launches a short-lived recovery Launcher without granting general Herdr
+  control. Human Orchestrator may otherwise use this messenger and the guarded
   `herdr-project-save-close --close` command after an explicit Human close
   request and a completed Operations save. It may use no other Herdr control.
 - The messenger prepends one short target-specific boundary reminder so a new

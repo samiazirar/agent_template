@@ -50,32 +50,65 @@ case "$target" in
     ;;
 esac
 
-pane_id="$(
-  herdr pane list --workspace "$HERDR_WORKSPACE_ID" |
-    python3 -c '
+pane_id="$(python3 - "$mode" "$target" "$HERDR_WORKSPACE_ID" "$PWD" <<'PY'
 import json
+from pathlib import Path
+import subprocess
 import sys
 
-mode, target = sys.argv[1:3]
-panes = json.load(sys.stdin)["result"]["panes"]
-matches = [
-    pane["pane_id"]
-    for pane in panes
-    if (
-        pane.get("label", "") == target
-        if mode == "exact"
-        else pane.get("label", "").startswith(target + " · ")
+mode, target, workspace_id, sender_cwd = sys.argv[1:5]
+
+
+def run_json(*args):
+    result = subprocess.run(
+        ["herdr", *args], check=True, capture_output=True, text=True
     )
-    and (pane.get("agent") or pane.get("agent_session"))
-]
+    return json.loads(result.stdout)["result"]
+
+
+def target_panes(panes):
+    return [
+        pane
+        for pane in panes
+        if (
+            pane.get("label", "") == target
+            if mode == "exact"
+            else pane.get("label", "").startswith(target + " · ")
+        )
+        and (pane.get("agent") or pane.get("agent_session"))
+    ]
+
+
+matches = target_panes(run_json("pane", "list", "--workspace", workspace_id)["panes"])
+
+# A resumed chat can retain its pre-move HERDR_WORKSPACE_ID. Only when the
+# normal lookup fails, recover the project by cwd or the shared Git directory.
 if len(matches) != 1:
-    print(
-        f"expected exactly one live {target}, found {len(matches)}",
-        file=sys.stderr,
-    )
+    sender_path = Path(sender_cwd).resolve()
+
+    def git_root(path):
+        result = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            capture_output=True,
+            text=True,
+        )
+        return Path(result.stdout.strip()).resolve() if result.returncode == 0 else None
+
+    sender_git = git_root(sender_path)
+    recovered = []
+    for workspace in run_json("workspace", "list")["workspaces"]:
+        panes = run_json("pane", "list", "--workspace", workspace["workspace_id"])["panes"]
+        for pane in target_panes(panes):
+            candidate = Path(pane.get("foreground_cwd") or pane.get("cwd") or "/").resolve()
+            if candidate == sender_path or (sender_git is not None and git_root(candidate) == sender_git):
+                recovered.append(pane)
+    matches = recovered
+
+if len(matches) != 1:
+    print(f"expected exactly one live {target}, found {len(matches)}", file=sys.stderr)
     raise SystemExit(1)
-print(matches[0])
-' "$mode" "$target"
+print(matches[0]["pane_id"])
+PY
 )"
 
 # Herdr 0.7.5 submits agent prompts atomically and refuses stale/non-agent

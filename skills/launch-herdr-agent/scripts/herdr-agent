@@ -197,16 +197,24 @@ target_role="${label%% · *}"
 
 require_task_card() {
     local card="${HERDR_TASK_CARD:-}"
-    local human_plan="$launch_dir/HUMAN_PLAN.md"
+    local human_plan="${HERDR_HUMAN_PLAN:-$PWD/HUMAN_PLAN.md}"
     if [ -z "$card" ] || [ ! -f "$card" ]; then
         printf '%s must set HERDR_TASK_CARD to its validated frozen task card before launching %s.\n' \
             "$caller_role" "$target_role" >&2
         exit 2
     fi
     if [ ! -f "$human_plan" ]; then
+        human_plan="$launch_dir/HUMAN_PLAN.md"
+    fi
+    if [ ! -f "$human_plan" ]; then
         local project_root
-        project_root="$(git -C "$launch_dir" rev-parse --show-toplevel 2>/dev/null || true)"
+        project_root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
         human_plan="$project_root/HUMAN_PLAN.md"
+    fi
+    if [ ! -f "$human_plan" ]; then
+        local launch_root
+        launch_root="$(git -C "$launch_dir" rev-parse --show-toplevel 2>/dev/null || true)"
+        human_plan="$launch_root/HUMAN_PLAN.md"
     fi
     if [ ! -f "$human_plan" ]; then
         printf 'HUMAN_PLAN.md is unavailable for task-goal validation.\n' >&2
@@ -247,8 +255,12 @@ require_card_marker() {
 
 case "$caller_role" in
     "Human Orchestrator")
-        printf 'Human Orchestrator cannot launch agents; send the request to Operations.\n' >&2
-        exit 2
+        if [ "${HERDR_OPERATIONS_RESTORE:-}" != "1" ] || \
+           [ "$target_role" != "Launcher" ] || \
+           [ "$surface" != "codex" ]; then
+            printf 'Human Orchestrator cannot launch agents; use restore-herdr-operations only when Operations is missing.\n' >&2
+            exit 2
+        fi
         ;;
     "Operations Collaborator")
         printf 'Operations Collaborator cannot launch productive roles.\n' >&2

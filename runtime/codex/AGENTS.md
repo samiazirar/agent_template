@@ -53,7 +53,9 @@ complete operating context for one minimal work package.
   `herdr-role-message operations`; Operations Lead uses
   `herdr-role-message human`; technical
   roles return with `herdr-role-message operations`. Human Orchestrator may
-  also run `herdr-project-save-close --close` only after the Human explicitly
+  run `herdr-restore-operations` only through the `restore-herdr-operations`
+  skill when Operations is missing. It may also run
+  `herdr-project-save-close --close` only after the Human explicitly
   asks to close and Operations has completed the final save. It may use no
   other Herdr control command.
 - “Do,” “go,” and “continue” authorize the already-discussed next action.

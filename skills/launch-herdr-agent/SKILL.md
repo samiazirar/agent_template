@@ -148,7 +148,10 @@ explicitly requests one; place it only in Operations.
    unless the human explicitly asks how the system works.
    Send every technical instruction with
    `herdr-role-message operations "..."`. Never use native model-agent lookup.
-   Its only other Herdr action is `herdr-project-save-close --close`, after the
+   If Operations is missing, its only launch exception is the
+   `restore-herdr-operations` skill through `herdr-restore-operations`; it may
+   not use `herdr-agent` or raw Herdr control directly. Its other Herdr action
+   is `herdr-project-save-close --close`, after the
    Human explicitly asks to save and close and Operations confirms the final
    handoff, role closure, Git commit, and synchronization are complete. Treat
    “do,” “go,” and “continue” as authorization for the already-discussed
@@ -172,7 +175,7 @@ message; do not repeat the full role contract in routine communication.
 
 Before launching, require `command -v herdr-role-message`,
 `command -v herdr-emergency-wake`, `command -v herdr-project-save-close`, and
-`command -v herdr-costs`. After launch,
+`command -v herdr-restore-operations`, and `command -v herdr-costs`. After launch,
 perform one real round trip: ask Human Orchestrator to send a short route-check
 message to Operations Lead through the helper; Operations Lead replies through
 the helper; Human Orchestrator confirms naturally. If either leg fails, repair

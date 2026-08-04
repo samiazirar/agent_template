@@ -274,11 +274,12 @@ def main() -> int:
     if role == "Human Orchestrator":
         allowed = re.match(
             r"^\s*(?:herdr-role-message\s+operations\b|"
-            r"herdr-project-save-close\s+--close\b)",
+            r"herdr-project-save-close\s+--close\b|"
+            r"herdr-restore-operations\s*$)",
             command,
         )
         if not allowed:
-            deny("Human Orchestrator may only message Operations or perform the guarded project close.")
+            deny("Human Orchestrator may only message Operations, run the guarded Operations restore, or perform the guarded project close.")
         return 0
 
     if RAW_AGENT_LAUNCH.search(command):

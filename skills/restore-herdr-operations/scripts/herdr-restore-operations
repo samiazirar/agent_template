@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[[ "${HERDR_ENV:-}" == "1" ]] || {
+  printf 'Run this from the project Human Orchestrator inside Herdr.\n' >&2
+  exit 1
+}
+
+project_dir="$PWD"
+
+read -r project_workspace human_pane human_label workspace_label < <(
+  python3 - "$project_dir" <<'PY'
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+project = Path(sys.argv[1]).resolve()
+
+
+def herdr(*args):
+    result = subprocess.run(["herdr", *args], check=True, capture_output=True, text=True)
+    return json.loads(result.stdout)["result"]
+
+
+def git_root(path):
+    result = subprocess.run(
+        ["git", "-C", str(path), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        capture_output=True,
+        text=True,
+    )
+    return Path(result.stdout.strip()).resolve() if result.returncode == 0 else None
+
+
+project_git = git_root(project)
+exact = []
+related = []
+for workspace in herdr("workspace", "list")["workspaces"]:
+    for pane in herdr("pane", "list", "--workspace", workspace["workspace_id"])["panes"]:
+        if not pane.get("label", "").startswith("Human Orchestrator · "):
+            continue
+        if not (pane.get("agent") or pane.get("agent_session")):
+            continue
+        cwd = Path(pane.get("foreground_cwd") or pane.get("cwd") or "/").resolve()
+        item = (workspace["workspace_id"], pane["pane_id"], pane["label"], workspace["label"])
+        if cwd == project:
+            exact.append(item)
+        elif project_git is not None and git_root(cwd) == project_git:
+            related.append(item)
+
+matches = exact or related
+if len(matches) != 1:
+    print(f"Expected one project Human Orchestrator, found {len(matches)}.", file=sys.stderr)
+    raise SystemExit(1)
+print(*matches[0], sep="\t")
+PY
+)
+
+read -r operations_count launcher_count < <(
+  herdr pane list --workspace "$project_workspace" | python3 -c '
+import json, sys
+panes = json.load(sys.stdin)["result"]["panes"]
+live = lambda pane: pane.get("agent") or pane.get("agent_session")
+print(
+    sum(p.get("label", "").startswith("Operations Lead · ") and bool(live(p)) for p in panes),
+    sum(p.get("label", "").startswith("Launcher · ") and bool(live(p)) for p in panes),
+)
+'
+)
+
+if [[ "$operations_count" == "1" ]]; then
+  printf 'Operations is already live; continue through herdr-role-message operations.\n'
+  exit 0
+fi
+if [[ "$operations_count" != "0" ]]; then
+  printf 'Expected zero or one live Operations Lead, found %s.\n' "$operations_count" >&2
+  exit 1
+fi
+if [[ "$launcher_count" != "0" ]]; then
+  printf 'An Operations restore is already active.\n'
+  exit 0
+fi
+
+launcher_label="Launcher · ${workspace_label} Operations Restore"
+HERDR_OPERATIONS_RESTORE=1 \
+HERDR_WORKSPACE_ID="$project_workspace" \
+HERDR_PANE_ID="$human_pane" \
+  herdr-agent codex "$launcher_label" "$project_dir" >/dev/null
+
+launcher_pane="$(
+  herdr pane list --workspace "$project_workspace" | python3 -c '
+import json, sys
+label = sys.argv[1]
+matches = [
+    pane["pane_id"]
+    for pane in json.load(sys.stdin)["result"]["panes"]
+    if pane.get("label") == label and (pane.get("agent") or pane.get("agent_session"))
+]
+if len(matches) != 1:
+    raise SystemExit(f"Expected one restore Launcher, found {len(matches)}.")
+print(matches[0])
+' "$launcher_label"
+)"
+
+prompt="You are a short-lived Launcher. Read and follow /home/user/azirar/agent_template/skills/launch-herdr-agent/SKILL.md completely. Restore the missing Operations Lead only in Herdr workspace ${project_workspace} (${workspace_label}), project ${project_dir}. Preserve the existing Human Orchestrator pane and native chat. Reuse the existing 02 Operations tab when safe or replace only its dead Operations pane. Preserve any prior Operations native session reference in OLD_HISTORY.md. Launch exactly one fresh native-Codex GPT-5.6 Sol-high Operations Lead, register cost before its first prompt, render and validate the canonical Operations role, brief only from HUMAN_PLAN.md and RESTART_HANDOFF.md, and do no project work. Perform a real Human-to-Operations-to-Human herdr-role-message round trip. Send the Human a short natural success or exact failure message, then close your own Launcher pane."
+
+herdr agent prompt "$launcher_pane" "$prompt" \
+  --wait --until working --until idle --until done --until blocked --timeout 10000 >/dev/null
+
+HERDR_WORKSPACE_ID="$project_workspace" HERDR_PANE_ID="$human_pane" \
+  herdr-emergency-wake arm named "$human_label" "$launcher_pane" 300 \
+  "Operations restore did not finish; inspect this one Launcher or run the restore skill again after it closes." \
+  >/dev/null
+
+printf 'Operations restore started. Its result will return to this Human chat.\n'
