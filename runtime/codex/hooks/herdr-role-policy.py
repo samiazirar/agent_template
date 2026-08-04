@@ -281,6 +281,19 @@ def main() -> int:
                 for path in relative
             ):
                 return 0
+        if role == "Operations Lead":
+            paths = re.findall(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", patch, re.MULTILINE)
+            project_root = Path(str(payload.get("cwd") or ".")).resolve()
+            resolved = [
+                (project_root / path).resolve() if not Path(path).is_absolute() else Path(path).resolve()
+                for path in paths
+            ]
+            if paths and all(
+                path.parent == project_root
+                and path.name in {"RESTART_HANDOFF.md", "OLD_HISTORY.md"}
+                for path in resolved
+            ):
+                return 0
         if role in CONTROL_ROLES:
             deny(f"{role} may not edit project files; dispatch the package to Luna.")
             return 0
