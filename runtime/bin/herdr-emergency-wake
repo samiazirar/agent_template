@@ -24,6 +24,55 @@ state_base() {
     "${XDG_STATE_HOME:-${HOME}/.local/state}" "$HERDR_WORKSPACE_ID" "$pane_id"
 }
 
+# A pane's visible text carries a spinner glyph, an elapsed-seconds counter, and
+# a token tally that all change every second while the agent is doing nothing.
+# Hashing the raw buffer therefore calls a hung worker "alive" forever. Keeping
+# only letters and spaces drops every one of those animated fields, so the hash
+# changes when real work appears -- a tool name, a path, a sentence -- and holds
+# still when the agent is merely ticking.
+progress_hash() {
+  herdr pane read "$1" --source detection --lines 60 2>/dev/null \
+    | LC_ALL=C tr -cd 'A-Za-z \n' | tr -s ' \n' ' ' | md5sum | cut -d' ' -f1
+}
+
+wake() {
+  local mode="$1" owner="$2" pane_id="$3" recovery="$4" reason="$5"
+  local base
+  base="$(state_base "$pane_id")"
+
+  local pane_json label="assigned role"
+  if pane_json="$(herdr pane get "$pane_id" 2>/dev/null)"; then
+    label="$(python3 -c '
+import json
+import sys
+
+pane = json.load(sys.stdin)["result"]["pane"]
+print(pane.get("label") or "assigned role")
+' <<<"$pane_json")"
+  fi
+
+  local summary="${label} ${reason}"
+  herdr notification show "Herdr task needs attention" \
+    --body "${summary}. ${recovery}" --position top-right --sound request \
+    >/dev/null 2>&1 || true
+  if [[ "$mode" == "operations" ]]; then
+    HERDR_WAKE_NO_DISARM=1 herdr-role-message operations \
+      "Emergency wake: ${summary}. ${recovery} Do not wait or poll inside this turn."
+  else
+    HERDR_WAKE_NO_DISARM=1 herdr-role-message named "$owner" \
+      "Emergency wake: ${summary}. ${recovery} Do not wait or poll inside this turn."
+  fi
+  rm -f "${base}.armed"
+  : >"${base}.fired"
+  exit 0
+}
+
+# SECONDS is a maximum-silence window, not a deadline. A worker that keeps
+# producing output is left alone however long it takes; one that stops
+# producing, blocks on input nobody will send, dies, or drops back to its
+# prompt without reporting wakes the parent as soon as that is visible. Those
+# are the cases where waiting silently costs the most: nothing else in the
+# system notices them.
 fire() {
   local workspace_id="$1"
   local mode="$2"
@@ -32,41 +81,72 @@ fire() {
   local seconds="$5"
   local recovery="$6"
 
-  sleep "$seconds"
-
   export HERDR_WORKSPACE_ID="$workspace_id"
   local base
   base="$(state_base "$pane_id")"
-  [[ -f "${base}.armed" ]] || exit 0
 
-  local pane_json
-  local summary
-  if pane_json="$(herdr pane get "$pane_id" 2>/dev/null)"; then
-    summary="$(python3 -c '
+  local poll=$(( seconds / 10 ))
+  (( poll < 10 )) && poll=10
+  (( poll > 60 )) && poll=60
+
+  # A worker that finishes normally reports with herdr-role-message, which
+  # disarms this watch. Allow one grace window for that message to land before
+  # treating a returned-to-prompt pane as a silent failure.
+  local grace=$(( poll * 3 ))
+
+  local last_hash="" silent=0 finished=0 worked=0 status
+  while :; do
+    sleep "$poll"
+    [[ -f "${base}.armed" ]] || exit 0
+
+    local pane_json
+    if ! pane_json="$(herdr pane get "$pane_id" 2>/dev/null)"; then
+      wake "$mode" "$owner" "$pane_id" "$recovery" \
+        "closed before its completion message was confirmed"
+    fi
+    status="$(python3 -c '
 import json
 import sys
 
-pane = json.load(sys.stdin)["result"]["pane"]
-label = pane.get("label") or "assigned role"
-status = pane.get("agent_status") or "unknown"
-print(f"{label} is still {status}")
-' <<<"$pane_json"
-    )"
-  else
-    summary="assigned role pane closed before its completion message was confirmed"
-  fi
+print(json.load(sys.stdin)["result"]["pane"].get("agent_status") or "unknown")
+' <<<"$pane_json")"
 
-  local message="Emergency wake after ${seconds}s: ${summary}. ${recovery} Do not wait or poll inside this turn."
-  herdr notification show "Herdr task needs attention" \
-    --body "${summary}. ${recovery}" --position top-right --sound request \
-    >/dev/null 2>&1 || true
-  if [[ "$mode" == "operations" ]]; then
-    HERDR_WAKE_NO_DISARM=1 herdr-role-message operations "$message"
-  else
-    HERDR_WAKE_NO_DISARM=1 herdr-role-message named "$owner" "$message"
-  fi
-  rm -f "${base}.armed"
-  : >"${base}.fired"
+    case "$status" in
+      blocked)
+        wake "$mode" "$owner" "$pane_id" "$recovery" \
+          "is blocked waiting for an answer that nobody is going to send"
+        ;;
+      idle|done)
+        finished=$(( finished + poll ))
+        if (( finished >= grace )); then
+          # Never having worked is a different failure from having worked and
+          # gone quiet: the prompt never took, so the worker has no task at all.
+          if (( worked == 0 )); then
+            wake "$mode" "$owner" "$pane_id" "$recovery" \
+              "never started working, so its prompt was never accepted; re-send the task"
+          fi
+          wake "$mode" "$owner" "$pane_id" "$recovery" \
+            "returned to its prompt without reporting a result, so it finished or failed unseen"
+        fi
+        ;;
+      *)
+        finished=0
+        if [[ "$status" == working ]]; then worked=1; fi
+        local now
+        now="$(progress_hash "$pane_id")"
+        if [[ "$now" != "$last_hash" ]]; then
+          last_hash="$now"
+          silent=0
+        else
+          silent=$(( silent + poll ))
+          if (( silent >= seconds )); then
+            wake "$mode" "$owner" "$pane_id" "$recovery" \
+              "has produced no visible progress for ${silent}s while still reporting ${status}"
+          fi
+        fi
+        ;;
+    esac
+  done
 }
 
 if [[ "${1:-}" == "_fire" ]]; then
