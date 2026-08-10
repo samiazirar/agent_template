@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: opencode-go [deepseek|qwen|kimi] [opencode arguments...]
+
+Models:
+  deepseek  DeepSeek V4 Flash (default)
+  qwen      Qwen 3.8 Max
+  kimi      Kimi K3
+EOF
+}
+
+model="opencode-go/deepseek-v4-flash"
+case "${1:-}" in
+    deepseek|deepseek-flash|deepseek-v4-flash)
+        shift
+        ;;
+    qwen|qwen-max|qwen3.8-max)
+        model="opencode-go/qwen3.8-max"
+        shift
+        ;;
+    kimi|kimi-k3)
+        model="opencode-go/kimi-k3"
+        shift
+        ;;
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+    models|--models)
+        opencode models opencode-go
+        exit 0
+        ;;
+esac
+
+exec opencode --model "$model" "$@"

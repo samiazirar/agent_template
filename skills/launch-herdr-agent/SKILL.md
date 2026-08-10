@@ -51,7 +51,7 @@ Run:
 
 ```bash
 herdr-agent \
-  <opencode|opencode-high|opencode-xhigh|opencode-max|opencode-luna-low|opencode-luna|codex-low|codex|codex-high|codex-xhigh|codex-max|claude|claudex|claudex-high|terra|terra-high|luna-low|luna|luna-max> \
+  <opencode|opencode-high|opencode-xhigh|opencode-max|opencode-luna-low|opencode-luna|opencode-go|opencode-go-deepseek|opencode-go-qwen|opencode-go-kimi|codex-low|codex|codex-high|codex-xhigh|codex-max|claude|claudex|claudex-high|terra|terra-high|luna-low|luna|luna-max> \
   "Role · PersonName Goal" [working-directory]
 ```
 
@@ -60,6 +60,14 @@ The launcher opens only the selected interactive executable:
 - OpenCode profiles are alternate-provider routes only. Use them when the task
   explicitly selects GLM 5.2 or another non-OpenAI provider; never use them as
   the default harness for OpenAI Sol or Luna.
+- `opencode-go` and `opencode-go-deepseek` use OpenCode Go DeepSeek V4 Flash;
+  `opencode-go-qwen` selects Qwen 3.8 Max and `opencode-go-kimi` selects Kimi
+  K3. DeepSeek is the default OpenCode Go route. All remain explicit
+  worker-only alternatives requiring the Human model choice in the task card.
+
+For a direct interactive OpenCode session outside Herdr, use
+`opencode-go [deepseek|qwen|kimi]`; omitting the selector uses DeepSeek V4
+Flash.
 
 - `codex` uses the configured GPT-5.6 Sol model and medium reasoning.
 - `codex-low` uses GPT-5.6 Sol at low reasoning for bounded research or data

@@ -49,7 +49,7 @@ CONTRACTS = {
     ),
     "worker": (
         "ROLE: Worker",
-        "MODEL: Native Codex GPT-5.6 Luna max for normal atomic work whether assigned by Operations or a Sol-medium suborchestrator; native Codex Sol medium only for a harder-package escalation; explicitly selected worker-only OpenCode GLM 5.2 or Opus 5 alternative",
+        "MODEL: Native Codex GPT-5.6 Luna max for normal atomic work whether assigned by Operations or a Sol-medium suborchestrator; native Codex Sol medium only for a harder-package escalation; explicitly selected worker-only OpenCode GLM 5.2, OpenCode Go DeepSeek V4 Flash, Qwen 3.8 Max, Kimi K3, or Opus 5 alternative",
         "RECEIVES FROM: Operations Lead or one owning suborchestrator",
         "SENDS TO: The same assigning role",
         "OWNS: One minimal work package in one fresh chat; one deliverable; one reproduction or run; one done check; one branch; one worktree; one result",
