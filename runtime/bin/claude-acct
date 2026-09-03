@@ -1,0 +1,1249 @@
+#!/usr/bin/env bash
+# claude-acct - run Claude Code under one of several accounts on this machine.
+#
+# Each extra account is a directory that CLAUDE_CONFIG_DIR points at. Chat
+# history, skills, agents, commands, hooks and plugins are shared through
+# directory symlinks (safe: an atomic rename never targets a directory). The
+# login and per-account state stay separate, which is the whole point.
+# settings.json is never copied or symlinked; the launcher passes
+# --settings ~/.claude/settings.json so there is one live canonical file.
+#
+# One account is special. Claude's default layout keeps its config file at
+# ~/.claude.json, ABOVE ~/.claude/, while a CLAUDE_CONFIG_DIR profile keeps it
+# inside. So the pre-existing account cannot be addressed by CLAUDE_CONFIG_DIR.
+# It is used by simply not setting that variable, and it is listed like any
+# other account. is_primary()/cfg_json() are the only places that care.
+
+set -euo pipefail
+
+ROOT="${CLAUDE_ACCT_ROOT:-$HOME/.claude-accounts}"
+CANON="$HOME/.claude"
+SHARED_PROJECTS="$CANON/projects"
+CANON_SETTINGS="$CANON/settings.json"
+PRIMARY_CFG="$HOME/.claude.json"
+THRESHOLD="${CLAUDE_ACCT_THRESHOLD:-80}"
+USAGE_TTL="${CLAUDE_ACCT_USAGE_TTL:-300}"
+SLICE_DIR="$HOME/.config/systemd/user"
+POOL_MEMMAX="${CLAUDE_ACCT_POOL_MEMMAX:-40G}"
+POOL_CPUQUOTA="${CLAUDE_ACCT_POOL_CPUQUOTA:-2400%}"
+LINK_DIRS=(skills agents commands hooks plugins local-plugins skill-packages transcripts tasks)
+STAGING="$ROOT/.staging"
+
+die()  { printf 'claude-acct: %s\n' "$*" >&2; exit 1; }
+warn() { printf 'claude-acct: %s\n' "$*" >&2; }
+
+is_primary() { [ "$(readlink -f "$1")" = "$(readlink -f "$CANON")" ]; }
+cfg_json()   { if is_primary "$1"; then printf '%s' "$PRIMARY_CFG"; else printf '%s/.claude.json' "$(readlink -f "$1")"; fi; }
+creds_json() { printf '%s/.credentials.json' "$(readlink -f "$1")"; }
+
+usage_cache() { printf '%s/.claude-acct-usage.json' "$(readlink -f "$1")"; }
+
+# systemd reads "-" in a unit name as hierarchy, so claude-a-b.slice would nest
+# inside claude-a.slice and share its limits. Underscores do not nest.
+slice_unit() { printf 'claude-%s.slice' "$(printf '%s' "$1" | tr '-' '_')"; }
+
+# ~/.local/bin/claude is a wrapper that calls `claude-acct run`; exec'ing it
+# from cmd_run would recurse forever, so resolve the real binary here.
+real_claude_binary() {
+  local pin="$ROOT/claude-binary" bin=""
+  [ -r "$pin" ] && bin="$(cat "$pin")"
+  if [ -z "$bin" ] || [ ! -x "$bin" ]; then
+    bin="$(ls -1 "$HOME/.local/share/claude/versions" 2>/dev/null | sort -V | tail -1)"
+    [ -n "$bin" ] || die "no claude binary: $pin is unusable and $HOME/.local/share/claude/versions is empty"
+    bin="$HOME/.local/share/claude/versions/$bin"
+  fi
+  [ -x "$bin" ] || die "claude binary is not executable: $bin"
+  printf '%s' "$bin"
+}
+
+refresh_usage() {  # $1 = profile dir. Quiet; failure just leaves the old value
+  # and records why in "$cache.err" (the HTTP code, or "curl-failed"),
+  # so status can mark the old value stale. Success removes that file.
+  local dir="$1" cache tok tmp code now
+  cache="$(usage_cache "$dir")"
+  now=$(date +%s)
+  if [ -f "$cache" ] && [ $(( now - $(stat -c%Y "$cache") )) -lt "$USAGE_TTL" ]; then
+    return 0
+  fi
+  tok="$(python3 -c 'import json,sys
+try: print(json.load(open(sys.argv[1]))["claudeAiOauth"]["accessToken"])
+except Exception: raise SystemExit(1)' "$(creds_json "$dir")" 2>/dev/null)" || return 1
+  [ -n "$tok" ] || return 1
+  tmp="$cache.tmp.$$"
+  code="$(curl -s -o "$tmp" -w '%{http_code}' -m 20 \
+    https://api.anthropic.com/api/oauth/usage \
+    -H "Authorization: Bearer $tok" \
+    -H 'anthropic-beta: oauth-2025-04-20' 2>/dev/null)" || { rm -f "$tmp"; printf 'curl-failed' > "$cache.err"; return 1; }
+  if [ "$code" = 200 ] && python3 -c 'import json,sys;json.load(open(sys.argv[1]))["limits"]' "$tmp" 2>/dev/null; then
+    mv "$tmp" "$cache"
+    rm -f "$cache.err"
+    return 0
+  fi
+  rm -f "$tmp"
+  printf '%s' "${code:-curl-failed}" > "$cache.err"
+  return 1
+}
+usage_err() {  # $1 = profile dir. Prints the recorded failure code, if any.
+  local f; f="$(usage_cache "$1").err"
+  [ -f "$f" ] && cat "$f"
+  return 0
+}
+
+# ---------------------------------------------------------------- identity ---
+# Prints TAB-separated: status email display org tier worst session weekly
+#                       reset_epoch seen_epoch
+# status: ok | nologin | expired | nousage | empty
+acct_info() {
+python3 - "$(cfg_json "$1")" "$(creds_json "$1")" "$(usage_cache "$1")" <<'PY'
+import json, os, sys, datetime
+cfg_p, cred_p, usage_p = sys.argv[1], sys.argv[2], sys.argv[3]
+def out(status, **kw):
+    f = ["status","email","display","org","tier","worst","session","weekly","reset","seen"]
+    kw["status"] = status
+    print("\t".join(str(kw.get(k, "")) for k in f))
+    raise SystemExit(0)
+
+try:
+    cfg = json.load(open(cfg_p))
+except Exception:
+    out("empty")
+
+acc = cfg.get("oauthAccount") or {}
+ident = dict(
+    email=acc.get("emailAddress", ""),
+    display=acc.get("displayName") or acc.get("fullName", ""),
+    org=acc.get("organizationName", ""),
+    tier=(acc.get("userRateLimitTier") or "").replace("default_claude_", "").replace("_", " "),
+)
+if not ident["email"]:
+    out("nologin", **ident)
+
+try:
+    cred = json.load(open(cred_p))["claudeAiOauth"]
+    if cred.get("refreshTokenExpiresAt", 0) / 1000 < datetime.datetime.now().timestamp():
+        out("expired", **ident)
+except Exception:
+    out("nologin", **ident)
+
+# Prefer our own live fetch; fall back to whatever Claude last cached.
+u, seen = None, 0
+try:
+    u = json.load(open(usage_p))
+    seen = int(os.path.getmtime(usage_p))
+except Exception:
+    cu = cfg.get("cachedUsageUtilization") or {}
+    u = cu.get("utilization") or None
+    seen = int(cu.get("fetchedAtMs", 0) / 1000)
+if not u:
+    out("nousage", seen=seen, **ident)
+
+now = datetime.datetime.now(datetime.timezone.utc)
+def live(d):
+    # A limit past its reset has already emptied, so it counts as zero.
+    r = d.get("resets_at")
+    if not r:
+        return True
+    try:
+        return datetime.datetime.fromisoformat(r) > now
+    except ValueError:
+        return True
+
+worst, reset = 0, None
+for lim in u.get("limits") or []:
+    if not live(lim):
+        continue
+    pct = lim.get("percent") or 0
+    worst = max(worst, pct)
+    if pct >= 1 and lim.get("resets_at"):
+        t = datetime.datetime.fromisoformat(lim["resets_at"])
+        if reset is None or t < reset:
+            reset = t
+
+def bucket(name):
+    b = u.get(name) or {}
+    return (b.get("utilization") or 0) if live(b) else 0
+
+out("ok", worst=worst, session=bucket("five_hour"), weekly=bucket("seven_day"),
+    reset=int(reset.timestamp()) if reset else "", seen=seen, **ident)
+PY
+}
+
+field() { printf '%s' "$1" | cut -f"$2"; }
+
+human_dur() {  # seconds -> "2h 24m"
+  local s="${1:-}"
+  [ -z "$s" ] && { printf '-'; return; }
+  (( s < 0 )) && s=0
+  local d=$((s/86400)) h=$(((s%86400)/3600)) m=$(((s%3600)/60))
+  if   (( d )); then printf '%dd %dh' "$d" "$h"
+  elif (( h )); then printf '%dh %dm' "$h" "$m"
+  else               printf '%dm' "$m"; fi
+}
+
+# ------------------------------------------------------------------ listing ---
+cmd_list() {
+  [ -d "$ROOT" ] || return 0
+  local p
+  for p in "$ROOT"/*; do
+    [ -d "$p" ] || continue
+    case "$(basename "$p")" in .*) continue ;; esac
+    basename "$p"
+  done
+}
+
+cmd_status() {
+  local fmt='%-24s %-34s %-15s %-8s %5s %8s %7s %10s %11s\n' n info st now seen reset seen_s reset_s any=0
+  local used_star=0 used_bang=0
+  local n_acct=0 n_free=0 live_sum=0 sess_list="" week_list=""
+  local hdr
+  # shellcheck disable=SC2059
+  hdr="$(printf "$fmt" ACCOUNT EMAIL NAME PLAN LIVE SESSION WEEKLY "RESETS IN" "LAST SEEN")"
+  printf '%s\n' "$hdr"
+  now=$(date +%s)
+  local -A live_by=(); local lc_name lc_n
+  while IFS=$'\t' read -r lc_name lc_n; do
+    [ -n "$lc_name" ] && live_by["$lc_name"]="$lc_n"
+  done < <(live_counts)
+  while read -r n; do
+    [ -n "$n" ] || continue
+    any=1
+    refresh_usage "$ROOT/$n" || true
+    info="$(acct_info "$ROOT/$n")"
+    st=$(field "$info" 1)
+    seen=$(field "$info" 10); reset=$(field "$info" 9)
+    seen_s="-"; reset_s="-"
+    [ -n "$seen" ] && [ "$seen" != 0 ] && seen_s="$(human_dur $((now-seen))) ago"
+    [ -n "$reset" ] && reset_s="$(human_dur $((reset-now)))"
+    # A usage figure older than an hour, or one the last refresh could not
+    # replace, is history, not the current state. Say so next to it.
+    local err_code; err_code="$(usage_err "$ROOT/$n")"
+    if [ -n "$err_code" ]; then seen_s="$seen_s stale($err_code)"
+    elif [ -n "$seen" ] && [ "$seen" != 0 ] && [ $((now-seen)) -gt 3600 ]; then seen_s="$seen_s stale"
+    fi
+    local mark=""
+    is_primary "$ROOT/$n" && { mark=" *"; used_star=1; }
+    local want dom
+    want="$(derive_slug_raw "$(field "$info" 2)")"
+    if [ -n "$want" ] && [ "$want" != "$n" ]; then
+      dom="$(field "$info" 2)"; dom="${dom#*@}"
+      [ "$want-$(printf '%s' "${dom%%.*}" | tr 'A-Z.' 'a-z-')" = "$n" ] || { mark="$mark !"; used_bang=1; }
+    fi
+    local em nm
+    em="$(field "$info" 2)"; nm="$(field "$info" 3)"
+    local live live_n; live_n="${live_by[$n]:-0}"
+    live="$live_n"; [ "$live" = 0 ] && live="-"
+    live_sum=$((live_sum + live_n))
+    case "$st" in
+      ok)      n_acct=$((n_acct+1))
+               sess_list="$sess_list $(field "$info" 7)"
+               week_list="$week_list $(field "$info" 8)"
+               [ "$(field "$info" 6)" -lt "$THRESHOLD" ] && n_free=$((n_free+1)) ;;
+      nousage) n_acct=$((n_acct+1)); n_free=$((n_free+1)) ;;
+    esac
+    [ -n "$em" ] || em="-"
+    [ -n "$nm" ] || nm="-"
+    case "$st" in
+      ok)      # shellcheck disable=SC2059
+               printf "$fmt" "$n$mark" "$em" "$nm" "$(field "$info" 5)" "$live" \
+                 "$(field "$info" 7)%" "$(field "$info" 8)%" "$reset_s" "$seen_s" ;;
+      nousage) # shellcheck disable=SC2059
+               printf "$fmt" "$n$mark" "$em" "$nm" "$(field "$info" 5)" "$live" \
+                 "?" "?" "$reset_s" "$seen_s" ;;
+      *)       # shellcheck disable=SC2059
+               printf "$fmt" "$n$mark" "$em" "$nm" "$st" "$live" - - - "$seen_s" ;;
+    esac
+  done < <(cmd_list)
+  [ "$any" = 1 ] || printf '  (none yet: run "claude-acct adopt", then "claude-acct add")\n'
+
+  if [ "$n_acct" -gt 0 ]; then
+    local sess_pool week_pool
+    sess_pool="$(awk -v n="$n_acct" '{t=0; for(i=1;i<=NF;i++) t+=$i; printf "%.0f", t/n}' <<< "$sess_list")"
+    week_pool="$(awk -v n="$n_acct" '{t=0; for(i=1;i<=NF;i++) t+=$i; printf "%.0f", t/n}' <<< "$week_list")"
+    printf '%s\n' "$(printf "%${#hdr}s" '' | tr ' ' -)"
+    # shellcheck disable=SC2059
+    printf "$fmt" "TOTAL" "$n_acct accounts, $n_free usable now" "" "" \
+      "$live_sum" "$sess_pool%" "$week_pool%" "" "" | sed 's/[[:space:]]*$//'
+    printf 'each account is its own limit, so TOTAL averages them: %s%% of all %s session pools is gone\n' \
+      "$sess_pool" "$n_acct"
+  fi
+  if ! wrapper_ok; then
+    printf '\nbare "claude" is NOT routed to an account any more: %s is not the wrapper.\n' \
+      "$(command -v claude 2>/dev/null || echo 'claude')"
+    printf 'A Claude update replaces it. Restore it with:  claude-acct wrapper\n'
+  fi
+  printf '\nthreshold %s%%  ·  an account is skipped once any live limit reaches it\n' "$THRESHOLD"
+  [ "$used_star" = 1 ] && printf '* uses Claude default location (no CLAUDE_CONFIG_DIR)\n'
+  [ "$used_bang" = 1 ] && printf '! registered name no longer matches the login (run: claude-acct adopt)\n'
+  [ -f "$CANON/.credentials.json" ] && \
+    printf 'a login sits at the shared location (~/.claude/.credentials.json); run: claude-acct claim\n'
+  if [ -s "$ROOT/.identity-log" ]; then
+    printf '\nlast account change seen by the session guard:\n  %s\n' "$(tail -1 "$ROOT/.identity-log")"
+  fi
+}
+
+slug_of_dir() {  # name a profile dir by its registered account name, else its basename
+  local d n
+  d="$(readlink -f "$1")"
+  while read -r n; do
+    [ -n "$n" ] || continue
+    [ "$(readlink -f "$ROOT/$n")" = "$d" ] && { printf '%s' "$n"; return 0; }
+  done < <(cmd_list)
+  printf '%s' "$(basename "$d")"
+}
+
+cmd_whoami() {
+  local d="${CLAUDE_CONFIG_DIR:-$CANON}" info
+  refresh_usage "$d" || true
+  info="$(acct_info "$d")"
+  printf '%s  %s / %s  ·  %s  ·  session %s%%  weekly %s%%  (%s)\n' \
+    "$(slug_of_dir "$d")" "$(field "$info" 3)" "$(field "$info" 4)" "$(field "$info" 5)" \
+    "$(field "$info" 7)" "$(field "$info" 8)" "$(field "$info" 1)"
+  printf 'config: %s\n' "$(cfg_json "$d")"
+}
+
+# ------------------------------------------------------------ project chain ---
+chain_file() {
+  local d
+  d="$(cd "${1:-$PWD}" 2>/dev/null && pwd)" || return 1
+  while :; do
+    { [ "$d" = "$HOME" ] || [ "$d" = "/" ]; } && break
+    [ -f "$d/.claude/accounts" ] && { printf '%s' "$d/.claude/accounts"; return 0; }
+    d="$(dirname "$d")"
+  done
+  return 1
+}
+
+read_chain() {
+  local f
+  if f="$(chain_file "${1:-$PWD}")"; then
+    grep -vE '^[[:space:]]*(#|$)' "$f" | awk '{print $1}'
+  fi
+}
+
+# ~/.claude-accounts/default is the machine-wide chain for any directory without
+# its own .claude/accounts. Like a project chain, pick reads it as a set of
+# allowed accounts and takes the one with the fewest live sessions; order only
+# breaks ties. Its first line is also default_first, the fallback seed account
+# when ~/.claude-accounts/seed does not name one.
+read_default_chain() {
+  [ -f "$ROOT/default" ] || return 0
+  grep -vE '^[[:space:]]*(#|$)' "$ROOT/default" | awk '{print $1}'
+}
+default_first() { read_default_chain | head -n1; }
+seed_account() {  # the account new profiles inherit answered questions from
+  local n
+  if [ -f "$ROOT/seed" ]; then
+    n="$(grep -vE '^[[:space:]]*(#|$)' "$ROOT/seed" | awk '{print $1}' | head -n1)"
+    [ -n "$n" ] && [ -d "$ROOT/$n" ] && { printf '%s' "$n"; return 0; }
+    warn "$ROOT/seed names an unusable account; falling back to the chain"
+  fi
+  default_first
+}
+default_add() {  # append an account to the machine-wide chain if it is missing
+  read_default_chain | grep -qx "$1" && return 0
+  printf '%s\n' "$1" >> "$ROOT/default"
+}
+
+cmd_bind() {
+  local dir="$PWD" f n
+  if [ "${1:-}" = "--show" ]; then
+    if f="$(chain_file "$dir")"; then printf 'from %s\n' "$f"; read_chain "$dir"
+    else printf 'no chain for %s; using the machine-wide chain (%s)\n' "$dir" "$ROOT/default"; read_default_chain; fi
+    return 0
+  fi
+  [ $# -gt 0 ] || die "usage: claude-acct bind <account> [account...]   |   bind --show"
+  for n in "$@"; do [ -d "$ROOT/$n" ] || die "no such account: $n (see claude-acct status)"; done
+  mkdir -p "$dir/.claude"
+  { printf '# Accounts for this project, in preference order.\n'
+    printf '# First line is the default; the rest take over when it nears its limit.\n'
+    printf '%s\n' "$@"; } > "$dir/.claude/accounts"
+  printf 'bound %s -> %s\n' "$dir" "$*"
+}
+
+cmd_pick() {
+  local -a chain=()
+  mapfile -t chain < <(read_chain "${1:-$PWD}")
+  [ ${#chain[@]} -eq 0 ] && mapfile -t chain < <(read_default_chain)
+  [ ${#chain[@]} -eq 0 ] && mapfile -t chain < <(cmd_list)
+  [ ${#chain[@]} -eq 0 ] && die "no accounts registered (run: claude-acct adopt)"
+
+  # A takeover has to be able to leave the project chain. Widen to the
+  # machine-wide chain and then every account, in order, rather than refusing
+  # because the project pinned a single account.
+  if [ "${CLAUDE_ACCT_ANY:-0}" = 1 ]; then
+    local -a wide=(); local q seen=""
+    for q in "${chain[@]}" $(read_default_chain) $(cmd_list); do
+      [ -n "$q" ] || continue
+      case " $seen " in *" $q "*) continue ;; esac
+      seen="$seen $q"; wide+=("$q")
+    done
+    chain=("${wide[@]}")
+  fi
+
+  # Among the accounts under the threshold, take the one with the fewest live
+  # sessions; chain order only breaks ties (strictly fewer wins, so the earlier
+  # entry keeps a tie). Usage registers only after work is done, so picking the
+  # first free account would stack a burst of launches on one seat.
+  local -A live_by=(); local lc_name lc_n
+  while IFS=$'\t' read -r lc_name lc_n; do
+    [ -n "$lc_name" ] && live_by["$lc_name"]="$lc_n"
+  done < <(live_counts)
+  local n info st worst best="" best_worst=1000 least="" least_load=0
+  for n in "${chain[@]}"; do
+    [ -n "$n" ] || continue
+    [ "$n" = "${CLAUDE_ACCT_EXCLUDE:-}" ] && continue
+    [ -d "$ROOT/$n" ] || { warn "chain names an unknown account: $n"; continue; }
+    refresh_usage "$ROOT/$n" || true
+    info="$(acct_info "$ROOT/$n")"
+    st=$(field "$info" 1)
+    case "$st" in
+      ok)      worst=$(field "$info" 6) ;;
+      nousage) worst=0
+               warn "$n: no usage figure cached yet, treating it as free" ;;
+      *)       warn "$n: $st, skipping"; continue ;;
+    esac
+    if [ "$worst" -lt "$THRESHOLD" ]; then
+      local load; load="${live_by[$n]:-0}"
+      if [ -z "$least" ] || [ "$load" -lt "$least_load" ]; then least="$n"; least_load="$load"; fi
+      continue
+    fi
+    if [ "$worst" -lt "$best_worst" ]; then best_worst="$worst"; best="$n"; fi
+  done
+  if [ -n "$least" ]; then printf '%s\n' "$least"; return 0; fi
+  [ -n "$best" ] || die "no usable account in chain: ${chain[*]}"
+  warn "every account in the chain is at or above ${THRESHOLD}%; using the least full ($best at ${best_worst}%)"
+  printf '%s\n' "$best"
+}
+
+# ------------------------------------------------------------------- slices ---
+ensure_slices() {
+  local n="$1" changed=0 unit tmp
+  mkdir -p "$SLICE_DIR"
+  tmp="$(mktemp)"
+  cat > "$tmp" <<EOF
+[Unit]
+Description=All Claude Code sessions on this machine
+
+[Slice]
+MemoryMax=$POOL_MEMMAX
+MemorySwapMax=0
+CPUQuota=$POOL_CPUQUOTA
+EOF
+  if ! cmp -s "$tmp" "$SLICE_DIR/claude.slice"; then
+    cp "$tmp" "$SLICE_DIR/claude.slice"; changed=1
+  fi
+  # No MemoryMax per account: kernel slab (e.g. dentry cache from a find /) is
+  # charged to the cgroup and OOM-kills unrelated sessions on that account
+  # while the machine has memory to spare. The pool slice keeps the cap.
+  unit="$(slice_unit "$n")"
+  cat > "$tmp" <<EOF
+[Unit]
+Description=Claude Code sessions for account $n
+
+[Slice]
+MemorySwapMax=0
+EOF
+  if ! cmp -s "$tmp" "$SLICE_DIR/$unit"; then
+    cp "$tmp" "$SLICE_DIR/$unit"; changed=1
+  fi
+  rm -f "$tmp"
+  # Old dashed unit names nested under each other; drop the ones we created.
+  local old
+  for old in sami-azirar sami-azirar-rwth-aachen; do
+    if [ -f "$SLICE_DIR/claude-$old.slice" ]; then
+      rm -f "$SLICE_DIR/claude-$old.slice"; changed=1
+    fi
+  done
+  [ "$changed" = 1 ] && systemctl --user daemon-reload
+  return 0
+}
+
+# ---------------------------------------------------------------------- run ---
+cmd_run() {
+  local name="" use_slice=1 bypass=1
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -a|--account) name="${2:?account name}"; shift 2 ;;
+      --no-slice)   use_slice=0; shift ;;
+      --no-bypass)  bypass=0; shift ;;
+      --)           shift; break ;;
+      *)            break ;;
+    esac
+  done
+  [ -n "$name" ] || name="$(cmd_pick "$PWD")"
+  local dir="$ROOT/$name"
+  [ -d "$dir" ] || die "no such account: $name"
+
+  local -a argv=("$(real_claude_binary)")
+  [ -f "$CANON_SETTINGS" ] && argv+=(--settings "$CANON_SETTINGS")
+  [ "$bypass" = 1 ] && argv+=(--dangerously-skip-permissions)
+  argv+=("$@")
+
+  export CLAUDE_ACCT_NAME="$name"
+  local -a envopts=(--setenv=CLAUDE_ACCT_NAME)
+  if is_primary "$dir"; then
+    unset CLAUDE_CONFIG_DIR          # the default account IS the default location
+  else
+    export CLAUDE_CONFIG_DIR="$(readlink -f "$dir")"
+    envopts+=(--setenv=CLAUDE_CONFIG_DIR)
+  fi
+
+  if [ "$use_slice" = 1 ]; then
+    command -v systemd-run >/dev/null 2>&1 || \
+      die "systemd-run is unavailable; re-run with --no-slice to accept no memory cap"
+    ensure_slices "$name"
+    exec systemd-run --user --scope --quiet --collect \
+      --slice="$(slice_unit "$name")" "${envopts[@]}" -- "${argv[@]}"
+  fi
+  exec "${argv[@]}"
+}
+
+# ----------------------------------------------------------- profile building --
+build_profile() {
+  local dir="$1" d
+  mkdir -p "$dir"
+  [ -e "$dir/projects" ] || ln -s "$SHARED_PROJECTS" "$dir/projects"
+  for d in "${LINK_DIRS[@]}"; do
+    [ -d "$CANON/$d" ] || continue
+    [ -e "$dir/$d" ] || ln -s "$CANON/$d" "$dir/$d"
+  done
+  # A real one-line file, never a symlink: Claude rewrites CLAUDE.md atomically,
+  # which would replace a symlink with a plain file and silently unshare it.
+  if [ -f "$CANON/CLAUDE.md" ] && [ ! -e "$dir/CLAUDE.md" ]; then
+    printf '@%s/CLAUDE.md\n' "$CANON" > "$dir/CLAUDE.md"
+  fi
+}
+
+seed_source() {  # where the answered-questions state actually lives now
+  local d
+  if [ -f "$ROOT/default" ]; then
+    d="$(seed_account)"
+    if [ -n "$d" ] && [ -d "$ROOT/$d" ] && [ -f "$(cfg_json "$ROOT/$d")" ]; then
+      printf '%s' "$(cfg_json "$ROOT/$d")"; return 0
+    fi
+  fi
+  printf '%s' "$PRIMARY_CFG"
+}
+
+seed_state() {  # carry over the questions you already answered
+python3 - "$(seed_source)" "$1/.claude.json" <<'PY'
+import json, os, sys
+src_p, dst_p = sys.argv[1], sys.argv[2]
+GLOBAL = ["hasCompletedOnboarding", "lastOnboardingVersion", "hasSeenUltraplanTerms",
+          "installMethod", "autoUpdates", "autoUpdatesProtectedForNative",
+          "mcpServers", "officialMarketplaceAutoInstalled",
+          "officialMarketplaceAutoInstallAttempted", "respectGitignore",
+          "shiftEnterKeyBindingInstalled"]
+PROJECT = ["hasTrustDialogAccepted", "hasClaudeMdExternalIncludesApproved",
+           "hasClaudeMdExternalIncludesWarningShown", "allowedTools",
+           "enabledMcpjsonServers", "disabledMcpjsonServers"]
+APPROVALS = {"hasTrustDialogAccepted", "hasClaudeMdExternalIncludesApproved",
+             "hasClaudeMdExternalIncludesWarningShown"}
+src = json.load(open(src_p))
+if os.path.exists(dst_p):
+    try:
+        dst = json.load(open(dst_p))
+    except Exception as e:
+        # Overwriting an unreadable config would wipe oauthAccount and force a
+        # re-login. A transient read failure must never cost a login.
+        raise SystemExit(f"refusing to rewrite {dst_p}: it exists but could not "
+                         f"be parsed ({e}). Nothing was changed.")
+else:
+    dst = {}
+for k in GLOBAL:
+    if k in src:
+        dst.setdefault(k, src[k])
+projects, n = dst.setdefault("projects", {}), 0
+for path, cfg in (src.get("projects") or {}).items():
+    if not cfg.get("hasTrustDialogAccepted"):
+        continue
+    tgt = projects.setdefault(path, {})
+    for k in PROJECT:
+        if k not in cfg:
+            continue
+        # An approval the source already granted must win. Claude writes these
+        # as false the first time it runs in an untrusted directory, and
+        # setdefault would then keep the false forever.
+        if k in APPROVALS and cfg[k]:
+            tgt[k] = cfg[k]
+        else:
+            tgt.setdefault(k, cfg[k])
+    n += 1
+tmp = dst_p + ".claude-acct.tmp"
+json.dump(dst, open(tmp, "w"), indent=2)
+os.replace(tmp, dst_p)
+print(f"carried over {n} trusted directories and your onboarding answers")
+PY
+}
+
+derive_slug_raw() {  # email -> the name it would get, ignoring collisions
+  printf '%s' "${1%%@*}" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/^-*//;s/-*$//'
+}
+
+derive_slug() {  # email -> account name, disambiguated by domain on collision
+  local email="$1" slug
+  [ -n "$email" ] || die "no email in the account config; cannot name the account"
+  slug="$(derive_slug_raw "$email")"
+  [ -n "$slug" ] || die "could not derive a name from email: $email"
+  if [ -e "$ROOT/$slug" ]; then
+    local dom="${email#*@}"
+    slug="$slug-$(printf '%s' "${dom%%.*}" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+  fi
+  printf '%s' "$slug"
+}
+
+acct_uuid() {
+python3 - "$1" <<'PY'
+import json, sys
+try: print(json.load(open(sys.argv[1])).get("oauthAccount", {}).get("accountUuid", ""))
+except Exception: print("")
+PY
+}
+
+cmd_adopt() {
+  mkdir -p "$ROOT"
+  local info email slug n
+  info="$(acct_info "$CANON")"
+  case "$(field "$info" 1)" in
+    ok|nousage) ;;
+    *) die "$PRIMARY_CFG has no usable login ($(field "$info" 1)); nothing to adopt" ;;
+  esac
+  email="$(field "$info" 2)"
+  slug="$(derive_slug "$email")"
+  local existing=""
+  while read -r n; do
+    [ -n "$n" ] || continue
+    if [ -L "$ROOT/$n" ] && is_primary "$ROOT/$n"; then existing="$n"; break; fi
+  done < <(cmd_list)
+
+  if [ "$existing" = "$slug" ]; then
+    printf 'already adopted: %s -> %s\n' "$slug" "$CANON"
+  elif [ -n "$existing" ]; then
+    warn "the default account is now $email, but it is registered as \"$existing\""
+    rm "$ROOT/$existing"
+    ln -s "$CANON" "$ROOT/$slug"
+    [ "$(default_first)" = "$existing" ] && sed -i "0,/^${existing}\$/s//${slug}/" "$ROOT/default"
+    rm -f "$SLICE_DIR/$(slice_unit "$existing")"
+    printf 'renamed account "%s" -> "%s"\n' "$existing" "$slug"
+    warn "any project bound to \"$existing\" needs: claude-acct bind $slug"
+  else
+    ln -s "$CANON" "$ROOT/$slug"
+    printf 'adopted %s as account "%s"\n' "$email" "$slug"
+  fi
+  [ -f "$ROOT/default" ] || printf '%s\n' "$slug" > "$ROOT/default"
+  ensure_slices "$slug"
+  printf 'default account: %s\n' "$(cat "$ROOT/default")"
+}
+
+cmd_add() {
+  mkdir -p "$ROOT"
+  if [ "${1:-}" = "--finish" ]; then shift; add_finish "$@"; return; fi
+  if [ "${1:-}" = "--discard" ]; then
+    [ -d "$STAGING" ] || die "nothing is staged"
+    local bk="$ROOT/.discarded-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$bk"; chmod 700 "$bk"
+    [ -f "$STAGING/.credentials.json" ] && mv "$STAGING/.credentials.json" "$bk/"
+    rm -rf "$STAGING"
+    printf 'discarded the staged login (its credentials kept in %s)\n' "$bk"
+    return 0
+  fi
+  [ -f "$ROOT/default" ] || die 'run "claude-acct adopt" first, so your existing account is registered'
+
+  if [ -d "$STAGING" ]; then
+    local sst sinfo semail suuid dup=""
+    sinfo="$(acct_info "$STAGING")"
+    sst="$(field "$sinfo" 1)"
+    case "$sst" in
+      ok|nousage)
+        semail="$(field "$sinfo" 2)"
+        suuid="$(acct_uuid "$STAGING/.claude.json")"
+        while read -r n; do
+          [ -n "$n" ] || continue
+          [ "$(acct_uuid "$(cfg_json "$ROOT/$n")")" = "$suuid" ] && { dup="$n"; break; }
+        done < <(cmd_list)
+        if [ -n "$dup" ]; then
+          die "the staged login is $semail, which you already have as \"$dup\".
+             The approval page reused the Anthropic session you are already
+             signed in to, so you logged in as an existing account.
+               claude-acct add --discard && claude-acct add    (start over)
+               claude-acct add --finish --replace   to renew \"$dup\" instead"
+        fi
+        die "a finished login for $semail is already staged.
+             Promote it with:  claude-acct add --finish
+             Discard it with:  claude-acct add --discard" ;;
+      *)
+        rm -rf "$STAGING"
+        printf 'removed a dead staging directory (it held no login)\n' ;;
+    esac
+  fi
+  build_profile "$STAGING"
+  printf 'staged a new empty account at %s\n' "$STAGING"
+
+  if [ -t 0 ] && [ -t 1 ]; then
+    printf '\nYou already have these accounts, so do NOT pick any of them:\n'
+    local n e
+    while read -r n; do
+      [ -n "$n" ] || continue
+      e="$(field "$(acct_info "$ROOT/$n")" 2)"
+      [ -n "$e" ] && printf '  %s   (%s)\n' "$e" "$n"
+    done < <(cmd_list)
+
+    cat <<EOF
+
+The approval page signs you in as whoever the browser is ALREADY signed in as,
+without asking. That is the only thing that makes this fail, so deal with it
+before you start. Do one of these, in the browser you are about to use:
+
+  a) Sign out of claude.ai   (profile menu, bottom left -> Log out)
+  b) Use a browser you have never signed in with
+  c) Use a FRESH private window. One left open from a previous attempt is
+     already signed in and will silently reuse that account.
+
+Then:
+  1. press Enter here; Claude must say "Not logged in"
+  2. type /login and open the link it prints
+  3. the page should ask you to SIGN IN. If it instead shows an approve button
+     for an account you already have, stop: the browser is still signed in.
+  4. approve, paste the code back here, then /exit
+
+Press Enter to start Claude in the new account, or Ctrl-C to stop.
+EOF
+    read -r _
+    CLAUDE_CONFIG_DIR="$STAGING" claude --settings "$CANON_SETTINGS" || true
+    add_finish
+  else
+    cat <<EOF
+
+Not a terminal, so the login cannot run here. Run this yourself:
+
+  claude-acct add
+
+By hand instead:
+  CLAUDE_CONFIG_DIR=$STAGING claude      # log in as the new account, then /exit
+  claude-acct add --finish
+EOF
+    return 3
+  fi
+}
+
+add_finish() {
+  [ -d "$STAGING" ] || die 'nothing staged; run "claude-acct add" first'
+  local replace=0
+  [ "${1:-}" = "--replace" ] && replace=1
+  local info st email uuid slug n
+  info="$(acct_info "$STAGING")"
+  st="$(field "$info" 1)"
+  case "$st" in
+    ok|nousage) ;;
+    nologin) die "check 1 of 3 failed: no login was saved in $STAGING.
+             It is left in place, so \"claude-acct add\" will retry it." ;;
+    expired) die "check 2 of 3 failed: the login in $STAGING is already expired." ;;
+    *)       die "check 1 of 3 failed: $STAGING has no usable config ($st)." ;;
+  esac
+  email="$(field "$info" 2)"
+  uuid="$(acct_uuid "$STAGING/.claude.json")"
+  while read -r n; do
+    [ -n "$n" ] || continue
+    if [ "$(acct_uuid "$(cfg_json "$ROOT/$n")")" = "$uuid" ]; then
+      if [ "$replace" = 1 ]; then
+        local bk="$ROOT/.relogin-backup-$(date +%Y%m%d-%H%M%S)"
+        mkdir -p "$bk"; chmod 700 "$bk"
+        cp -p "$ROOT/$n/.credentials.json" "$bk/" 2>/dev/null || true
+        mv "$STAGING/.credentials.json" "$ROOT/$n/.credentials.json"
+        rm -rf "$STAGING"
+        rm -f "$(usage_cache "$ROOT/$n")"
+        printf 'refreshed the login for existing account "%s" (%s)\n' "$n" "$email"
+        printf 'previous credentials kept in %s\n' "$bk"
+        cmd_doctor "$n"
+        return 0
+      fi
+      die "check 3 of 3 failed: $email is already registered as \"$n\".
+             You logged in as an account you already have, most likely because
+             the browser reused a signed-in Anthropic session. Retry with a
+             private window, or, if you meant to renew this account's login:
+               claude-acct add --finish --replace
+             Discard the staged copy with: rm -rf $STAGING"
+    fi
+  done < <(cmd_list)
+
+  slug="$(derive_slug "$email")"
+  seed_state "$STAGING"
+  mv "$STAGING" "$ROOT/$slug"
+  ensure_slices "$slug"
+  default_add "$slug"
+  printf '\nadded account "%s"  (%s)\n\n' "$slug" "$email"
+  cmd_status
+  printf '\nuse it here with:  claude-acct bind %s %s\n' "$(default_first)" "$slug"
+}
+
+# ------------------------------------------------------------------ migrate ---
+# Move the default location's login into a real profile, so no session runs on
+# the shared location any more. The three files are MOVED, never copied: one
+# login must exist in exactly one file, or whichever copy refreshes second can
+# be silently logged out.
+MOVE_FILES_HOME=(.claude.json)
+MOVE_FILES_CANON=(.credentials.json history.jsonl)
+
+cmd_migrate() {
+  mkdir -p "$ROOT"
+  local live; live="$(shared_location_sessions)"
+  if [ "$live" -gt 0 ]; then
+    die "$live Claude session(s) are running on the shared location.
+             Migrating would log them out mid-work. Close them first."
+  fi
+  local info email slug n stamp backup
+  info="$(acct_info "$CANON")"
+  case "$(field "$info" 1)" in
+    ok|nousage) ;;
+    *) die "the default location has no usable login ($(field "$info" 1)); nothing to migrate" ;;
+  esac
+  email="$(field "$info" 2)"
+  slug="$(derive_slug "$email")"
+  [ -d "$ROOT/$slug" ] && [ ! -L "$ROOT/$slug" ] && \
+    die "$ROOT/$slug already exists as a real profile; refusing to overwrite it"
+
+  stamp="$(date +%Y%m%d-%H%M%S)"
+  backup="$ROOT/.migration-backup-$stamp"
+  mkdir -p "$backup"
+  local f
+  for f in "${MOVE_FILES_HOME[@]}"; do
+    [ -f "$HOME/$f" ] && cp -p "$HOME/$f" "$backup/$f"
+  done
+  for f in "${MOVE_FILES_CANON[@]}"; do
+    [ -f "$CANON/$f" ] && cp -p "$CANON/$f" "$backup/$f"
+  done
+  chmod 700 "$backup"
+  printf 'backup: %s\n' "$backup"
+
+  # drop the old adopt-style registration, which pointed at the shared location
+  while read -r n; do
+    [ -n "$n" ] || continue
+    [ -L "$ROOT/$n" ] && is_primary "$ROOT/$n" && { rm "$ROOT/$n"; printf 'unregistered %s (was the shared location)\n' "$n"; }
+  done < <(cmd_list)
+
+  build_profile "$ROOT/$slug"
+  for f in "${MOVE_FILES_HOME[@]}"; do
+    [ -f "$HOME/$f" ] && mv "$HOME/$f" "$ROOT/$slug/$f" && printf 'moved ~/%s\n' "$f"
+  done
+  for f in "${MOVE_FILES_CANON[@]}"; do
+    [ -f "$CANON/$f" ] && mv "$CANON/$f" "$ROOT/$slug/$f" && printf 'moved ~/.claude/%s\n' "$f"
+  done
+
+  if [ "$(default_first)" != "$slug" ]; then
+    { printf '%s\n' "$slug"; read_default_chain | grep -vx "$slug"; } > "$ROOT/default.tmp" \
+      && mv "$ROOT/default.tmp" "$ROOT/default"
+  fi
+  ensure_slices "$slug"
+
+  # Fail loudly rather than leave a half-migrated account behind.
+  local check; check="$(field "$(acct_info "$ROOT/$slug")" 1)"
+  case "$check" in
+    ok|nousage) ;;
+    *) die "the moved profile does not read back as logged in ($check).
+             Roll back with: mv $backup/.claude.json \$HOME/ &&
+             mv $backup/.credentials.json $backup/history.jsonl $CANON/" ;;
+  esac
+
+  printf '\nmigrated %s to %s\n\n' "$email" "$ROOT/$slug"
+  cmd_doctor "$slug"
+  cat <<EOF
+
+Rollback, if you want the old layout back:
+  mv $backup/.claude.json \$HOME/
+  mv $backup/.credentials.json $backup/history.jsonl $CANON/
+
+Next:
+  1. smoke test the moved login (proves the profile really authenticates):
+       claude-acct run -a $slug -- -p ok
+  2. bare "claude" now has no login, on purpose: the shared location is dead.
+     To keep typing "claude", add this to your ~/.bashrc and ~/.zshrc yourself:
+       export CLAUDE_CONFIG_DIR="\$HOME/.claude-accounts/$slug"
+     Without it, use "claude-acct run", which also picks the account per project.
+  3. add the second account when you have a browser:
+       claude-acct add
+
+Sessions started before now keep working on their cached token until it
+expires, then ask you to log in. Restart or re-login them at your own pace.
+EOF
+}
+
+# -------------------------------------------------------------------- claim ---
+# A /login in a session without CLAUDE_CONFIG_DIR writes its credentials to the
+# shared default location, even after a migration. That leaves the same login in
+# two files, which is the one thing that must never persist: if a refresh
+# rotates the token, whichever copy refreshes second is silently logged out.
+# claim consolidates it, keeping the newer file and discarding nothing silently.
+
+identity_from_token() {  # -> "email<TAB>uuid", asking Anthropic who this token is
+  local cred="$CANON/.credentials.json" tok
+  tok="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["claudeAiOauth"]["accessToken"])' "$cred" 2>/dev/null)" || return 1
+  [ -n "$tok" ] || return 1
+  curl -s -m 25 https://api.anthropic.com/api/oauth/profile \
+    -H "Authorization: Bearer $tok" -H "anthropic-beta: oauth-2025-04-20" \
+  | python3 -c '
+import json,sys
+try: a = json.load(sys.stdin)["account"]
+except Exception: raise SystemExit(1)
+e, u = a.get("email",""), a.get("uuid","")
+if not u: raise SystemExit(1)
+print(e + "\t" + u)'
+}
+
+# Count live sessions pinned to the shared location. A running process cannot
+# be moved to a profile, so taking its credentials away logs it out mid-work.
+live_counts() {  # one /proc walk; prints "account<TAB>count" per account seen
+  local vdir="$HOME/.local/share/claude/versions/" d cfg
+  for d in /proc/[0-9]*; do
+    case "$(readlink "$d/exe" 2>/dev/null)" in "$vdir"*) ;; *) continue ;; esac
+    cfg="$(tr '\0' '\n' < "$d/environ" 2>/dev/null | sed -n 's/^CLAUDE_CONFIG_DIR=//p' | head -1)"
+    [ -n "$cfg" ] && printf '%s\n' "${cfg##*/}"
+  done | sort | uniq -c | awk '{print $2 "\t" $1}'
+}
+sessions_for_account() {  # live Claude processes already on this account
+  local n; n="$(live_counts | awk -F'\t' -v w="$1" '$1==w {print $2}')"
+  printf '%s' "${n:-0}"
+}
+
+wrapper_ok() {  # is bare `claude` still routed to the project's account?
+  local w; w="$(command -v claude 2>/dev/null)" || return 1
+  grep -q 'claude-acct run' "$w" 2>/dev/null
+}
+
+shared_location_sessions() {
+  local vdir="$HOME/.local/share/claude/versions/" d n=0
+  for d in /proc/[0-9]*; do
+    case "$(readlink "$d/exe" 2>/dev/null)" in
+      "$vdir"*) ;;
+      *) continue ;;
+    esac
+    grep -qz "^CLAUDE_CONFIG_DIR=" "$d/environ" 2>/dev/null || n=$((n+1))
+  done
+  printf '%s' "$n"
+}
+
+cmd_claim() {
+  mkdir -p "$ROOT"
+  local force=0
+  [ "${1:-}" = "--force" ] && force=1
+  local cred="$CANON/.credentials.json"
+  [ -f "$cred" ] || die "no login sits at the shared location; nothing to claim"
+
+  if [ "$force" = 0 ]; then
+    local live; live="$(shared_location_sessions)"
+    if [ "$live" -gt 0 ]; then
+      die "$live Claude session(s) are running on the shared location right now.
+             Taking this login away would log them out mid-work, and a running
+             session cannot be moved to a profile. Close them first, or pass
+             --force if you accept logging them out."
+    fi
+  fi
+
+  local email uuid ident
+  if [ -f "$PRIMARY_CFG" ]; then
+    ident="$(acct_info "$CANON")"
+    email="$(field "$ident" 2)"
+    uuid="$(acct_uuid "$PRIMARY_CFG")"
+  fi
+  if [ -z "${uuid:-}" ]; then
+    printf 'asking Anthropic which account this login belongs to...\n' >&2
+    ident="$(identity_from_token)" || \
+      die "could not identify the login at $cred (the profile request failed).
+             Start one session there so Claude writes its own identity file, or
+             remove the file if it is a leftover."
+    email="$(printf '%s' "$ident" | cut -f1)"
+    uuid="$(printf '%s' "$ident" | cut -f2)"
+  fi
+  printf 'the shared location holds: %s\n' "$email"
+
+  local n existing=""
+  while read -r n; do
+    [ -n "$n" ] || continue
+    [ "$(acct_uuid "$(cfg_json "$ROOT/$n")")" = "$uuid" ] && { existing="$n"; break; }
+  done < <(cmd_list)
+
+  local stamp backup slug
+  stamp="$(date +%Y%m%d-%H%M%S)"
+  backup="$ROOT/.claim-backup-$stamp"
+  mkdir -p "$backup"; chmod 700 "$backup"
+
+  if [ -n "$existing" ]; then
+    slug="$existing"
+    printf 'that account already has the profile "%s"\n' "$slug"
+    if [ -f "$ROOT/$slug/.credentials.json" ]; then
+      if cmp -s "$cred" "$ROOT/$slug/.credentials.json"; then
+        rm "$cred"
+        printf 'the two files were identical; removed the shared copy\n'
+        [ -f "$PRIMARY_CFG" ] && mv "$PRIMARY_CFG" "$backup/.claude.json" && \
+          printf 'moved a stray ~/.claude.json to the backup\n'
+        rmdir "$backup" 2>/dev/null || true
+        return 0
+      fi
+      cp -p "$ROOT/$slug/.credentials.json" "$backup/profile.credentials.json"
+      printf 'kept the older profile copy in %s\n' "$backup"
+    fi
+    mv "$cred" "$ROOT/$slug/.credentials.json"
+    printf 'the newer login now lives only in %s\n' "$ROOT/$slug"
+  else
+    slug="$(derive_slug "$email")"
+    build_profile "$ROOT/$slug"
+    mv "$cred" "$ROOT/$slug/.credentials.json"
+    [ -f "$PRIMARY_CFG" ] && mv "$PRIMARY_CFG" "$ROOT/$slug/.claude.json"
+    [ -f "$CANON/history.jsonl" ] && mv "$CANON/history.jsonl" "$ROOT/$slug/history.jsonl"
+    seed_state "$ROOT/$slug" 2>/dev/null || true
+    ensure_slices "$slug"
+    printf 'created account "%s" from the login at the shared location\n' "$slug"
+  fi
+
+  # A stray ~/.claude.json left behind would make the dead location look alive.
+  if [ -f "$PRIMARY_CFG" ]; then
+    mv "$PRIMARY_CFG" "$backup/.claude.json"
+    printf 'moved the leftover ~/.claude.json to %s\n' "$backup"
+  fi
+
+  local check; check="$(field "$(acct_info "$ROOT/$slug")" 1)"
+  case "$check" in
+    ok|nousage) ;;
+    *) die "profile $slug does not read back as logged in ($check); backup: $backup" ;;
+  esac
+  printf '\n'; cmd_doctor "$slug"
+  printf '\nsmoke test it with:  claude-acct run -a %s -- -p ok\n' "$slug"
+}
+
+cmd_wrapper() {  # (re)install the bare-`claude` router
+  local bin dest="$HOME/.local/bin/claude"
+  bin="$(readlink -f "$dest" 2>/dev/null || true)"
+  case "$bin" in
+    "$HOME/.local/share/claude/versions/"*) printf '%s\n' "$bin" > "$ROOT/claude-binary" ;;
+    *) # dest is our own wrapper (not a symlink into versions/), so the update
+       # it should pick up is simply the newest installed version.
+       bin="$(ls -1d "$HOME"/.local/share/claude/versions/* 2>/dev/null | sort -V | tail -1)"
+       [ -x "$bin" ] || die "cannot find the real Claude binary; look in ~/.local/share/claude/versions"
+       printf '%s\n' "$bin" > "$ROOT/claude-binary" ;;
+  esac
+  cat > "$dest.tmp" <<'WRAP'
+#!/usr/bin/env bash
+# Route a bare `claude` to the account this directory is bound to.
+#
+# The shared default location holds no login on purpose, so without this a plain
+# `claude` asks for /login in every pane. With CLAUDE_CONFIG_DIR already set we
+# are being called *by* claude-acct, so run the real binary and do not recurse.
+set -u
+
+real_binary() {
+    local pinned="$HOME/.claude-accounts/claude-binary"
+    if [ -r "$pinned" ]; then
+        local p; p="$(cat "$pinned")"
+        [ -x "$p" ] && { printf '%s' "$p"; return 0; }
+    fi
+    local newest
+    newest="$(ls -1d "$HOME"/.local/share/claude/versions/* 2>/dev/null | sort -V | tail -1)"
+    [ -x "$newest" ] || return 1
+    printf '%s' "$newest"
+}
+
+bin="$(real_binary)" || {
+    printf 'claude: no installed binary under ~/.local/share/claude/versions\n' >&2
+    exit 127
+}
+
+if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
+    exec -a claude "$bin" "$@"
+fi
+
+if command -v claude-acct >/dev/null 2>&1; then
+    exec claude-acct run -- "$@"
+fi
+
+printf 'claude: claude-acct is not on PATH, so no account was selected\n' >&2
+exec -a claude "$bin" "$@"
+WRAP
+  chmod 755 "$dest.tmp"; mv "$dest.tmp" "$dest"
+  printf 'bare "claude" now routes through claude-acct\n'
+  printf 'real binary pinned at %s\n' "$(cat "$ROOT/claude-binary")"
+}
+
+cmd_backup() {
+  local dest="$ROOT/.logins-backup-$(date +%Y%m%d-%H%M%S)" n f count=0
+  mkdir -p "$dest"; chmod 700 "$dest"
+  while read -r n; do
+    [ -n "$n" ] || continue
+    f="$(creds_json "$ROOT/$n")"
+    if [ -f "$f" ] && python3 -c 'import json,sys;json.load(open(sys.argv[1]))["claudeAiOauth"]' "$f" 2>/dev/null; then
+      cp -p "$f" "$dest/$n.credentials.json"
+      printf '  %-26s saved\n' "$n"
+      count=$((count+1))
+    else
+      printf '  %-26s SKIPPED (no valid login in %s)\n' "$n" "$f"
+    fi
+  done < <(cmd_list)
+  if [ -f "$CANON/.credentials.json" ]; then
+    cp -p "$CANON/.credentials.json" "$dest/_shared-location.credentials.json"
+    printf '  %-26s saved\n' "(shared location)"
+    count=$((count+1))
+  fi
+  chmod 600 "$dest"/* 2>/dev/null || true
+  printf '\n%s login file(s) copied to %s\n' "$count" "$dest"
+  printf 'restore one with:  cp %s/<name>.credentials.json %s/<name>/.credentials.json\n' \
+    "$dest" "$ROOT"
+}
+
+cmd_refresh() {
+  local n rc=0
+  for n in ${1:+"$1"} ${1:-$(cmd_list)}; do
+    [ -d "$ROOT/$n" ] || continue
+    rm -f "$(usage_cache "$ROOT/$n")"
+    if refresh_usage "$ROOT/$n"; then printf '%-18s refreshed\n' "$n"
+    else printf '%-18s FAILED (%s)\n' "$n" "$(usage_err "$ROOT/$n")"; rc=1; fi
+  done
+  [ "$rc" = 1 ] && printf '429 or 401 with 0 live sessions usually means the access token expired; it refreshes when a session starts on that account\n'
+  return $rc
+}
+
+cmd_trust() {
+  local n="${1:?usage: claude-acct trust <account>}"
+  [ -d "$ROOT/$n" ] || die "no such account: $n"
+  printf 'source: %s\n' "$(seed_source)"
+  seed_state "$ROOT/$n"
+}
+
+cmd_doctor() {
+  local n="${1:-$(slug_of_dir "${CLAUDE_CONFIG_DIR:-$CANON}")}" dir="$ROOT/${1:-}" info d target
+  [ -n "${1:-}" ] || dir="$ROOT/$n"
+  [ -d "$dir" ] || die "no such account: $n"
+  info="$(acct_info "$dir")"
+  printf 'account %s -> %s\n' "$n" "$(readlink -f "$dir")"
+  printf '  login       %s\n' "$(field "$info" 1)"
+  printf '  identity    %s / %s  (%s)\n' "$(field "$info" 3)" "$(field "$info" 4)" "$(field "$info" 2)"
+  printf '  config      %s\n' "$(cfg_json "$dir")"
+  local want dom; want="$(derive_slug_raw "$(field "$info" 2)")"
+  if [ -n "$want" ] && [ "$want" != "$n" ]; then
+    dom="$(field "$info" 2)"; dom="${dom#*@}"
+    [ "$want-$(printf '%s' "${dom%%.*}" | tr 'A-Z.' 'a-z-')" = "$n" ] || \
+      printf '  name        STALE: this login would be named "%s" now (run: claude-acct adopt)\n' "$want"
+  fi
+  if is_primary "$dir"; then
+    printf '  sharing     canonical: this account owns projects/, skills/, hooks/, settings.json\n'
+    printf '  launch      no CLAUDE_CONFIG_DIR (Claude default location)\n'
+  else
+    for d in projects "${LINK_DIRS[@]}"; do
+      if [ -L "$dir/$d" ]; then
+        target="$(readlink -f "$dir/$d")"
+        if [ -d "$target" ]; then printf '  %-11s shared -> %s\n' "$d" "$target"
+        else printf '  %-11s BROKEN LINK -> %s\n' "$d" "$(readlink "$dir/$d")"; fi
+      elif [ -e "$dir/$d" ]; then
+        printf '  %-11s NOT SHARED: a plain %s, so it has drifted\n' "$d" \
+          "$([ -d "$dir/$d" ] && echo directory || echo file)"
+      else
+        printf '  %-11s missing\n' "$d"
+      fi
+    done
+    if [ -f "$dir/CLAUDE.md" ] && grep -q "^@$CANON/CLAUDE.md" "$dir/CLAUDE.md"; then
+      printf '  CLAUDE.md   imports %s/CLAUDE.md\n' "$CANON"
+    else
+      printf '  CLAUDE.md   does NOT import %s/CLAUDE.md\n' "$CANON"
+    fi
+    [ -e "$dir/settings.json" ] && \
+      printf '  settings    WARNING: %s/settings.json shadows the canonical file\n' "$dir"
+  fi
+  printf '  slice       %s\n' \
+    "$([ -f "$SLICE_DIR/$(slice_unit "$n")" ] && slice_unit "$n" || echo missing)"
+}
+
+# ----------------------------------------------------------------- takeover ---
+# Continue this project's work under a different account. The chat lives in the
+# shared projects/ directory, so any account can resume it. --fork-session gives
+# the continuation its own id, so the original chat is never written to by two
+# accounts at once.
+cmd_takeover() {
+  local name="" sid="" print_only=0 cur
+  cur="${CLAUDE_ACCT_NAME:-$(slug_of_dir "${CLAUDE_CONFIG_DIR:-$CANON}")}"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -a|--account) name="${2:?account name}"; shift 2 ;;
+      -s|--session) sid="${2:?session id}"; shift 2 ;;
+      --print)      print_only=1; shift ;;
+      *)            break ;;
+    esac
+  done
+
+  if [ -z "$sid" ]; then
+    sid="${CLAUDE_CODE_SESSION_ID:-}"
+  fi
+  if [ -z "$sid" ]; then
+    local pdir newest
+    pdir="$SHARED_PROJECTS/$(printf '%s' "$(cd "$PWD" && pwd)" | tr '/' '-')"
+    [ -d "$pdir" ] || die "no chats recorded for $PWD, so there is nothing to take over"
+    newest="$(ls -t "$pdir"/*.jsonl 2>/dev/null | head -1)" || true
+    [ -n "$newest" ] || die "no chats recorded for $PWD, so there is nothing to take over"
+    sid="$(basename "$newest" .jsonl)"
+    warn "no session given; taking over the newest chat in this directory ($sid)"
+  fi
+
+  if [ -z "$name" ]; then
+    CLAUDE_ACCT_EXCLUDE="$cur" CLAUDE_ACCT_ANY=1 name="$(cmd_pick "$PWD")" \
+      || die "no other account is available to take over from $cur"
+  fi
+  [ "$name" = "$cur" ] && die "$name is already the current account"
+  [ -d "$ROOT/$name" ] || die "no such account: $name"
+
+  if [ "$print_only" = 1 ]; then
+    printf 'claude-acct run -a %s -- --resume %s --fork-session\n' "$name" "$sid"
+    return 0
+  fi
+  printf 'handing this chat to %s (a forked copy; the original stays with %s)\n' "$name" "$cur" >&2
+  cmd_run -a "$name" -- --resume "$sid" --fork-session
+}
+
+usage() {
+  cat <<'EOF'
+claude-acct - several Claude accounts on one machine
+
+  claude-acct status                 how full every account is
+  claude-acct refresh [NAME]         force a live usage fetch now
+  claude-acct backup                 snapshot every account's login file
+  claude-acct wrapper                re-route bare "claude" after a Claude update
+  claude-acct whoami                 which account this shell is on
+  claude-acct pick [dir]             name the best account for a directory
+  claude-acct run [-a NAME] [args]   start Claude on that account
+  claude-acct migrate                move the default location's login into a profile
+  claude-acct claim                  adopt a login that /login left at the shared location
+                                     (refuses while sessions still use it)
+  claude-acct adopt                  register the existing account as number one
+  claude-acct add                    add another account (guided login)
+  claude-acct add --finish           finish an add you did by hand
+  claude-acct add --finish --replace renew an existing account's login instead
+  claude-acct add --discard          throw away a staged login and start over
+  claude-acct takeover [-a NAME]      continue this chat on another account
+  claude-acct bind NAME [NAME...]    set this project's accounts, in order
+  claude-acct bind --show            show this project's accounts
+  claude-acct trust NAME             copy your trusted-folder answers to an account
+  claude-acct doctor [NAME]          check one account's sharing and login
+  claude-acct list                   account names, one per line
+
+run passes --settings ~/.claude/settings.json and --dangerously-skip-permissions
+(--no-bypass turns the latter off) inside a per-account slice under the claude.slice memory pool.
+
+env: CLAUDE_ACCT_THRESHOLD (80)  CLAUDE_ACCT_POOL_MEMMAX (40G)  CLAUDE_ACCT_ROOT
+EOF
+}
+
+case "${1:-status}" in
+  status)  shift || true; cmd_status ;;
+  list)    shift || true; cmd_list ;;
+  whoami)  shift || true; cmd_whoami ;;
+  pick)    shift || true; cmd_pick "${1:-$PWD}" ;;
+  run)     shift || true; cmd_run "$@" ;;
+  adopt)   shift || true; cmd_adopt ;;
+  add)     shift || true; cmd_add "$@" ;;
+  bind)    shift || true; cmd_bind "$@" ;;
+  migrate) shift || true; cmd_migrate ;;
+  claim)   shift || true; cmd_claim "$@" ;;
+  trust)   shift || true; cmd_trust "$@" ;;
+  refresh) shift || true; cmd_refresh "${1:-}" ;;
+  backup)  shift || true; cmd_backup ;;
+  wrapper) shift || true; cmd_wrapper ;;
+  takeover) shift || true; cmd_takeover "$@" ;;
+  doctor)  shift || true; cmd_doctor "$@" ;;
+  -h|--help|help) usage ;;
+  *)       usage; exit 2 ;;
+esac
