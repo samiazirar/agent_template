@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# claude-acct - run Claude Code under one of several accounts on this machine.
+# claude-acct - run Claude Code under one of several accounts on this machine,
+# and keep the eight accounts legible as one budget.
 #
 # Each extra account is a directory that CLAUDE_CONFIG_DIR points at. Chat
 # history, skills, agents, commands, hooks and plugins are shared through
@@ -13,6 +14,12 @@
 # inside. So the pre-existing account cannot be addressed by CLAUDE_CONFIG_DIR.
 # It is used by simply not setting that variable, and it is listed like any
 # other account. is_primary()/cfg_json() are the only places that care.
+#
+# Bash owns the files: profiles, logins, slices, launching. One embedded Python
+# module (py() below) owns everything that reads and computes: identity, usage
+# history, burn rates, the forecast and the pick score. status, forecast and
+# pick are three renderings of that one computation, so the terminal, the
+# Capacity card and the phone cannot drift apart.
 
 set -euo pipefail
 
@@ -28,6 +35,8 @@ POOL_MEMMAX="${CLAUDE_ACCT_POOL_MEMMAX:-40G}"
 POOL_CPUQUOTA="${CLAUDE_ACCT_POOL_CPUQUOTA:-2400%}"
 LINK_DIRS=(skills agents commands hooks plugins local-plugins skill-packages transcripts tasks)
 STAGING="$ROOT/.staging"
+HISTORY="$ROOT/.usage-history.tsv"
+REFRESH_TIMER=claude-acct-refresh.timer
 
 die()  { printf 'claude-acct: %s\n' "$*" >&2; exit 1; }
 warn() { printf 'claude-acct: %s\n' "$*" >&2; }
@@ -35,7 +44,6 @@ warn() { printf 'claude-acct: %s\n' "$*" >&2; }
 is_primary() { [ "$(readlink -f "$1")" = "$(readlink -f "$CANON")" ]; }
 cfg_json()   { if is_primary "$1"; then printf '%s' "$PRIMARY_CFG"; else printf '%s/.claude.json' "$(readlink -f "$1")"; fi; }
 creds_json() { printf '%s/.credentials.json' "$(readlink -f "$1")"; }
-
 usage_cache() { printf '%s/.claude-acct-usage.json' "$(readlink -f "$1")"; }
 
 # systemd reads "-" in a unit name as hierarchy, so claude-a-b.slice would nest
@@ -56,18 +64,877 @@ real_claude_binary() {
   printf '%s' "$bin"
 }
 
+# ===========================================================================
+# The one computation. Every number this tool prints comes out of here.
+# ===========================================================================
+py() {
+  CA_ROOT="$ROOT" CA_CANON="$CANON" CA_PRIMARY_CFG="$PRIMARY_CFG" \
+  CA_HISTORY="$HISTORY" CA_THRESHOLD="$THRESHOLD" \
+  python3 - "$@" <<'PY'
+"""claude-acct's reader and forecaster.
+
+Modes, all called from the bash half:
+
+  info DIR                one profile as a TSV line (identity + percentages)
+  token DIR               the OAuth access token, for the usage fetch
+  uuid CFG                accountUuid out of a config file
+  creds-ok FILE           exit 0 if the file holds a usable login
+  whose-token             stdin is an /api/oauth/profile reply -> "email<TAB>uuid"
+  seed SRC DST            carry answered questions into a new profile
+  history-append NAME DIR record one successful fetch, prune to 30 days
+  status                  the account table, the POOL line, the legend
+  forecast [--json]       the same numbers as a table or as the data contract
+  pick [--fewest-live] [--exclude NAME] NAME...   one account name
+
+The unit. Percentages of different accounts do not add up, so anything summed
+is in u: one percentage point of one week of a 1x account. A max-5x week is
+500 u. Used = binding % x multiplier. Per-account percentages stay visible;
+pool figures, burn rates and the pick score are in u.
+"""
+import datetime
+import json
+import os
+import sys
+import time
+
+ROOT = os.environ["CA_ROOT"]
+CANON = os.environ["CA_CANON"]
+PRIMARY_CFG = os.environ["CA_PRIMARY_CFG"]
+HISTORY = os.environ["CA_HISTORY"]
+THRESHOLD = float(os.environ.get("CA_THRESHOLD") or 80)
+HOME = os.path.expanduser("~")
+UTC = datetime.timezone.utc
+
+# A pane launched this recently has not shown up in the usage figures yet, so
+# pick charges it a per-session burn by hand. That is the anti-stacking rule.
+RECENT_LAUNCH = float(os.environ.get("CLAUDE_ACCT_RECENT_LAUNCH") or 600)
+# What one pane is assumed to burn, in percentage points per hour, until the
+# history knows better. 0.4 pct/h is 2 u/h on a max-5x seat.
+SESSION_BURN = float(os.environ.get("CLAUDE_ACCT_SESSION_BURN") or 0.4)
+HISTORY_DAYS = 30
+SERIES_DAYS = 7
+SERIES_STEP = 1800           # the contract's 30-minute resolution
+NO_WINDOW_HOURS = 7 * 24     # an account with no open week is a 7-day reserve
+MIN_DAYS = 1.0 / 24.0        # keep "per day" finite in the last hour of a week
+
+INFO_FIELDS = ["status", "email", "display", "org", "tier", "worst", "session",
+               "weekly", "reset", "seen", "fable", "binding", "bindingPct",
+               "multiplier"]
+
+
+# ------------------------------------------------------------------- paths ---
+def is_primary(d):
+    return os.path.realpath(d) == os.path.realpath(CANON)
+
+
+def cfg_json(d):
+    return PRIMARY_CFG if is_primary(d) else os.path.join(os.path.realpath(d), ".claude.json")
+
+
+def creds_json(d):
+    return os.path.join(os.path.realpath(d), ".credentials.json")
+
+
+def usage_cache(d):
+    return os.path.join(os.path.realpath(d), ".claude-acct-usage.json")
+
+
+def load(path):
+    try:
+        with open(path) as fh:
+            return json.load(fh)
+    except Exception:
+        return None
+
+
+def accounts_registered():
+    """Registered account names, in the order the directory lists them."""
+    try:
+        names = sorted(n for n in os.listdir(ROOT) if not n.startswith("."))
+    except OSError:
+        return []
+    return [n for n in names if os.path.isdir(os.path.join(ROOT, n))]
+
+
+def multiplier_of(tier_raw):
+    return {"default_claude_max_20x": 20, "default_claude_max_5x": 5}.get(tier_raw or "", 1)
+
+
+# ------------------------------------------------------------------ limits ---
+def parse_iso(s):
+    if not s:
+        return None
+    try:
+        t = datetime.datetime.fromisoformat(s)
+    except ValueError:
+        return None
+    return t if t.tzinfo else t.replace(tzinfo=UTC)
+
+
+def iso_z(dt):
+    return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ") if dt else None
+
+
+def windows(usage, now):
+    """session / weekly / fable, each as {"pct", "reset": datetime|None}.
+
+    A limit whose reset has passed has already emptied, so it reads as zero.
+    The limits array is authoritative because it carries the Fable scope; the
+    bare buckets are the fallback for a config-cached snapshot.
+    """
+    out = {k: {"pct": 0, "reset": None} for k in ("session", "weekly", "fable")}
+    seen = set()
+    for lim in (usage.get("limits") or []):
+        kind = lim.get("kind")
+        if kind == "session":
+            key = "session"
+        elif kind == "weekly_all":
+            key = "weekly"
+        elif kind == "weekly_scoped":
+            model = ((lim.get("scope") or {}).get("model") or {}).get("display_name") or ""
+            key = "fable" if model.lower() == "fable" else None
+        else:
+            key = None
+        if not key:
+            continue
+        reset = parse_iso(lim.get("resets_at"))
+        expired = reset is not None and reset <= now
+        out[key] = {"pct": 0 if expired else (lim.get("percent") or 0),
+                    "reset": None if expired else reset}
+        seen.add(key)
+    for key, bucket in (("session", "five_hour"), ("weekly", "seven_day")):
+        if key in seen:
+            continue
+        b = usage.get(bucket) or {}
+        reset = parse_iso(b.get("resets_at"))
+        expired = reset is not None and reset <= now
+        out[key] = {"pct": 0 if expired else (b.get("utilization") or 0),
+                    "reset": None if expired else reset}
+    return out
+
+
+def worst_live(usage, now):
+    """The fullest limit of any kind, which is what the threshold looks at."""
+    worst = 0
+    for lim in (usage.get("limits") or []):
+        reset = parse_iso(lim.get("resets_at"))
+        if reset is not None and reset <= now:
+            continue
+        worst = max(worst, lim.get("percent") or 0)
+    if not (usage.get("limits") or []):
+        w = windows(usage, now)
+        worst = max(w["session"]["pct"], w["weekly"]["pct"])
+    return worst
+
+
+def read_profile(d, now):
+    """One profile directory as a record. status is the same vocabulary as
+    before: ok | nologin | expired | nousage | empty."""
+    rec = {"dir": os.path.realpath(d), "primary": is_primary(d), "status": "empty",
+           "email": "", "display": "", "org": "", "tier": "", "multiplier": 1,
+           "worst": 0, "seen": 0, "err": "",
+           "session": {"pct": 0, "reset": None},
+           "weekly": {"pct": 0, "reset": None},
+           "fable": {"pct": 0, "reset": None}}
+    cfg = load(cfg_json(d))
+    if cfg is None:
+        return rec
+    acc = cfg.get("oauthAccount") or {}
+    rec.update(email=acc.get("emailAddress", ""),
+               display=acc.get("displayName") or acc.get("fullName", ""),
+               org=acc.get("organizationName", ""),
+               tier=(acc.get("userRateLimitTier") or "").replace("default_claude_", "").replace("_", " "),
+               multiplier=multiplier_of(acc.get("userRateLimitTier")))
+    if not rec["email"]:
+        rec["status"] = "nologin"
+        return rec
+    cred = load(creds_json(d)) or {}
+    oauth = cred.get("claudeAiOauth") or {}
+    if not oauth:
+        rec["status"] = "nologin"
+        return rec
+    if (oauth.get("refreshTokenExpiresAt", 0) / 1000) < now.timestamp():
+        rec["status"] = "expired"
+        return rec
+
+    # Prefer our own live fetch; fall back to whatever Claude last cached.
+    cache = usage_cache(d)
+    usage = load(cache)
+    if usage is not None:
+        rec["seen"] = int(os.path.getmtime(cache))
+    else:
+        cu = cfg.get("cachedUsageUtilization") or {}
+        usage = cu.get("utilization") or None
+        rec["seen"] = int(cu.get("fetchedAtMs", 0) / 1000)
+    try:
+        with open(cache + ".err") as fh:
+            rec["err"] = fh.read().strip()
+    except OSError:
+        pass
+    if not usage:
+        rec["status"] = "nousage"
+        return rec
+    rec["status"] = "ok"
+    rec.update(windows(usage, now))
+    rec["worst"] = worst_live(usage, now)
+    return rec
+
+
+# ----------------------------------------------------------------- history ---
+HIST_HEADER = "# epoch\tname\tbinding\tweekly\tfable\tsession\tresetEpoch\n"
+
+
+def history_append(name, d):
+    now = datetime.datetime.now(UTC)
+    rec = read_profile(d, now)
+    if rec["status"] != "ok":
+        return
+    binding, _, reset = binding_of(rec)
+    line = "%d\t%s\t%g\t%g\t%g\t%g\t%s\n" % (
+        rec["seen"] or int(now.timestamp()), name, binding, rec["weekly"]["pct"],
+        rec["fable"]["pct"], rec["session"]["pct"],
+        int(reset.timestamp()) if reset else "")
+    if history_has(line.split("\t", 2)[0], name):
+        return                       # the same fetch, recorded by another pane
+    if not os.path.exists(HISTORY):
+        line = HIST_HEADER + line
+    # One write of one short line: eight parallel refreshes append to this file
+    # and O_APPEND keeps each of them whole.
+    with open(HISTORY, "a") as fh:
+        fh.write(line)
+    history_prune()
+
+
+def history_has(epoch, name):
+    """Was this exact snapshot already recorded? Two panes refreshing at the
+    same moment both fetch and both append, and one row is enough."""
+    needle = "%s\t%s\t" % (epoch, name)
+    try:
+        with open(HISTORY, "rb") as fh:
+            size = fh.seek(0, os.SEEK_END)
+            fh.seek(max(0, size - 65536))
+            return needle in fh.read().decode("utf-8", "replace")
+    except OSError:
+        return False
+
+
+def history_prune():
+    """Keep 30 days. Cheap: only the first data line is read to decide."""
+    cutoff = time.time() - HISTORY_DAYS * 86400
+    try:
+        with open(HISTORY) as fh:
+            for line in fh:
+                if line.startswith("#"):
+                    continue
+                first = float(line.split("\t", 1)[0])
+                break
+            else:
+                return
+    except (OSError, ValueError):
+        return
+    if first >= cutoff - 86400:          # a day of slack, so this rewrites rarely
+        return
+    tmp = HISTORY + ".tmp.%d" % os.getpid()
+    try:
+        with open(HISTORY) as src, open(tmp, "w") as dst:
+            dst.write(HIST_HEADER)
+            for line in src:
+                if line.startswith("#"):
+                    continue
+                try:
+                    if float(line.split("\t", 1)[0]) >= cutoff:
+                        dst.write(line)
+                except ValueError:
+                    continue
+        os.replace(tmp, HISTORY)
+    except OSError:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+
+
+def history_read(tail_bytes=None):
+    """name -> [(epoch, bindingPct)], oldest first.
+
+    tail_bytes reads only the end of the log, which is all a burn rate needs;
+    the full file is only read for the seven-day series in the contract.
+    """
+    out = {}
+    try:
+        with open(HISTORY, "rb") as fh:
+            if tail_bytes:
+                size = fh.seek(0, os.SEEK_END)
+                if size > tail_bytes:
+                    fh.seek(size - tail_bytes)
+                    fh.readline()        # drop the partial line
+                else:
+                    fh.seek(0)
+            data = fh.read().decode("utf-8", "replace")
+    except OSError:
+        return out
+    for line in data.splitlines():
+        if not line or line.startswith("#"):
+            continue
+        f = line.split("\t")
+        if len(f) < 3:
+            continue
+        try:
+            out.setdefault(f[1], []).append((float(f[0]), float(f[2])))
+        except ValueError:
+            continue
+    for pts in out.values():
+        pts.sort()
+    return out
+
+
+def burn_rate(pts, now, hours):
+    """Percentage points per hour, from the rises inside the window.
+
+    Only the rises are summed, so a weekly reset in the middle of the window
+    reads as a pause rather than as negative usage.
+    """
+    lo = now - hours * 3600
+    win = [p for p in pts if p[0] >= lo]
+    if len(win) < 2:
+        return 0.0
+    span = (win[-1][0] - win[0][0]) / 3600.0
+    if span < 0.25:
+        return 0.0
+    gain = sum(max(0.0, b[1] - a[1]) for a, b in zip(win, win[1:]))
+    return gain / span
+
+
+def series(pts, now):
+    """The contract's history: 30-minute buckets, seven days, max 336 points."""
+    lo = now - SERIES_DAYS * 86400
+    buckets = {}
+    for epoch, pct in pts:
+        if epoch < lo:
+            continue
+        buckets[int(epoch // SERIES_STEP)] = pct
+    keys = sorted(buckets)[-(SERIES_DAYS * 48):]
+    return [[k * SERIES_STEP, round(buckets[k], 1)] for k in keys]
+
+
+# -------------------------------------------------------------- live panes ---
+def live_map():
+    """account key -> {"live", "recent"} from one /proc walk.
+
+    The key is the basename of CLAUDE_CONFIG_DIR, or "" for a session on the
+    Claude default location, which is how the primary account is addressed.
+    """
+    vdir = os.path.join(HOME, ".local/share/claude/versions") + "/"
+    now = time.time()
+    out = {}
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        try:
+            if not os.readlink("/proc/%s/exe" % pid).startswith(vdir):
+                continue
+        except OSError:
+            continue
+        key = ""
+        try:
+            with open("/proc/%s/environ" % pid, "rb") as fh:
+                for entry in fh.read().split(b"\0"):
+                    if entry.startswith(b"CLAUDE_CONFIG_DIR="):
+                        key = os.path.basename(entry.split(b"=", 1)[1]
+                                               .decode("utf-8", "replace").rstrip("/"))
+                        break
+        except OSError:
+            continue
+        try:
+            started = os.stat("/proc/%s" % pid).st_mtime
+        except OSError:
+            started = now
+        slot = out.setdefault(key, {"live": 0, "recent": 0})
+        slot["live"] += 1
+        if now - started <= RECENT_LAUNCH:
+            slot["recent"] += 1
+    return out
+
+
+# ----------------------------------------------------------------- metrics ---
+def binding_of(rec):
+    """(percent, which, reset) for the binding limit: the fuller of the two
+    weekly windows. Its own reset is preferred; if the binding window has no
+    reset of its own, the other weekly window's reset still bounds it."""
+    week, fable = rec["weekly"], rec["fable"]
+    which = "fable" if fable["pct"] > week["pct"] else "weekly"
+    pct = max(week["pct"], fable["pct"])
+    reset = rec[which]["reset"] or week["reset"] or fable["reset"]
+    return pct, which, reset
+
+
+def measure(rec, live, recent, pts, now_ts):
+    """Everything derived, per account. Percentages and their unit twins."""
+    mult = rec["multiplier"] or 1
+    used, which, reset = binding_of(rec)
+    if rec["status"] != "ok":
+        used, which, reset = 0, "weekly", None
+    hours = (reset.timestamp() - now_ts) / 3600.0 if reset else NO_WINDOW_HOURS
+    hours = max(hours, 1.0 / 60.0)
+    days = max(hours / 24.0, MIN_DAYS)
+
+    burn6 = burn_rate(pts, now_ts, 6)
+    burn24 = burn_rate(pts, now_ts, 24)
+    per_session = burn6 / live if (live and burn6) else 0.0
+
+    left_pct = max(0.0, 100.0 - used)
+    per_day = left_pct / days
+    projected = min(100.0, used + burn24 * hours)
+    slack = max(0.0, 100.0 - projected)
+    lock_at = None
+    if burn24 > 0 and used + burn24 * hours >= 100:
+        lock_at = now_ts + (left_pct / burn24) * 3600
+
+    # Anti-stacking: a pane launched in the last ten minutes has not reached
+    # the usage figures yet, so charge it to the score. It only lowers the
+    # score; it never excludes an account, because it is an assumption rather
+    # than a measurement.
+    charged = recent * (per_session or SESSION_BURN) * hours
+    score = max(0.0, slack - charged) * mult / hours
+
+    m = {
+        "multiplier": mult,
+        "binding": which, "bindingPct": round(used, 1),
+        "resetsAt": iso_z(reset), "hoursToReset": round(hours, 1),
+        "remainingPerDay": round(per_day, 1),
+        "burn6h": round(burn6, 2), "burn24h": round(burn24, 2),
+        "perSessionBurn": round(per_session, 2),
+        "projectedAtReset": round(projected, 1),
+        "slack": round(slack, 1),
+        "lockAt": iso_z(datetime.datetime.fromtimestamp(lock_at, UTC)) if lock_at else None,
+        "score": round(score, 2),
+        "units": {"week": 100 * mult,
+                  "used": round(used * mult, 1),
+                  "left": round(left_pct * mult, 1),
+                  "perDay": round(per_day * mult, 1),
+                  "burn6h": round(burn6 * mult, 2),
+                  "burn24h": round(burn24 * mult, 2),
+                  "perSession": round(per_session * mult, 2),
+                  "slack": round(slack * mult, 1)},
+    }
+    m["_reset_ts"] = reset.timestamp() if reset else None
+    m["_lock_ts"] = lock_at
+    return m
+
+
+def survey(names=None, tail_bytes=None, full_history=False):
+    """The whole pool, computed once: accounts (soonest reset first) + pool."""
+    now = datetime.datetime.now(UTC)
+    now_ts = now.timestamp()
+    panes = live_map()
+    hist = history_read(None if full_history else (tail_bytes or 262144))
+    have_history = any(len(v) >= 2 for v in hist.values())
+
+    accts = []
+    for name in (names if names is not None else accounts_registered()):
+        d = os.path.join(ROOT, name)
+        if not os.path.isdir(d):
+            continue
+        rec = read_profile(d, now)
+        key = "" if rec["primary"] else name
+        slot = panes.get(key) or {"live": 0, "recent": 0}
+        pts = hist.get(name, [])
+        a = {"name": name, "email": rec["email"], "display": rec["display"],
+             "tier": rec["tier"], "status": rec["status"],
+             "live": slot["live"], "recentLaunches": slot["recent"],
+             "primary": rec["primary"], "seenAt": rec["seen"], "err": rec["err"],
+             "worst": rec["worst"],
+             "session": {"pct": rec["session"]["pct"], "resetsAt": iso_z(rec["session"]["reset"])},
+             "weekly": {"pct": rec["weekly"]["pct"], "resetsAt": iso_z(rec["weekly"]["reset"])},
+             "fable": {"pct": rec["fable"]["pct"], "resetsAt": iso_z(rec["fable"]["reset"])},
+             "history": series(pts, now_ts) if full_history else []}
+        a.update(measure(rec, slot["live"], slot["recent"], pts, now_ts))
+        accts.append(a)
+
+    # Soonest reset first, in every view; no open window sorts last.
+    accts.sort(key=lambda a: (a["_reset_ts"] is None, a["_reset_ts"] or 0, a["name"]))
+
+    usable = [a for a in accts if eligible(a)]
+    resets = [a["_reset_ts"] for a in accts if a["_reset_ts"]]
+    locks = [a["_lock_ts"] for a in accts if a["_lock_ts"]]
+    counted = [a for a in accts if a["status"] in ("ok", "nousage")]
+    soon = [a for a in counted if a["_reset_ts"] and a["_reset_ts"] - now_ts <= 86400]
+    pool = {
+        "accounts": len(counted), "usable": len(usable),
+        "live": sum(a["live"] for a in accts),
+        "unitsWeek": sum(a["units"]["week"] for a in counted),
+        "unitsLeft": round(sum(a["units"]["left"] for a in counted), 1),
+        "remainingPerDay": round(sum(a["units"]["perDay"] for a in counted), 1),
+        "slack24h": round(sum(a["units"]["slack"] for a in soon), 1),
+        "atRisk": sum(1 for a in counted if a["_lock_ts"]),
+        "firstLockAt": iso_z(datetime.datetime.fromtimestamp(min(locks), UTC)) if locks else None,
+        "nextResetAt": iso_z(datetime.datetime.fromtimestamp(min(resets), UTC)) if resets else None,
+        "pick": max(usable, key=lambda a: a["score"])["name"] if usable else None,
+        "_next_ts": min(resets) if resets else None,
+    }
+    return {"generatedAt": iso_z(now),
+            "threshold": int(THRESHOLD) if THRESHOLD == int(THRESHOLD) else THRESHOLD,
+            "unit": {"symbol": "u",
+                     "meaning": "one percentage point of one week of a 1x account",
+                     "weekPer1x": 100},
+            "haveHistory": have_history, "pool": pool, "accounts": accts}
+
+
+def eligible(a):
+    """Pickable: logged in, under the threshold, and not projected to lock."""
+    if a["status"] not in ("ok", "nousage"):
+        return False
+    if a["bindingPct"] >= THRESHOLD or a["worst"] >= THRESHOLD:
+        return False
+    return a["_lock_ts"] is None
+
+
+# ------------------------------------------------------------------ render ---
+def dur(seconds):
+    if seconds is None:
+        return "-"
+    s = max(0, int(seconds))
+    d, h, m = s // 86400, (s % 86400) // 3600, (s % 3600) // 60
+    if d:
+        return "%dd %dh" % (d, h)
+    if h:
+        return "%dh %dm" % (h, m)
+    return "%dm" % m
+
+
+def pct(v):
+    return "%g%%" % round(v, 1)
+
+
+def u(v, suffix=" u"):
+    """Units for a table: whole u once there are more than ten of them, since
+    the tenth of a percentage point behind them is noise."""
+    return "%d%s" % (round(v), suffix) if abs(v) >= 10 else "%g%s" % (round(v, 1), suffix)
+
+
+def seen_col(a, now_ts):
+    if not a["seenAt"]:
+        out = "-"
+    else:
+        out = "%s ago" % dur(now_ts - a["seenAt"])
+    # A figure the last refresh could not replace, or one older than an hour,
+    # is history rather than the current state. Say so next to it.
+    if a["err"]:
+        out += " stale(%s)" % a["err"]
+    elif a["seenAt"] and now_ts - a["seenAt"] > 3600:
+        out += " stale"
+    return out
+
+
+def name_col(a):
+    mark = " *" if a["primary"] else ""
+    if a["email"]:
+        want = slug_raw(a["email"])
+        dom = a["email"].split("@")[-1].split(".")[0].lower()
+        if want and a["name"] not in (want, "%s-%s" % (want, dom)):
+            mark += " !"
+    return a["name"] + mark
+
+
+def slug_raw(email):
+    local = email.split("@")[0].lower()
+    out = "".join(c if c.isalnum() else "-" for c in local)
+    while "--" in out:
+        out = out.replace("--", "-")
+    return out.strip("-")
+
+
+def pool_block(s, now_ts):
+    p = s["pool"]
+    nxt_in = dur(p["_next_ts"] - now_ts) if p["_next_ts"] else "-"
+    lines = [
+        "POOL  %d accounts, %d usable, %d live  ·  %s/week, %s left  ·  %s/day"
+        % (p["accounts"], p["usable"], p["live"], u(p["unitsWeek"]),
+           u(p["unitsLeft"]), u(p["remainingPerDay"])),
+        "      %s expiring unused in 24 h  ·  %d at risk  ·  first lock %s  ·  next reset %s  ·  next seat %s"
+        % (u(p["slack24h"]), p["atRisk"], p["firstLockAt"] or "none", nxt_in,
+           p["pick"] or "none"),
+    ]
+    return lines
+
+
+DEAD = {"expired": "sign-in expired; this account is skipped until it logs in again",
+        "nologin": "no login in this profile",
+        "empty": "no config file, so this is not an account yet"}
+
+
+def render_status(s):
+    now_ts = time.time()
+    fmt = "%-27s %4s %4s %5s %5s %5s %5s %9s %8s %9s %10s  %s"
+    hdr = fmt % ("ACCOUNT", "TIER", "LIVE", "SESS", "WEEK", "FABLE", "BIND",
+                 "LEFT/DAY", "BURN 6h", "AT RESET", "RESETS IN", "SEEN")
+    out = [hdr]
+    for a in s["accounts"]:
+        tier = "%gx" % a["multiplier"]
+        live = str(a["live"]) if a["live"] else "-"
+        resets_in = dur(a["_reset_ts"] - now_ts) if a["_reset_ts"] else "-"
+        if a["status"] == "ok":
+            at_reset = "lock %s" % dur(a["_lock_ts"] - now_ts) if a["_lock_ts"] \
+                else pct(a["projectedAtReset"])
+            out.append(fmt % (name_col(a), tier, live, pct(a["session"]["pct"]),
+                              pct(a["weekly"]["pct"]), pct(a["fable"]["pct"]),
+                              pct(a["bindingPct"]), u(a["units"]["perDay"]),
+                              u(a["units"]["burn6h"], " u/h"), at_reset,
+                              resets_in, seen_col(a, now_ts)))
+        elif a["status"] == "nousage":
+            out.append(fmt % (name_col(a), tier, live, "?", "?", "?", "?", "?",
+                              "?", "?", resets_in, seen_col(a, now_ts)))
+        else:
+            # No numbers to align, so say what is wrong in plain words instead
+            # of a row of dashes.
+            out.append("%-27s %4s %4s  %s" % (name_col(a), tier, live, DEAD[a["status"]]))
+    out.append("-" * min(len(hdr), 131))
+    out.extend(pool_block(s, now_ts))
+    out.append("")
+    out.append("1 u = 1% of one week of a 1x account, so a max-5x week is 500 u.")
+    out.append("BIND is the fuller weekly window, Fable or all-model; everything derived uses it.")
+    out.append("threshold %g%%  ·  an account is skipped once any live limit reaches it"
+               % THRESHOLD)
+    if not s["haveHistory"]:
+        out.append("no usage history yet, so burn rates read 0; the refresh timer needs about an hour")
+    if any(a["primary"] for a in s["accounts"]):
+        out.append("* uses Claude default location (no CLAUDE_CONFIG_DIR)")
+    if any(" !" in name_col(a) for a in s["accounts"]):
+        out.append("! registered name no longer matches the login (run: claude-acct adopt)")
+    return "\n".join(out)
+
+
+def render_forecast(s):
+    now_ts = time.time()
+    fmt = "%-24s %4s %4s %5s %7s %7s %8s %8s %8s %9s %7s %6s %10s"
+    out = [fmt % ("ACCOUNT", "TIER", "LIVE", "BIND", "LEFT", "/DAY", "BURN 6h",
+                  "BURN 24h", "/SESS", "AT RESET", "SLACK", "SCORE", "RESETS IN")]
+    for a in s["accounts"]:
+        if a["status"] not in ("ok", "nousage"):
+            out.append("%-24s %4s %4s  %s" % (a["name"], "%gx" % a["multiplier"],
+                                              a["live"] or "-", DEAD[a["status"]]))
+            continue
+        un = a["units"]
+        at_reset = "lock %s" % dur(a["_lock_ts"] - now_ts) if a["_lock_ts"] \
+            else pct(a["projectedAtReset"])
+        out.append(fmt % (a["name"], "%gx" % a["multiplier"], a["live"] or "-",
+                          pct(a["bindingPct"]), u(un["left"]), u(un["perDay"]),
+                          u(un["burn6h"], " u/h"), u(un["burn24h"], " u/h"),
+                          u(un["perSession"], " u/h"), at_reset, u(un["slack"]),
+                          "%.2f" % a["score"],
+                          dur(a["_reset_ts"] - now_ts) if a["_reset_ts"] else "-"))
+    out.append("-" * 119)
+    out.extend(pool_block(s, now_ts))
+    out.append("")
+    out.append("score = slack in u / hours to reset, so the seat whose budget expires soonest goes first.")
+    out.append("a pane launched in the last %d min is charged one /SESS burn against the score."
+               % int(RECENT_LAUNCH / 60))
+    if not s["haveHistory"]:
+        out.append("no usage history yet: burn, AT RESET and SLACK assume nothing is burning.")
+    return "\n".join(out)
+
+
+CONTRACT = ["name", "email", "tier", "multiplier", "status", "live",
+            "recentLaunches", "primary", "units", "session", "weekly", "fable",
+            "binding", "bindingPct", "resetsAt", "hoursToReset",
+            "remainingPerDay", "burn6h", "burn24h", "perSessionBurn",
+            "projectedAtReset", "slack", "lockAt", "score", "seenAt", "err",
+            "history"]
+
+
+def contract(s):
+    return {"generatedAt": s["generatedAt"], "threshold": s["threshold"],
+            "unit": s["unit"], "haveHistory": s["haveHistory"],
+            "pool": {k: v for k, v in s["pool"].items() if not k.startswith("_")},
+            "accounts": [{k: a[k] for k in CONTRACT if k in a} for a in s["accounts"]]}
+
+
+# -------------------------------------------------------------------- pick ---
+def do_pick(argv):
+    fewest = False
+    exclude = None
+    chain = []
+    i = 0
+    while i < len(argv):
+        if argv[i] == "--fewest-live":
+            fewest = True
+        elif argv[i] == "--exclude":
+            i += 1
+            exclude = argv[i]
+        else:
+            chain.append(argv[i])
+        i += 1
+    order = {n: i for i, n in enumerate(chain)}
+    known = accounts_registered()
+    for n in chain:
+        if n not in known:
+            sys.stderr.write("claude-acct: chain names an unknown account: %s\n" % n)
+    wanted = [n for n in chain if n in known and n != exclude]
+    if not wanted:
+        sys.stderr.write("claude-acct: no usable account in chain: %s\n" % " ".join(chain))
+        return 1
+    s = survey(names=wanted)
+    for a in s["accounts"]:
+        if a["status"] == "nousage":
+            sys.stderr.write("claude-acct: %s: no usage figure cached yet, treating it as free\n" % a["name"])
+        elif a["status"] not in ("ok",):
+            sys.stderr.write("claude-acct: %s: %s, skipping\n" % (a["name"], a["status"]))
+    usable = [a for a in s["accounts"] if eligible(a)]
+    if usable:
+        if fewest:
+            # The old rule, kept for CLAUDE_ACCT_PICK=fewest-live: fewest live
+            # sessions, chain order only breaking ties.
+            best = min(usable, key=lambda a: (a["live"], order[a["name"]]))
+        else:
+            best = max(usable, key=lambda a: (a["score"], -order[a["name"]]))
+        print(best["name"])
+        return 0
+    live_ones = [a for a in s["accounts"] if a["status"] in ("ok", "nousage")]
+    if not live_ones:
+        sys.stderr.write("claude-acct: no usable account in chain: %s\n" % " ".join(chain))
+        return 1
+    best = min(live_ones, key=lambda a: (a["bindingPct"], order[a["name"]]))
+    sys.stderr.write("claude-acct: every account in the chain is at or above %g%% or "
+                     "projected to lock; using %s (%g%%)\n"
+                     % (THRESHOLD, best["name"], best["bindingPct"]))
+    print(best["name"])
+    return 0
+
+
+# ------------------------------------------------------------- small modes ---
+def mode_info(d):
+    now = datetime.datetime.now(UTC)
+    rec = read_profile(d, now)
+    binding, which, reset = binding_of(rec)
+    row = {"status": rec["status"], "email": rec["email"], "display": rec["display"],
+           "org": rec["org"], "tier": rec["tier"], "worst": rec["worst"],
+           "session": rec["session"]["pct"], "weekly": rec["weekly"]["pct"],
+           "reset": int(reset.timestamp()) if reset else "", "seen": rec["seen"],
+           "fable": rec["fable"]["pct"], "binding": which,
+           "bindingPct": binding, "multiplier": rec["multiplier"]}
+    if rec["status"] != "ok":
+        row["reset"] = ""
+    print("\t".join(str(row[k]) for k in INFO_FIELDS))
+
+
+def mode_seed(src_p, dst_p):
+    """Carry the questions you already answered into a new profile."""
+    GLOBAL = ["hasCompletedOnboarding", "lastOnboardingVersion", "hasSeenUltraplanTerms",
+              "installMethod", "autoUpdates", "autoUpdatesProtectedForNative",
+              "mcpServers", "officialMarketplaceAutoInstalled",
+              "officialMarketplaceAutoInstallAttempted", "respectGitignore",
+              "shiftEnterKeyBindingInstalled"]
+    PROJECT = ["hasTrustDialogAccepted", "hasClaudeMdExternalIncludesApproved",
+               "hasClaudeMdExternalIncludesWarningShown", "allowedTools",
+               "enabledMcpjsonServers", "disabledMcpjsonServers"]
+    APPROVALS = {"hasTrustDialogAccepted", "hasClaudeMdExternalIncludesApproved",
+                 "hasClaudeMdExternalIncludesWarningShown"}
+    with open(src_p) as fh:
+        src = json.load(fh)
+    if os.path.exists(dst_p):
+        try:
+            with open(dst_p) as fh:
+                dst = json.load(fh)
+        except Exception as exc:
+            # Overwriting an unreadable config would wipe oauthAccount and force
+            # a re-login. A transient read failure must never cost a login.
+            raise SystemExit("refusing to rewrite %s: it exists but could not be "
+                             "parsed (%s). Nothing was changed." % (dst_p, exc))
+    else:
+        dst = {}
+    for k in GLOBAL:
+        if k in src:
+            dst.setdefault(k, src[k])
+    projects, n = dst.setdefault("projects", {}), 0
+    for path, cfg in (src.get("projects") or {}).items():
+        if not cfg.get("hasTrustDialogAccepted"):
+            continue
+        tgt = projects.setdefault(path, {})
+        for k in PROJECT:
+            if k not in cfg:
+                continue
+            # An approval the source already granted must win. Claude writes
+            # these as false the first time it runs in an untrusted directory,
+            # and setdefault would then keep the false forever.
+            if k in APPROVALS and cfg[k]:
+                tgt[k] = cfg[k]
+            else:
+                tgt.setdefault(k, cfg[k])
+        n += 1
+    tmp = dst_p + ".claude-acct.tmp"
+    with open(tmp, "w") as fh:
+        json.dump(dst, fh, indent=2)
+    os.replace(tmp, dst_p)
+    print("carried over %d trusted directories and your onboarding answers" % n)
+
+
+def main(argv):
+    mode = argv[0] if argv else "status"
+    rest = argv[1:]
+    if mode == "info":
+        mode_info(rest[0])
+    elif mode == "token":
+        cred = load(creds_json(rest[0])) or {}
+        tok = (cred.get("claudeAiOauth") or {}).get("accessToken")
+        if not tok:
+            return 1
+        print(tok)
+    elif mode == "uuid":
+        cfg = load(rest[0]) or {}
+        print((cfg.get("oauthAccount") or {}).get("accountUuid", ""))
+    elif mode == "creds-ok":
+        cred = load(rest[0]) or {}
+        return 0 if cred.get("claudeAiOauth") else 1
+    elif mode == "whose-token":
+        try:
+            acc = json.load(sys.stdin)["account"]
+        except Exception:
+            return 1
+        if not acc.get("uuid"):
+            return 1
+        print("%s\t%s" % (acc.get("email", ""), acc["uuid"]))
+    elif mode == "seed":
+        mode_seed(rest[0], rest[1])
+    elif mode == "history-append":
+        history_append(rest[0], rest[1])
+    elif mode == "status":
+        print(render_status(survey()))
+    elif mode == "forecast":
+        s = survey(full_history=True)
+        if "--json" in rest:
+            print(json.dumps(contract(s), indent=2))
+        else:
+            print(render_forecast(s))
+    elif mode == "pick":
+        return do_pick(rest)
+    else:
+        sys.stderr.write("claude-acct: unknown internal mode %s\n" % mode)
+        return 2
+    return 0
+
+
+sys.exit(main(sys.argv[1:]))
+PY
+}
+
+acct_info() { py info "$1"; }
+field() { printf '%s' "$1" | cut -f"$2"; }
+
+# ---------------------------------------------------------------- usage API ---
 refresh_usage() {  # $1 = profile dir. Quiet; failure just leaves the old value
-  # and records why in "$cache.err" (the HTTP code, or "curl-failed"),
-  # so status can mark the old value stale. Success removes that file.
-  local dir="$1" cache tok tmp code now
+  # and records why in "$cache.err" (the HTTP code, or "curl-failed"), so status
+  # can mark the old value stale. Success removes that file and appends one
+  # history point, which is where every burn rate comes from.
+  local dir="$1" cache tok tmp code now name
   cache="$(usage_cache "$dir")"
   now=$(date +%s)
-  if [ -f "$cache" ] && [ $(( now - $(stat -c%Y "$cache") )) -lt "$USAGE_TTL" ]; then
+  # CA_FORCE ignores the cache age without deleting the cache, so a failed
+  # fetch still leaves the last known figure in place.
+  if [ "${CA_FORCE:-0}" != 1 ] && [ -f "$cache" ] \
+     && [ $(( now - $(stat -c%Y "$cache") )) -lt "$USAGE_TTL" ]; then
     return 0
   fi
-  tok="$(python3 -c 'import json,sys
-try: print(json.load(open(sys.argv[1]))["claudeAiOauth"]["accessToken"])
-except Exception: raise SystemExit(1)' "$(creds_json "$dir")" 2>/dev/null)" || return 1
+  tok="$(py token "$dir" 2>/dev/null)" || return 1
   [ -n "$tok" ] || return 1
   tmp="$cache.tmp.$$"
   code="$(curl -s -o "$tmp" -w '%{http_code}' -m 20 \
@@ -77,107 +944,37 @@ except Exception: raise SystemExit(1)' "$(creds_json "$dir")" 2>/dev/null)" || r
   if [ "$code" = 200 ] && python3 -c 'import json,sys;json.load(open(sys.argv[1]))["limits"]' "$tmp" 2>/dev/null; then
     mv "$tmp" "$cache"
     rm -f "$cache.err"
+    name="$(slug_of_dir "$dir")"
+    py history-append "$name" "$dir" 2>/dev/null || true
     return 0
   fi
   rm -f "$tmp"
   printf '%s' "${code:-curl-failed}" > "$cache.err"
   return 1
 }
+
 usage_err() {  # $1 = profile dir. Prints the recorded failure code, if any.
   local f; f="$(usage_cache "$1").err"
   [ -f "$f" ] && cat "$f"
   return 0
 }
 
-# ---------------------------------------------------------------- identity ---
-# Prints TAB-separated: status email display org tier worst session weekly
-#                       reset_epoch seen_epoch
-# status: ok | nologin | expired | nousage | empty
-acct_info() {
-python3 - "$(cfg_json "$1")" "$(creds_json "$1")" "$(usage_cache "$1")" <<'PY'
-import json, os, sys, datetime
-cfg_p, cred_p, usage_p = sys.argv[1], sys.argv[2], sys.argv[3]
-def out(status, **kw):
-    f = ["status","email","display","org","tier","worst","session","weekly","reset","seen"]
-    kw["status"] = status
-    print("\t".join(str(kw.get(k, "")) for k in f))
-    raise SystemExit(0)
-
-try:
-    cfg = json.load(open(cfg_p))
-except Exception:
-    out("empty")
-
-acc = cfg.get("oauthAccount") or {}
-ident = dict(
-    email=acc.get("emailAddress", ""),
-    display=acc.get("displayName") or acc.get("fullName", ""),
-    org=acc.get("organizationName", ""),
-    tier=(acc.get("userRateLimitTier") or "").replace("default_claude_", "").replace("_", " "),
-)
-if not ident["email"]:
-    out("nologin", **ident)
-
-try:
-    cred = json.load(open(cred_p))["claudeAiOauth"]
-    if cred.get("refreshTokenExpiresAt", 0) / 1000 < datetime.datetime.now().timestamp():
-        out("expired", **ident)
-except Exception:
-    out("nologin", **ident)
-
-# Prefer our own live fetch; fall back to whatever Claude last cached.
-u, seen = None, 0
-try:
-    u = json.load(open(usage_p))
-    seen = int(os.path.getmtime(usage_p))
-except Exception:
-    cu = cfg.get("cachedUsageUtilization") or {}
-    u = cu.get("utilization") or None
-    seen = int(cu.get("fetchedAtMs", 0) / 1000)
-if not u:
-    out("nousage", seen=seen, **ident)
-
-now = datetime.datetime.now(datetime.timezone.utc)
-def live(d):
-    # A limit past its reset has already emptied, so it counts as zero.
-    r = d.get("resets_at")
-    if not r:
-        return True
-    try:
-        return datetime.datetime.fromisoformat(r) > now
-    except ValueError:
-        return True
-
-worst, reset = 0, None
-for lim in u.get("limits") or []:
-    if not live(lim):
-        continue
-    pct = lim.get("percent") or 0
-    worst = max(worst, pct)
-    if pct >= 1 and lim.get("resets_at"):
-        t = datetime.datetime.fromisoformat(lim["resets_at"])
-        if reset is None or t < reset:
-            reset = t
-
-def bucket(name):
-    b = u.get(name) or {}
-    return (b.get("utilization") or 0) if live(b) else 0
-
-out("ok", worst=worst, session=bucket("five_hour"), weekly=bucket("seven_day"),
-    reset=int(reset.timestamp()) if reset else "", seen=seen, **ident)
-PY
+refresh_some() {  # refresh the named accounts at once, so a cold cache is one
+  # round trip rather than eight. Each child writes only its own files.
+  local n pids=()
+  for n in "$@"; do
+    [ -d "$ROOT/$n" ] || continue
+    refresh_usage "$ROOT/$n" & pids+=("$!")
+  done
+  [ ${#pids[@]} -gt 0 ] && { wait "${pids[@]}" 2>/dev/null || true; }
+  return 0
 }
 
-field() { printf '%s' "$1" | cut -f"$2"; }
-
-human_dur() {  # seconds -> "2h 24m"
-  local s="${1:-}"
-  [ -z "$s" ] && { printf '-'; return; }
-  (( s < 0 )) && s=0
-  local d=$((s/86400)) h=$(((s%86400)/3600)) m=$(((s%3600)/60))
-  if   (( d )); then printf '%dd %dh' "$d" "$h"
-  elif (( h )); then printf '%dh %dm' "$h" "$m"
-  else               printf '%dm' "$m"; fi
+refresh_all() {
+  local -a all=()
+  mapfile -t all < <(cmd_list)
+  [ ${#all[@]} -gt 0 ] && refresh_some "${all[@]}"
+  return 0
 }
 
 # ------------------------------------------------------------------ listing ---
@@ -191,96 +988,6 @@ cmd_list() {
   done
 }
 
-cmd_status() {
-  local fmt='%-24s %-34s %-15s %-8s %5s %8s %7s %10s %11s\n' n info st now seen reset seen_s reset_s any=0
-  local used_star=0 used_bang=0
-  local n_acct=0 n_free=0 live_sum=0 sess_list="" week_list=""
-  local hdr
-  # shellcheck disable=SC2059
-  hdr="$(printf "$fmt" ACCOUNT EMAIL NAME PLAN LIVE SESSION WEEKLY "RESETS IN" "LAST SEEN")"
-  printf '%s\n' "$hdr"
-  now=$(date +%s)
-  local -A live_by=(); local lc_name lc_n
-  while IFS=$'\t' read -r lc_name lc_n; do
-    [ -n "$lc_name" ] && live_by["$lc_name"]="$lc_n"
-  done < <(live_counts)
-  while read -r n; do
-    [ -n "$n" ] || continue
-    any=1
-    refresh_usage "$ROOT/$n" || true
-    info="$(acct_info "$ROOT/$n")"
-    st=$(field "$info" 1)
-    seen=$(field "$info" 10); reset=$(field "$info" 9)
-    seen_s="-"; reset_s="-"
-    [ -n "$seen" ] && [ "$seen" != 0 ] && seen_s="$(human_dur $((now-seen))) ago"
-    [ -n "$reset" ] && reset_s="$(human_dur $((reset-now)))"
-    # A usage figure older than an hour, or one the last refresh could not
-    # replace, is history, not the current state. Say so next to it.
-    local err_code; err_code="$(usage_err "$ROOT/$n")"
-    if [ -n "$err_code" ]; then seen_s="$seen_s stale($err_code)"
-    elif [ -n "$seen" ] && [ "$seen" != 0 ] && [ $((now-seen)) -gt 3600 ]; then seen_s="$seen_s stale"
-    fi
-    local mark=""
-    is_primary "$ROOT/$n" && { mark=" *"; used_star=1; }
-    local want dom
-    want="$(derive_slug_raw "$(field "$info" 2)")"
-    if [ -n "$want" ] && [ "$want" != "$n" ]; then
-      dom="$(field "$info" 2)"; dom="${dom#*@}"
-      [ "$want-$(printf '%s' "${dom%%.*}" | tr 'A-Z.' 'a-z-')" = "$n" ] || { mark="$mark !"; used_bang=1; }
-    fi
-    local em nm
-    em="$(field "$info" 2)"; nm="$(field "$info" 3)"
-    local live live_n; live_n="${live_by[$n]:-0}"
-    live="$live_n"; [ "$live" = 0 ] && live="-"
-    live_sum=$((live_sum + live_n))
-    case "$st" in
-      ok)      n_acct=$((n_acct+1))
-               sess_list="$sess_list $(field "$info" 7)"
-               week_list="$week_list $(field "$info" 8)"
-               [ "$(field "$info" 6)" -lt "$THRESHOLD" ] && n_free=$((n_free+1)) ;;
-      nousage) n_acct=$((n_acct+1)); n_free=$((n_free+1)) ;;
-    esac
-    [ -n "$em" ] || em="-"
-    [ -n "$nm" ] || nm="-"
-    case "$st" in
-      ok)      # shellcheck disable=SC2059
-               printf "$fmt" "$n$mark" "$em" "$nm" "$(field "$info" 5)" "$live" \
-                 "$(field "$info" 7)%" "$(field "$info" 8)%" "$reset_s" "$seen_s" ;;
-      nousage) # shellcheck disable=SC2059
-               printf "$fmt" "$n$mark" "$em" "$nm" "$(field "$info" 5)" "$live" \
-                 "?" "?" "$reset_s" "$seen_s" ;;
-      *)       # shellcheck disable=SC2059
-               printf "$fmt" "$n$mark" "$em" "$nm" "$st" "$live" - - - "$seen_s" ;;
-    esac
-  done < <(cmd_list)
-  [ "$any" = 1 ] || printf '  (none yet: run "claude-acct adopt", then "claude-acct add")\n'
-
-  if [ "$n_acct" -gt 0 ]; then
-    local sess_pool week_pool
-    sess_pool="$(awk -v n="$n_acct" '{t=0; for(i=1;i<=NF;i++) t+=$i; printf "%.0f", t/n}' <<< "$sess_list")"
-    week_pool="$(awk -v n="$n_acct" '{t=0; for(i=1;i<=NF;i++) t+=$i; printf "%.0f", t/n}' <<< "$week_list")"
-    printf '%s\n' "$(printf "%${#hdr}s" '' | tr ' ' -)"
-    # shellcheck disable=SC2059
-    printf "$fmt" "TOTAL" "$n_acct accounts, $n_free usable now" "" "" \
-      "$live_sum" "$sess_pool%" "$week_pool%" "" "" | sed 's/[[:space:]]*$//'
-    printf 'each account is its own limit, so TOTAL averages them: %s%% of all %s session pools is gone\n' \
-      "$sess_pool" "$n_acct"
-  fi
-  if ! wrapper_ok; then
-    printf '\nbare "claude" is NOT routed to an account any more: %s is not the wrapper.\n' \
-      "$(command -v claude 2>/dev/null || echo 'claude')"
-    printf 'A Claude update replaces it. Restore it with:  claude-acct wrapper\n'
-  fi
-  printf '\nthreshold %s%%  ·  an account is skipped once any live limit reaches it\n' "$THRESHOLD"
-  [ "$used_star" = 1 ] && printf '* uses Claude default location (no CLAUDE_CONFIG_DIR)\n'
-  [ "$used_bang" = 1 ] && printf '! registered name no longer matches the login (run: claude-acct adopt)\n'
-  [ -f "$CANON/.credentials.json" ] && \
-    printf 'a login sits at the shared location (~/.claude/.credentials.json); run: claude-acct claim\n'
-  if [ -s "$ROOT/.identity-log" ]; then
-    printf '\nlast account change seen by the session guard:\n  %s\n' "$(tail -1 "$ROOT/.identity-log")"
-  fi
-}
-
 slug_of_dir() {  # name a profile dir by its registered account name, else its basename
   local d n
   d="$(readlink -f "$1")"
@@ -291,13 +998,36 @@ slug_of_dir() {  # name a profile dir by its registered account name, else its b
   printf '%s' "$(basename "$d")"
 }
 
+cmd_status() {
+  refresh_all
+  ensure_refresh_timer
+  py status
+  if ! wrapper_ok; then
+    printf '\nbare "claude" is NOT routed to an account any more: %s is not the wrapper.\n' \
+      "$(command -v claude 2>/dev/null || echo 'claude')"
+    printf 'A Claude update replaces it. Restore it with:  claude-acct wrapper\n'
+  fi
+  [ -f "$CANON/.credentials.json" ] && \
+    printf 'a login sits at the shared location (~/.claude/.credentials.json); run: claude-acct claim\n'
+  if [ -s "$ROOT/.identity-log" ]; then
+    printf '\nlast account change seen by the session guard:\n  %s\n' "$(tail -1 "$ROOT/.identity-log")"
+  fi
+  return 0
+}
+
+cmd_forecast() {
+  refresh_all
+  py forecast "$@"
+}
+
 cmd_whoami() {
   local d="${CLAUDE_CONFIG_DIR:-$CANON}" info
   refresh_usage "$d" || true
   info="$(acct_info "$d")"
-  printf '%s  %s / %s  ·  %s  ·  session %s%%  weekly %s%%  (%s)\n' \
+  printf '%s  %s / %s  ·  %s  ·  session %s%%  weekly %s%%  fable %s%%  ·  binding %s %s%%  (%s)\n' \
     "$(slug_of_dir "$d")" "$(field "$info" 3)" "$(field "$info" 4)" "$(field "$info" 5)" \
-    "$(field "$info" 7)" "$(field "$info" 8)" "$(field "$info" 1)"
+    "$(field "$info" 7)" "$(field "$info" 8)" "$(field "$info" 11)" \
+    "$(field "$info" 12)" "$(field "$info" 13)" "$(field "$info" 1)"
   printf 'config: %s\n' "$(cfg_json "$d")"
 }
 
@@ -321,10 +1051,9 @@ read_chain() {
 }
 
 # ~/.claude-accounts/default is the machine-wide chain for any directory without
-# its own .claude/accounts. Like a project chain, pick reads it as a set of
-# allowed accounts and takes the one with the fewest live sessions; order only
-# breaks ties. Its first line is also default_first, the fallback seed account
-# when ~/.claude-accounts/seed does not name one.
+# its own .claude/accounts. Like a project chain it is a set of allowed accounts,
+# scored the same way; order only breaks ties. Its first line is also
+# default_first, the fallback seed account when ~/.claude-accounts/seed is unset.
 read_default_chain() {
   [ -f "$ROOT/default" ] || return 0
   grep -vE '^[[:space:]]*(#|$)' "$ROOT/default" | awk '{print $1}'
@@ -360,6 +1089,8 @@ cmd_bind() {
   printf 'bound %s -> %s\n' "$dir" "$*"
 }
 
+# Which seat a new pane should take. The chain says which accounts are allowed;
+# the score says which of them has budget that would otherwise expire unused.
 cmd_pick() {
   local -a chain=()
   mapfile -t chain < <(read_chain "${1:-$PWD}")
@@ -380,39 +1111,11 @@ cmd_pick() {
     chain=("${wide[@]}")
   fi
 
-  # Among the accounts under the threshold, take the one with the fewest live
-  # sessions; chain order only breaks ties (strictly fewer wins, so the earlier
-  # entry keeps a tie). Usage registers only after work is done, so picking the
-  # first free account would stack a burst of launches on one seat.
-  local -A live_by=(); local lc_name lc_n
-  while IFS=$'\t' read -r lc_name lc_n; do
-    [ -n "$lc_name" ] && live_by["$lc_name"]="$lc_n"
-  done < <(live_counts)
-  local n info st worst best="" best_worst=1000 least="" least_load=0
-  for n in "${chain[@]}"; do
-    [ -n "$n" ] || continue
-    [ "$n" = "${CLAUDE_ACCT_EXCLUDE:-}" ] && continue
-    [ -d "$ROOT/$n" ] || { warn "chain names an unknown account: $n"; continue; }
-    refresh_usage "$ROOT/$n" || true
-    info="$(acct_info "$ROOT/$n")"
-    st=$(field "$info" 1)
-    case "$st" in
-      ok)      worst=$(field "$info" 6) ;;
-      nousage) worst=0
-               warn "$n: no usage figure cached yet, treating it as free" ;;
-      *)       warn "$n: $st, skipping"; continue ;;
-    esac
-    if [ "$worst" -lt "$THRESHOLD" ]; then
-      local load; load="${live_by[$n]:-0}"
-      if [ -z "$least" ] || [ "$load" -lt "$least_load" ]; then least="$n"; least_load="$load"; fi
-      continue
-    fi
-    if [ "$worst" -lt "$best_worst" ]; then best_worst="$worst"; best="$n"; fi
-  done
-  if [ -n "$least" ]; then printf '%s\n' "$least"; return 0; fi
-  [ -n "$best" ] || die "no usable account in chain: ${chain[*]}"
-  warn "every account in the chain is at or above ${THRESHOLD}%; using the least full ($best at ${best_worst}%)"
-  printf '%s\n' "$best"
+  refresh_some "${chain[@]}"
+  local -a args=()
+  [ "${CLAUDE_ACCT_PICK:-}" = "fewest-live" ] && args+=(--fewest-live)
+  [ -n "${CLAUDE_ACCT_EXCLUDE:-}" ] && args+=(--exclude "$CLAUDE_ACCT_EXCLUDE")
+  py pick "${args[@]}" "${chain[@]}" || die "no usable account in chain: ${chain[*]}"
 }
 
 # ------------------------------------------------------------------- slices ---
@@ -447,14 +1150,74 @@ EOF
     cp "$tmp" "$SLICE_DIR/$unit"; changed=1
   fi
   rm -f "$tmp"
-  # Old dashed unit names nested under each other; drop the ones we created.
-  local old
-  for old in sami-azirar sami-azirar-rwth-aachen; do
-    if [ -f "$SLICE_DIR/claude-$old.slice" ]; then
-      rm -f "$SLICE_DIR/claude-$old.slice"; changed=1
-    fi
-  done
   [ "$changed" = 1 ] && systemctl --user daemon-reload
+  return 0
+}
+
+# --------------------------------------------------------------- refreshing ---
+# The burn rates are only as good as the history, and the history only grows
+# when someone fetches. So a timer fetches every ten minutes whether or not a
+# pane happens to run status.
+ensure_refresh_timer() {
+  local changed=0 tmp
+  command -v systemctl >/dev/null 2>&1 || return 0
+  mkdir -p "$SLICE_DIR"
+  tmp="$(mktemp)"
+  cat > "$tmp" <<EOF
+[Unit]
+Description=Refresh the Claude account usage snapshots and history
+
+[Service]
+Type=oneshot
+Environment=PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=$HOME/.local/bin/claude-acct refresh
+# One account failing to answer is normal (an expired access token refreshes
+# when a session next starts on it), and must not mark the timer failed.
+SuccessExitStatus=0 1
+EOF
+  if ! cmp -s "$tmp" "$SLICE_DIR/claude-acct-refresh.service"; then
+    cp "$tmp" "$SLICE_DIR/claude-acct-refresh.service"; changed=1
+  fi
+  cat > "$tmp" <<'EOF'
+[Unit]
+Description=Refresh the Claude account usage every 10 minutes
+
+[Timer]
+OnActiveSec=1min
+OnUnitActiveSec=10min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target
+EOF
+  if ! cmp -s "$tmp" "$SLICE_DIR/$REFRESH_TIMER"; then
+    cp "$tmp" "$SLICE_DIR/$REFRESH_TIMER"; changed=1
+  fi
+  rm -f "$tmp"
+  chmod 644 "$SLICE_DIR/claude-acct-refresh.service" "$SLICE_DIR/$REFRESH_TIMER"
+  [ "$changed" = 1 ] && systemctl --user daemon-reload
+  systemctl --user is-active --quiet "$REFRESH_TIMER" && return 0
+  systemctl --user enable --now "$REFRESH_TIMER" >/dev/null 2>&1 \
+    || warn "could not start $REFRESH_TIMER; run: systemctl --user enable --now $REFRESH_TIMER"
+  return 0
+}
+
+cmd_refresh() {
+  local -a names=()
+  if [ -n "${1:-}" ]; then names=("$1"); else mapfile -t names < <(cmd_list); fi
+  ensure_refresh_timer
+  local n ok=0 bad=0
+  CA_FORCE=1 refresh_some "${names[@]}"
+  for n in "${names[@]}"; do
+    [ -d "$ROOT/$n" ] || continue
+    if [ -z "$(usage_err "$ROOT/$n")" ]; then printf '%-26s refreshed\n' "$n"; ok=$((ok+1))
+    else printf '%-26s FAILED (%s)\n' "$n" "$(usage_err "$ROOT/$n")"; bad=$((bad+1)); fi
+  done
+  if [ "$bad" -gt 0 ]; then
+    printf '429 or 401 with 0 live sessions usually means the access token expired; it refreshes when a session starts on that account\n'
+    [ "$ok" = 0 ] && return 1
+    return 1
+  fi
   return 0
 }
 
@@ -525,56 +1288,7 @@ seed_source() {  # where the answered-questions state actually lives now
   printf '%s' "$PRIMARY_CFG"
 }
 
-seed_state() {  # carry over the questions you already answered
-python3 - "$(seed_source)" "$1/.claude.json" <<'PY'
-import json, os, sys
-src_p, dst_p = sys.argv[1], sys.argv[2]
-GLOBAL = ["hasCompletedOnboarding", "lastOnboardingVersion", "hasSeenUltraplanTerms",
-          "installMethod", "autoUpdates", "autoUpdatesProtectedForNative",
-          "mcpServers", "officialMarketplaceAutoInstalled",
-          "officialMarketplaceAutoInstallAttempted", "respectGitignore",
-          "shiftEnterKeyBindingInstalled"]
-PROJECT = ["hasTrustDialogAccepted", "hasClaudeMdExternalIncludesApproved",
-           "hasClaudeMdExternalIncludesWarningShown", "allowedTools",
-           "enabledMcpjsonServers", "disabledMcpjsonServers"]
-APPROVALS = {"hasTrustDialogAccepted", "hasClaudeMdExternalIncludesApproved",
-             "hasClaudeMdExternalIncludesWarningShown"}
-src = json.load(open(src_p))
-if os.path.exists(dst_p):
-    try:
-        dst = json.load(open(dst_p))
-    except Exception as e:
-        # Overwriting an unreadable config would wipe oauthAccount and force a
-        # re-login. A transient read failure must never cost a login.
-        raise SystemExit(f"refusing to rewrite {dst_p}: it exists but could not "
-                         f"be parsed ({e}). Nothing was changed.")
-else:
-    dst = {}
-for k in GLOBAL:
-    if k in src:
-        dst.setdefault(k, src[k])
-projects, n = dst.setdefault("projects", {}), 0
-for path, cfg in (src.get("projects") or {}).items():
-    if not cfg.get("hasTrustDialogAccepted"):
-        continue
-    tgt = projects.setdefault(path, {})
-    for k in PROJECT:
-        if k not in cfg:
-            continue
-        # An approval the source already granted must win. Claude writes these
-        # as false the first time it runs in an untrusted directory, and
-        # setdefault would then keep the false forever.
-        if k in APPROVALS and cfg[k]:
-            tgt[k] = cfg[k]
-        else:
-            tgt.setdefault(k, cfg[k])
-    n += 1
-tmp = dst_p + ".claude-acct.tmp"
-json.dump(dst, open(tmp, "w"), indent=2)
-os.replace(tmp, dst_p)
-print(f"carried over {n} trusted directories and your onboarding answers")
-PY
-}
+seed_state() { py seed "$(seed_source)" "$1/.claude.json"; }
 
 derive_slug_raw() {  # email -> the name it would get, ignoring collisions
   printf '%s' "${1%%@*}" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/^-*//;s/-*$//'
@@ -592,13 +1306,7 @@ derive_slug() {  # email -> account name, disambiguated by domain on collision
   printf '%s' "$slug"
 }
 
-acct_uuid() {
-python3 - "$1" <<'PY'
-import json, sys
-try: print(json.load(open(sys.argv[1])).get("oauthAccount", {}).get("accountUuid", ""))
-except Exception: print("")
-PY
-}
+acct_uuid() { py uuid "$1"; }
 
 cmd_adopt() {
   mkdir -p "$ROOT"
@@ -650,7 +1358,7 @@ cmd_add() {
   [ -f "$ROOT/default" ] || die 'run "claude-acct adopt" first, so your existing account is registered'
 
   if [ -d "$STAGING" ]; then
-    local sst sinfo semail suuid dup=""
+    local sst sinfo semail suuid dup="" n
     sinfo="$(acct_info "$STAGING")"
     sst="$(field "$sinfo" 1)"
     case "$sst" in
@@ -875,40 +1583,16 @@ EOF
 # claim consolidates it, keeping the newer file and discarding nothing silently.
 
 identity_from_token() {  # -> "email<TAB>uuid", asking Anthropic who this token is
-  local cred="$CANON/.credentials.json" tok
-  tok="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["claudeAiOauth"]["accessToken"])' "$cred" 2>/dev/null)" || return 1
+  local tok
+  tok="$(py token "$CANON" 2>/dev/null)" || return 1
   [ -n "$tok" ] || return 1
   curl -s -m 25 https://api.anthropic.com/api/oauth/profile \
     -H "Authorization: Bearer $tok" -H "anthropic-beta: oauth-2025-04-20" \
-  | python3 -c '
-import json,sys
-try: a = json.load(sys.stdin)["account"]
-except Exception: raise SystemExit(1)
-e, u = a.get("email",""), a.get("uuid","")
-if not u: raise SystemExit(1)
-print(e + "\t" + u)'
+  | py whose-token
 }
 
-# Count live sessions pinned to the shared location. A running process cannot
-# be moved to a profile, so taking its credentials away logs it out mid-work.
-live_counts() {  # one /proc walk; prints "account<TAB>count" per account seen
-  local vdir="$HOME/.local/share/claude/versions/" d cfg
-  for d in /proc/[0-9]*; do
-    case "$(readlink "$d/exe" 2>/dev/null)" in "$vdir"*) ;; *) continue ;; esac
-    cfg="$(tr '\0' '\n' < "$d/environ" 2>/dev/null | sed -n 's/^CLAUDE_CONFIG_DIR=//p' | head -1)"
-    [ -n "$cfg" ] && printf '%s\n' "${cfg##*/}"
-  done | sort | uniq -c | awk '{print $2 "\t" $1}'
-}
-sessions_for_account() {  # live Claude processes already on this account
-  local n; n="$(live_counts | awk -F'\t' -v w="$1" '$1==w {print $2}')"
-  printf '%s' "${n:-0}"
-}
-
-wrapper_ok() {  # is bare `claude` still routed to the project's account?
-  local w; w="$(command -v claude 2>/dev/null)" || return 1
-  grep -q 'claude-acct run' "$w" 2>/dev/null
-}
-
+# A running process cannot be moved to a profile, so taking its credentials
+# away logs it out mid-work. Count what is on the shared location before that.
 shared_location_sessions() {
   local vdir="$HOME/.local/share/claude/versions/" d n=0
   for d in /proc/[0-9]*; do
@@ -919,6 +1603,11 @@ shared_location_sessions() {
     grep -qz "^CLAUDE_CONFIG_DIR=" "$d/environ" 2>/dev/null || n=$((n+1))
   done
   printf '%s' "$n"
+}
+
+wrapper_ok() {  # is bare `claude` still routed to the project's account?
+  local w; w="$(command -v claude 2>/dev/null)" || return 1
+  grep -q 'claude-acct run' "$w" 2>/dev/null
 }
 
 cmd_claim() {
@@ -1068,7 +1757,7 @@ cmd_backup() {
   while read -r n; do
     [ -n "$n" ] || continue
     f="$(creds_json "$ROOT/$n")"
-    if [ -f "$f" ] && python3 -c 'import json,sys;json.load(open(sys.argv[1]))["claudeAiOauth"]' "$f" 2>/dev/null; then
+    if [ -f "$f" ] && py creds-ok "$f"; then
       cp -p "$f" "$dest/$n.credentials.json"
       printf '  %-26s saved\n' "$n"
       count=$((count+1))
@@ -1087,18 +1776,6 @@ cmd_backup() {
     "$dest" "$ROOT"
 }
 
-cmd_refresh() {
-  local n rc=0
-  for n in ${1:+"$1"} ${1:-$(cmd_list)}; do
-    [ -d "$ROOT/$n" ] || continue
-    rm -f "$(usage_cache "$ROOT/$n")"
-    if refresh_usage "$ROOT/$n"; then printf '%-18s refreshed\n' "$n"
-    else printf '%-18s FAILED (%s)\n' "$n" "$(usage_err "$ROOT/$n")"; rc=1; fi
-  done
-  [ "$rc" = 1 ] && printf '429 or 401 with 0 live sessions usually means the access token expired; it refreshes when a session starts on that account\n'
-  return $rc
-}
-
 cmd_trust() {
   local n="${1:?usage: claude-acct trust <account>}"
   [ -d "$ROOT/$n" ] || die "no such account: $n"
@@ -1114,6 +1791,11 @@ cmd_doctor() {
   printf 'account %s -> %s\n' "$n" "$(readlink -f "$dir")"
   printf '  login       %s\n' "$(field "$info" 1)"
   printf '  identity    %s / %s  (%s)\n' "$(field "$info" 3)" "$(field "$info" 4)" "$(field "$info" 2)"
+  printf '  plan        %s  (x%s: one week is %s u)\n' "$(field "$info" 5)" \
+    "$(field "$info" 14)" "$(( 100 * $(field "$info" 14) ))"
+  printf '  usage       session %s%%  weekly %s%%  fable %s%%  ·  binding %s at %s%%\n' \
+    "$(field "$info" 7)" "$(field "$info" 8)" "$(field "$info" 11)" \
+    "$(field "$info" 12)" "$(field "$info" 13)"
   printf '  config      %s\n' "$(cfg_json "$dir")"
   local want dom; want="$(derive_slug_raw "$(field "$info" 2)")"
   if [ -n "$want" ] && [ "$want" != "$n" ]; then
@@ -1147,6 +1829,7 @@ cmd_doctor() {
   fi
   printf '  slice       %s\n' \
     "$([ -f "$SLICE_DIR/$(slice_unit "$n")" ] && slice_unit "$n" || echo missing)"
+  return 0
 }
 
 # ----------------------------------------------------------------- takeover ---
@@ -1196,9 +1879,10 @@ cmd_takeover() {
 
 usage() {
   cat <<'EOF'
-claude-acct - several Claude accounts on one machine
+claude-acct - several Claude accounts on one machine, as one budget
 
-  claude-acct status                 how full every account is
+  claude-acct status                 how full every account is, and the pool
+  claude-acct forecast [--json]      per-day budget, burn, slack, and the pick
   claude-acct refresh [NAME]         force a live usage fetch now
   claude-acct backup                 snapshot every account's login file
   claude-acct wrapper                re-route bare "claude" after a Claude update
@@ -1213,37 +1897,46 @@ claude-acct - several Claude accounts on one machine
   claude-acct add --finish           finish an add you did by hand
   claude-acct add --finish --replace renew an existing account's login instead
   claude-acct add --discard          throw away a staged login and start over
-  claude-acct takeover [-a NAME]      continue this chat on another account
+  claude-acct takeover [-a NAME]     continue this chat on another account
   claude-acct bind NAME [NAME...]    set this project's accounts, in order
   claude-acct bind --show            show this project's accounts
   claude-acct trust NAME             copy your trusted-folder answers to an account
   claude-acct doctor [NAME]          check one account's sharing and login
   claude-acct list                   account names, one per line
+  claude-acct timer                  install the 10-minute usage-history timer
+
+Everything summed is in u: 1 u is one percentage point of one week of a 1x
+account, so a max-5x week is 500 u. pick takes the account whose remaining
+budget would otherwise expire soonest (highest slack-in-u per hour to reset).
 
 run passes --settings ~/.claude/settings.json and --dangerously-skip-permissions
 (--no-bypass turns the latter off) inside a per-account slice under the claude.slice memory pool.
 
-env: CLAUDE_ACCT_THRESHOLD (80)  CLAUDE_ACCT_POOL_MEMMAX (40G)  CLAUDE_ACCT_ROOT
+env: CLAUDE_ACCT_THRESHOLD (80)  CLAUDE_ACCT_PICK (score|fewest-live)
+     CLAUDE_ACCT_USAGE_TTL (300)  CLAUDE_ACCT_SESSION_BURN (0.4 pct/h)
+     CLAUDE_ACCT_POOL_MEMMAX (40G)  CLAUDE_ACCT_ROOT
 EOF
 }
 
 case "${1:-status}" in
-  status)  shift || true; cmd_status ;;
-  list)    shift || true; cmd_list ;;
-  whoami)  shift || true; cmd_whoami ;;
-  pick)    shift || true; cmd_pick "${1:-$PWD}" ;;
-  run)     shift || true; cmd_run "$@" ;;
-  adopt)   shift || true; cmd_adopt ;;
-  add)     shift || true; cmd_add "$@" ;;
-  bind)    shift || true; cmd_bind "$@" ;;
-  migrate) shift || true; cmd_migrate ;;
-  claim)   shift || true; cmd_claim "$@" ;;
-  trust)   shift || true; cmd_trust "$@" ;;
-  refresh) shift || true; cmd_refresh "${1:-}" ;;
-  backup)  shift || true; cmd_backup ;;
-  wrapper) shift || true; cmd_wrapper ;;
+  status)   shift || true; cmd_status ;;
+  forecast) shift || true; cmd_forecast "$@" ;;
+  list)     shift || true; cmd_list ;;
+  whoami)   shift || true; cmd_whoami ;;
+  pick)     shift || true; cmd_pick "${1:-$PWD}" ;;
+  run)      shift || true; cmd_run "$@" ;;
+  adopt)    shift || true; cmd_adopt ;;
+  add)      shift || true; cmd_add "$@" ;;
+  bind)     shift || true; cmd_bind "$@" ;;
+  migrate)  shift || true; cmd_migrate ;;
+  claim)    shift || true; cmd_claim "$@" ;;
+  trust)    shift || true; cmd_trust "$@" ;;
+  refresh)  shift || true; cmd_refresh "${1:-}" ;;
+  timer)    shift || true; ensure_refresh_timer; systemctl --user list-timers --no-pager "$REFRESH_TIMER" ;;
+  backup)   shift || true; cmd_backup ;;
+  wrapper)  shift || true; cmd_wrapper ;;
   takeover) shift || true; cmd_takeover "$@" ;;
-  doctor)  shift || true; cmd_doctor "$@" ;;
+  doctor)   shift || true; cmd_doctor "$@" ;;
   -h|--help|help) usage ;;
-  *)       usage; exit 2 ;;
+  *)        usage; exit 2 ;;
 esac
