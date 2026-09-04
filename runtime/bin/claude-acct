@@ -77,7 +77,8 @@ Modes, all called from the bash half:
 
   info DIR                one profile as a TSV line (identity + percentages)
   token DIR               the OAuth access token, for the usage fetch
-  uuid CFG                accountUuid out of a config file
+  uuid CFG                accountUuid/organizationUuid out of a config file
+  orgname CFG             organizationName out of a config file
   creds-ok FILE           exit 0 if the file holds a usable login
   whose-token             stdin is an /api/oauth/profile reply -> "email<TAB>uuid"
   seed SRC DST            carry answered questions into a new profile
@@ -880,8 +881,14 @@ def main(argv):
             return 1
         print(tok)
     elif mode == "uuid":
-        cfg = load(rest[0]) or {}
-        print((cfg.get("oauthAccount") or {}).get("accountUuid", ""))
+        # One login can sit in several organizations (a team seat and a personal
+        # plan), each with its own limits, so identity is user + organization.
+        acc = (load(rest[0]) or {}).get("oauthAccount") or {}
+        org = acc.get("organizationUuid", "")
+        print(acc.get("accountUuid", "") + ("/" + org if org else ""))
+    elif mode == "orgname":
+        acc = (load(rest[0]) or {}).get("oauthAccount") or {}
+        print(acc.get("organizationName", ""))
     elif mode == "creds-ok":
         cred = load(rest[0]) or {}
         return 0 if cred.get("claudeAiOauth") else 1
@@ -1294,14 +1301,27 @@ derive_slug_raw() {  # email -> the name it would get, ignoring collisions
   printf '%s' "${1%%@*}" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/^-*//;s/-*$//'
 }
 
-derive_slug() {  # email -> account name, disambiguated by domain on collision
-  local email="$1" slug
+org_suffix() {  # organizationName -> short slug; a personal plan's own org is "personal"
+  case "$1" in
+    *"'s Organization"|*"’s Organization"|"") printf 'personal' ;;
+    *) printf '%s' "$1" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/^-*//;s/-*$//' ;;
+  esac
+}
+
+derive_slug() {  # email [cfg] -> account name, disambiguated on collision
+  # Same local part, other domain: suffix the domain. Same email again, which
+  # means the same login in another organization: suffix that organization.
+  local email="$1" cfg="${2:-}" slug
   [ -n "$email" ] || die "no email in the account config; cannot name the account"
   slug="$(derive_slug_raw "$email")"
   [ -n "$slug" ] || die "could not derive a name from email: $email"
   if [ -e "$ROOT/$slug" ]; then
-    local dom="${email#*@}"
-    slug="$slug-$(printf '%s' "${dom%%.*}" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+    if [ -n "$cfg" ] && [ "$(field "$(acct_info "$ROOT/$slug")" 2)" = "$email" ]; then
+      slug="$slug-$(org_suffix "$(py orgname "$cfg")")"
+    else
+      local dom="${email#*@}"
+      slug="$slug-$(printf '%s' "${dom%%.*}" | tr 'A-Z' 'a-z' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+    fi
   fi
   printf '%s' "$slug"
 }
@@ -1317,7 +1337,7 @@ cmd_adopt() {
     *) die "$PRIMARY_CFG has no usable login ($(field "$info" 1)); nothing to adopt" ;;
   esac
   email="$(field "$info" 2)"
-  slug="$(derive_slug "$email")"
+  slug="$(derive_slug "$email" "$PRIMARY_CFG")"
   local existing=""
   while read -r n; do
     [ -n "$n" ] || continue
@@ -1388,12 +1408,12 @@ cmd_add() {
   printf 'staged a new empty account at %s\n' "$STAGING"
 
   if [ -t 0 ] && [ -t 1 ]; then
-    printf '\nYou already have these accounts, so do NOT pick any of them:\n'
+    printf '\nYou already have these seats, so do NOT pick the same email in the same organization:\n'
     local n e
     while read -r n; do
       [ -n "$n" ] || continue
       e="$(field "$(acct_info "$ROOT/$n")" 2)"
-      [ -n "$e" ] && printf '  %s   (%s)\n' "$e" "$n"
+      [ -n "$e" ] && printf '  %s in %s   (%s)\n' "$e" "$(py orgname "$(cfg_json "$ROOT/$n")")" "$n"
     done < <(cmd_list)
 
     cat <<EOF
@@ -1412,7 +1432,10 @@ Then:
   2. type /login and open the link it prints
   3. the page should ask you to SIGN IN. If it instead shows an approve button
      for an account you already have, stop: the browser is still signed in.
-  4. approve, paste the code back here, then /exit
+  4. if the account belongs to several organizations (a team seat AND a
+     personal plan), the page asks which one: pick the one you are adding.
+     Each organization is its own seat with its own limits.
+  5. approve, paste the code back here, then /exit
 
 Press Enter to start Claude in the new account, or Ctrl-C to stop.
 EOF
@@ -1474,7 +1497,7 @@ add_finish() {
     fi
   done < <(cmd_list)
 
-  slug="$(derive_slug "$email")"
+  slug="$(derive_slug "$email" "$STAGING/.claude.json")"
   seed_state "$STAGING"
   mv "$STAGING" "$ROOT/$slug"
   ensure_slices "$slug"
@@ -1506,7 +1529,7 @@ cmd_migrate() {
     *) die "the default location has no usable login ($(field "$info" 1)); nothing to migrate" ;;
   esac
   email="$(field "$info" 2)"
-  slug="$(derive_slug "$email")"
+  slug="$(derive_slug "$email" "$PRIMARY_CFG")"
   [ -d "$ROOT/$slug" ] && [ ! -L "$ROOT/$slug" ] && \
     die "$ROOT/$slug already exists as a real profile; refusing to overwrite it"
 
@@ -1673,7 +1696,7 @@ cmd_claim() {
     mv "$cred" "$ROOT/$slug/.credentials.json"
     printf 'the newer login now lives only in %s\n' "$ROOT/$slug"
   else
-    slug="$(derive_slug "$email")"
+    slug="$(derive_slug "$email" "$PRIMARY_CFG")"
     build_profile "$ROOT/$slug"
     mv "$cred" "$ROOT/$slug/.credentials.json"
     [ -f "$PRIMARY_CFG" ] && mv "$PRIMARY_CFG" "$ROOT/$slug/.claude.json"
@@ -1799,9 +1822,10 @@ cmd_doctor() {
   printf '  config      %s\n' "$(cfg_json "$dir")"
   local want dom; want="$(derive_slug_raw "$(field "$info" 2)")"
   if [ -n "$want" ] && [ "$want" != "$n" ]; then
-    dom="$(field "$info" 2)"; dom="${dom#*@}"
-    [ "$want-$(printf '%s' "${dom%%.*}" | tr 'A-Z.' 'a-z-')" = "$n" ] || \
-      printf '  name        STALE: this login would be named "%s" now (run: claude-acct adopt)\n' "$want"
+    case "$n" in
+      "$want"-*) ;;  # disambiguated by domain or organization
+      *) printf '  name        STALE: this login would be named "%s" now (run: claude-acct adopt)\n' "$want" ;;
+    esac
   fi
   if is_primary "$dir"; then
     printf '  sharing     canonical: this account owns projects/, skills/, hooks/, settings.json\n'
