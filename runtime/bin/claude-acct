@@ -157,6 +157,12 @@ def accounts_registered():
     return [n for n in names if os.path.isdir(os.path.join(ROOT, n))]
 
 
+def tier_of(acc):
+    """A team seat carries userRateLimitTier; a personal Max plan carries only
+    the organization's tier, so fall back to that."""
+    return acc.get("userRateLimitTier") or acc.get("organizationRateLimitTier") or ""
+
+
 def multiplier_of(tier_raw):
     return {"default_claude_max_20x": 20, "default_claude_max_5x": 5}.get(tier_raw or "", 1)
 
@@ -244,8 +250,8 @@ def read_profile(d, now):
     rec.update(email=acc.get("emailAddress", ""),
                display=acc.get("displayName") or acc.get("fullName", ""),
                org=acc.get("organizationName", ""),
-               tier=(acc.get("userRateLimitTier") or "").replace("default_claude_", "").replace("_", " "),
-               multiplier=multiplier_of(acc.get("userRateLimitTier")))
+               tier=tier_of(acc).replace("default_claude_", "").replace("_", " "),
+               multiplier=multiplier_of(tier_of(acc)))
     if not rec["email"]:
         rec["status"] = "nologin"
         return rec
@@ -631,8 +637,8 @@ def name_col(a):
     mark = " *" if a["primary"] else ""
     if a["email"]:
         want = slug_raw(a["email"])
-        dom = a["email"].split("@")[-1].split(".")[0].lower()
-        if want and a["name"] not in (want, "%s-%s" % (want, dom)):
+        # a suffix means the name was disambiguated by domain or organization
+        if want and a["name"] != want and not a["name"].startswith(want + "-"):
             mark += " !"
     return a["name"] + mark
 
