@@ -51,15 +51,15 @@ usage_cache() { printf '%s/.claude-acct-usage.json' "$(readlink -f "$1")"; }
 slice_unit() { printf 'claude-%s.slice' "$(printf '%s' "$1" | tr '-' '_')"; }
 
 # ~/.local/bin/claude is a wrapper that calls `claude-acct run`; exec'ing it
-# from cmd_run would recurse forever, so resolve the real binary here.
+# from cmd_run would recurse forever, so resolve the real binary here. Always
+# the newest installed version: `claude update` only downloads into versions/,
+# so a session that says "restart to update" gets the update by restarting.
+# (A fixed pin used to live in ~/.claude-accounts/claude-binary; it kept every
+# restart on the old version until 2026-09-04.)
 real_claude_binary() {
-  local pin="$ROOT/claude-binary" bin=""
-  [ -r "$pin" ] && bin="$(cat "$pin")"
-  if [ -z "$bin" ] || [ ! -x "$bin" ]; then
-    bin="$(ls -1 "$HOME/.local/share/claude/versions" 2>/dev/null | sort -V | tail -1)"
-    [ -n "$bin" ] || die "no claude binary: $pin is unusable and $HOME/.local/share/claude/versions is empty"
-    bin="$HOME/.local/share/claude/versions/$bin"
-  fi
+  local bin
+  bin="$(ls -1d "$HOME"/.local/share/claude/versions/* 2>/dev/null | sort -V | tail -1)"
+  [ -n "$bin" ] || die "no claude binary: $HOME/.local/share/claude/versions is empty"
   [ -x "$bin" ] || die "claude binary is not executable: $bin"
   printf '%s' "$bin"
 }
@@ -1737,16 +1737,9 @@ cmd_claim() {
 }
 
 cmd_wrapper() {  # (re)install the bare-`claude` router
-  local bin dest="$HOME/.local/bin/claude"
-  bin="$(readlink -f "$dest" 2>/dev/null || true)"
-  case "$bin" in
-    "$HOME/.local/share/claude/versions/"*) printf '%s\n' "$bin" > "$ROOT/claude-binary" ;;
-    *) # dest is our own wrapper (not a symlink into versions/), so the update
-       # it should pick up is simply the newest installed version.
-       bin="$(ls -1d "$HOME"/.local/share/claude/versions/* 2>/dev/null | sort -V | tail -1)"
-       [ -x "$bin" ] || die "cannot find the real Claude binary; look in ~/.local/share/claude/versions"
-       printf '%s\n' "$bin" > "$ROOT/claude-binary" ;;
-  esac
+  local dest="$HOME/.local/bin/claude"
+  real_claude_binary >/dev/null
+  rm -f "$ROOT/claude-binary"   # the old fixed pin; the newest version is used now
   cat > "$dest.tmp" <<'WRAP'
 #!/usr/bin/env bash
 # Route a bare `claude` to the account this directory is bound to.
@@ -1756,12 +1749,7 @@ cmd_wrapper() {  # (re)install the bare-`claude` router
 # are being called *by* claude-acct, so run the real binary and do not recurse.
 set -u
 
-real_binary() {
-    local pinned="$HOME/.claude-accounts/claude-binary"
-    if [ -r "$pinned" ]; then
-        local p; p="$(cat "$pinned")"
-        [ -x "$p" ] && { printf '%s' "$p"; return 0; }
-    fi
+real_binary() {  # newest installed version; `claude update` only adds to versions/
     local newest
     newest="$(ls -1d "$HOME"/.local/share/claude/versions/* 2>/dev/null | sort -V | tail -1)"
     [ -x "$newest" ] || return 1
@@ -1786,7 +1774,7 @@ exec -a claude "$bin" "$@"
 WRAP
   chmod 755 "$dest.tmp"; mv "$dest.tmp" "$dest"
   printf 'bare "claude" now routes through claude-acct\n'
-  printf 'real binary pinned at %s\n' "$(cat "$ROOT/claude-binary")"
+  printf 'real binary: %s (newest installed; restarts pick up updates)\n' "$(real_claude_binary)"
 }
 
 cmd_backup() {
