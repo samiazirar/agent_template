@@ -69,7 +69,7 @@ real_claude_binary() {
 # ===========================================================================
 py() {
   CA_ROOT="$ROOT" CA_CANON="$CANON" CA_PRIMARY_CFG="$PRIMARY_CFG" \
-  CA_HISTORY="$HISTORY" CA_THRESHOLD="$THRESHOLD" \
+  CA_HISTORY="$HISTORY" CA_THRESHOLD="$THRESHOLD" CA_MODEL="${CLAUDE_ACCT_MODEL:-}" \
   python3 - "$@" <<'PY'
 """claude-acct's reader and forecaster.
 
@@ -103,6 +103,16 @@ CANON = os.environ["CA_CANON"]
 PRIMARY_CFG = os.environ["CA_PRIMARY_CFG"]
 HISTORY = os.environ["CA_HISTORY"]
 THRESHOLD = float(os.environ.get("CA_THRESHOLD") or 80)
+# CLAUDE_ACCT_MODEL names the model the picked session will run. Fable has its
+# own weekly window; any other model (opus, sonnet) spends only the all-model
+# week, so for those the Fable window is not binding. The owner's rule
+# (2026-09-18): an Opus worker takes a seat whose Fable share is *below* its
+# all-model share (its week is mostly non-Fable already) and whose Fable is not
+# spent; a seat at Fable 100 % is out even with weekly room, and a seat whose
+# week is mostly Fable keeps that room for Fable sessions.
+MODEL = (os.environ.get("CA_MODEL") or "").strip().lower()
+NOT_FABLE = bool(MODEL) and MODEL != "fable"
+FABLE_SPENT = 100.0  # a seat at this Fable % is out for every model
 HOME = os.path.expanduser("~")
 UTC = datetime.timezone.utc
 
@@ -226,6 +236,8 @@ def worst_live(usage, now):
     for lim in (usage.get("limits") or []):
         reset = parse_iso(lim.get("resets_at"))
         if reset is not None and reset <= now:
+            continue
+        if NOT_FABLE and str(lim.get("model") or "").lower() == "fable":
             continue
         worst = max(worst, lim.get("percent") or 0)
     if not (usage.get("limits") or []):
@@ -476,6 +488,10 @@ def binding_of(rec):
     weekly windows. Its own reset is preferred; if the binding window has no
     reset of its own, the other weekly window's reset still bounds it."""
     week, fable = rec["weekly"], rec["fable"]
+    if NOT_FABLE:
+        # A non-Fable session cannot touch the Fable window, so only the
+        # all-model week binds it.
+        return week["pct"], "weekly", week["reset"] or fable["reset"]
     which = "fable" if fable["pct"] > week["pct"] else "weekly"
     pct = max(week["pct"], fable["pct"])
     reset = rec[which]["reset"] or week["reset"] or fable["reset"]
@@ -708,7 +724,11 @@ def render_status(s):
     out.extend(pool_block(s, now_ts))
     out.append("")
     out.append("1 u = 1% of one week of a 1x account, so a max-5x week is 500 u.")
-    out.append("BIND is the fuller weekly window, Fable or all-model; everything derived uses it.")
+    if NOT_FABLE:
+        out.append("CLAUDE_ACCT_MODEL=%s: BIND is the all-model week only; pick takes a seat with FABLE below WEEK and below 100%% first."
+                   % MODEL)
+    else:
+        out.append("BIND is the fuller weekly window, Fable or all-model; everything derived uses it.")
     out.append("threshold %g%%  ·  an account is skipped once any live limit reaches it"
                % THRESHOLD)
     if not s["haveHistory"]:
@@ -769,6 +789,7 @@ def contract(s):
 def do_pick(argv):
     fewest = False
     exclude = None
+    pool = []
     chain = []
     i = 0
     while i < len(argv):
@@ -777,6 +798,9 @@ def do_pick(argv):
         elif argv[i] == "--exclude":
             i += 1
             exclude = argv[i]
+        elif argv[i] == "--pool":
+            i += 1
+            pool = [n for n in argv[i].split() if n]
         else:
             chain.append(argv[i])
         i += 1
@@ -789,13 +813,34 @@ def do_pick(argv):
     if not wanted:
         sys.stderr.write("claude-acct: no usable account in chain: %s\n" % " ".join(chain))
         return 1
-    s = survey(names=wanted)
+    # A non-Fable session may leave the project's list for a seat whose Fable
+    # week is spent: that seat is useless to Fable and free for Opus.
+    extra = [n for n in pool if n in known and n != exclude and n not in wanted] if NOT_FABLE else []
+    s = survey(names=wanted + extra)
+    in_chain = set(wanted)
     for a in s["accounts"]:
         if a["status"] == "nousage":
             sys.stderr.write("claude-acct: %s: no usage figure cached yet, treating it as free\n" % a["name"])
         elif a["status"] not in ("ok",):
             sys.stderr.write("claude-acct: %s: %s, skipping\n" % (a["name"], a["status"]))
     usable = [a for a in s["accounts"] if eligible(a)]
+    if NOT_FABLE:
+        # Opus/Sonnet work goes to a seat whose Fable week is already spent when
+        # one is usable anywhere on the machine, so seats with Fable left stay
+        # free for Fable sessions; otherwise the project's own list applies.
+        fits = [a for a in usable
+                if a["fable"]["pct"] < FABLE_SPENT and a["fable"]["pct"] < a["weekly"]["pct"]]
+        if fits:
+            fits.sort(key=lambda a: (a["name"] not in in_chain, -a["score"]))
+            if fits[0]["name"] not in in_chain:
+                sys.stderr.write("claude-acct: %s: seat outside this project's list, taken for %s\n"
+                                 % (fits[0]["name"], MODEL))
+            print(fits[0]["name"])
+            return 0
+        sys.stderr.write("claude-acct: no usable seat with Fable below its all-model share; "
+                         "falling back to the project's list for %s\n" % MODEL)
+        usable = [a for a in usable if a["name"] in in_chain]
+        order.update({a["name"]: len(order) for a in s["accounts"] if a["name"] not in order})
     if usable:
         if fewest:
             # The old rule, kept for CLAUDE_ACCT_PICK=fewest-live: fewest live
@@ -1137,6 +1182,7 @@ cmd_pick() {
   local -a args=()
   [ "${CLAUDE_ACCT_PICK:-}" = "fewest-live" ] && args+=(--fewest-live)
   [ -n "${CLAUDE_ACCT_EXCLUDE:-}" ] && args+=(--exclude "$CLAUDE_ACCT_EXCLUDE")
+  case "${CLAUDE_ACCT_MODEL:-}" in ""|fable|Fable|FABLE) ;; *) args+=(--pool "$(cmd_list | tr '\n' ' ')") ;; esac
   py pick "${args[@]}" "${chain[@]}" || die "no usable account in chain: ${chain[*]}"
 }
 
@@ -1939,7 +1985,11 @@ budget would otherwise expire soonest (highest slack-in-u per hour to reset).
 run passes --settings ~/.claude/settings.json and --dangerously-skip-permissions
 (--no-bypass turns the latter off) inside a per-account slice under the claude.slice memory pool.
 
-env: CLAUDE_ACCT_THRESHOLD (80)  CLAUDE_ACCT_PICK (score|fewest-live)
+Opus or Sonnet workers: CLAUDE_ACCT_MODEL=opus claude-acct run ... ranks by the
+all-model week only and takes a seat whose FABLE share is below its WEEK share
+(and below 100 %) first, so seats whose week is mostly Fable stay for Fable.
+
+env: CLAUDE_ACCT_THRESHOLD (80)  CLAUDE_ACCT_PICK (score|fewest-live)  CLAUDE_ACCT_MODEL (fable|opus|sonnet)
      CLAUDE_ACCT_USAGE_TTL (300)  CLAUDE_ACCT_SESSION_BURN (0.4 pct/h)
      CLAUDE_ACCT_POOL_MEMMAX (40G)  CLAUDE_ACCT_ROOT
 EOF
