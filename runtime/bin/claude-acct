@@ -828,8 +828,13 @@ def do_pick(argv):
         # Opus/Sonnet work goes to a seat whose Fable week is already spent when
         # one is usable anywhere on the machine, so seats with Fable left stay
         # free for Fable sessions; otherwise the project's own list applies.
-        fits = [a for a in usable
-                if a["fable"]["pct"] < FABLE_SPENT and a["fable"]["pct"] < a["weekly"]["pct"]]
+        # Under the threshold, Fable not spent, Fable share below the all-model
+        # share. The burn-based lock projection is a forecast, not a limit, so
+        # it does not exclude a seat here (it still lowers the score).
+        fits = [a for a in s["accounts"]
+                if a["status"] in ("ok", "nousage")
+                and a["bindingPct"] < THRESHOLD and a["worst"] < THRESHOLD
+                and a["fable"]["pct"] < FABLE_SPENT and a["fable"]["pct"] < a["weekly"]["pct"]]
         if fits:
             fits.sort(key=lambda a: (a["name"] not in in_chain, -a["score"]))
             if fits[0]["name"] not in in_chain:
