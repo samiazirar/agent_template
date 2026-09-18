@@ -106,13 +106,13 @@ THRESHOLD = float(os.environ.get("CA_THRESHOLD") or 80)
 # CLAUDE_ACCT_MODEL names the model the picked session will run. Fable has its
 # own weekly window; any other model (opus, sonnet) spends only the all-model
 # week, so for those the Fable window is not binding. The owner's rule
-# (2026-09-18): an Opus worker takes a seat whose Fable share is *below* its
-# all-model share (its week is mostly non-Fable already) and whose Fable is not
-# spent; a seat at Fable 100 % is out even with weekly room, and a seat whose
-# week is mostly Fable keeps that room for Fable sessions.
+# (2026-09-18, 17:55): an Opus worker takes a seat whose Fable week is spent
+# and whose all-model week still has room, so seats with Fable left stay for
+# Fable sessions.
 MODEL = (os.environ.get("CA_MODEL") or "").strip().lower()
 NOT_FABLE = bool(MODEL) and MODEL != "fable"
-FABLE_SPENT = 100.0  # a seat at this Fable % is out for every model
+FABLE_SPENT = 99.0   # at or above this Fable %, the seat's Fable week counts as spent
+WEEK_ROOM = 95.0     # ...and its all-model week must still be under this
 HOME = os.path.expanduser("~")
 UTC = datetime.timezone.utc
 
@@ -725,8 +725,8 @@ def render_status(s):
     out.append("")
     out.append("1 u = 1% of one week of a 1x account, so a max-5x week is 500 u.")
     if NOT_FABLE:
-        out.append("CLAUDE_ACCT_MODEL=%s: BIND is the all-model week only; pick takes a seat with FABLE below WEEK and below 100%% first."
-                   % MODEL)
+        out.append("CLAUDE_ACCT_MODEL=%s: BIND is the all-model week only; pick takes a Fable-spent seat (FABLE >= %g%%) with WEEK under %g%% first."
+                   % (MODEL, FABLE_SPENT, WEEK_ROOM))
     else:
         out.append("BIND is the fuller weekly window, Fable or all-model; everything derived uses it.")
     out.append("threshold %g%%  ·  an account is skipped once any live limit reaches it"
@@ -833,8 +833,9 @@ def do_pick(argv):
         # it does not exclude a seat here (it still lowers the score).
         fits = [a for a in s["accounts"]
                 if a["status"] in ("ok", "nousage")
-                and a["bindingPct"] < THRESHOLD and a["worst"] < THRESHOLD
-                and a["fable"]["pct"] < FABLE_SPENT and a["fable"]["pct"] < a["weekly"]["pct"]]
+                and a["fable"]["pct"] >= FABLE_SPENT
+                and a["weekly"]["pct"] < WEEK_ROOM
+                and a["session"]["pct"] < THRESHOLD]
         if fits:
             fits.sort(key=lambda a: (a["name"] not in in_chain, -a["score"]))
             if fits[0]["name"] not in in_chain:
@@ -842,7 +843,7 @@ def do_pick(argv):
                                  % (fits[0]["name"], MODEL))
             print(fits[0]["name"])
             return 0
-        sys.stderr.write("claude-acct: no usable seat with Fable below its all-model share; "
+        sys.stderr.write("claude-acct: no Fable-spent seat with all-model room; "
                          "falling back to the project's list for %s\n" % MODEL)
         usable = [a for a in usable if a["name"] in in_chain]
         order.update({a["name"]: len(order) for a in s["accounts"] if a["name"] not in order})
@@ -1991,8 +1992,8 @@ run passes --settings ~/.claude/settings.json and --dangerously-skip-permissions
 (--no-bypass turns the latter off) inside a per-account slice under the claude.slice memory pool.
 
 Opus or Sonnet workers: CLAUDE_ACCT_MODEL=opus claude-acct run ... ranks by the
-all-model week only and takes a seat whose FABLE share is below its WEEK share
-(and below 100 %) first, so seats whose week is mostly Fable stay for Fable.
+all-model week only and takes a seat whose Fable week is spent (FABLE 100 %)
+but whose all-model week has room first, so seats with Fable left stay for Fable.
 
 env: CLAUDE_ACCT_THRESHOLD (80)  CLAUDE_ACCT_PICK (score|fewest-live)  CLAUDE_ACCT_MODEL (fable|opus|sonnet)
      CLAUDE_ACCT_USAGE_TTL (300)  CLAUDE_ACCT_SESSION_BURN (0.4 pct/h)
