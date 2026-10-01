@@ -1312,8 +1312,20 @@ cmd_run() {
   [ -d "$dir" ] || die "no such account: $name"
 
   local -a argv=("$(real_claude_binary)")
-  [ -f "$CANON_SETTINGS" ] && argv+=(--settings "$CANON_SETTINGS")
-  [ "$bypass" = 1 ] && argv+=(--dangerously-skip-permissions)
+  case "${1:-}" in
+    rc|remote-control)
+      # `claude rc` refuses to start when --settings comes before the verb (its
+      # spawned sessions would not inherit it), and takes the permission mode
+      # for those sessions as its own option after the verb. Its sessions read
+      # this account's own settings.json, not the canonical one.
+      argv+=("$1"); shift
+      if [ "$bypass" = 1 ] && ! printf '%s\n' "$@" | grep -q '^--permission-mode'; then
+        argv+=(--permission-mode bypassPermissions)
+      fi ;;
+    *)
+      [ -f "$CANON_SETTINGS" ] && argv+=(--settings "$CANON_SETTINGS")
+      [ "$bypass" = 1 ] && argv+=(--dangerously-skip-permissions) ;;
+  esac
   argv+=("$@")
 
   export CLAUDE_ACCT_NAME="$name"
@@ -1968,6 +1980,7 @@ claude-acct - several Claude accounts on one machine, as one budget
   claude-acct whoami                 which account this shell is on
   claude-acct pick [dir]             name the best account for a directory
   claude-acct run [-a NAME] [args]   start Claude on that account
+  claude-acct run [-a NAME] -- rc [opts]  Remote Control server on that account
   claude-acct migrate                move the default location's login into a profile
   claude-acct claim                  adopt a login that /login left at the shared location
                                      (refuses while sessions still use it)
