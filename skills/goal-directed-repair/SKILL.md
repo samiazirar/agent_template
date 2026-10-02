@@ -1,6 +1,6 @@
 ---
 name: goal-directed-repair
-description: Repair a bug, failed command, broken implementation, or unexpected behavior by finding the causal root and making the smallest root-level change. Use when Codex, Claudex, or Claude Code is asked to fix or repair a concrete failure. Do not use for broad audits, speculative cleanup, general code review, or creating test suites.
+description: Repair a bug, failed command, broken implementation, or unexpected behavior by finding the causal root and making the smallest root-level change. Use when asked to fix or repair a concrete failure. Do not use for broad audits, speculative cleanup, general code review, or creating test suites.
 ---
 
 # Goal-directed repair
@@ -42,9 +42,8 @@ only when it produces the requested working state.
 - Form one new causal explanation and make one new bounded repair while the
   work remains the same minimal package.
 - If the next action requires a materially different design, another subsystem,
-  or broader authority, return the exact observed difference to the owning
-  suborchestrator or Operations Lead. They launch a fresh Sol-medium worker for
-  the harder package while unrelated work continues.
+  or broader authority, report the exact observed difference to whoever
+  assigned the task (the user or the parent session) and stop.
 - Do not declare an architectural problem merely because attempts failed. Raise
   architecture only when concrete coupling or incompatible requirements show
   that no local root repair can produce the requested state.
