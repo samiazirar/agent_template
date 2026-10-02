@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+"""claude-usage: where Claude Code usage went, read from the local transcripts.
+
+  claude-usage              last 7 days
+  claude-usage --days 30    last 30 days
+  claude-usage --project cflab
+
+Costs are API-equivalent USD at list prices (a common unit across models, not a
+bill). Streaming writes one transcript line per content block, so calls are
+deduplicated by (message id, request id) and their tool calls merged.
+"""
+import argparse, collections, datetime as dt, glob, json, os, re, statistics as st
+
+ROOT = os.path.expanduser(os.environ.get("CLAUDE_USAGE_ROOT", "~/.claude/projects"))
+# $/MTok: input, cache write 5m, cache write 1h, cache read, output
+PRICES = [("fable", (10, 12.5, 20, 0.25, 50)), ("mythos", (10, 12.5, 20, 0.25, 50)),
+          ("opus-5-5", (4, 5, 8, 0.20, 20)), ("opus", (5, 6.25, 10, 0.50, 25)),
+          ("sonnet", (2, 2.5, 4, 0.20, 10)), ("haiku", (1, 1.25, 2, 0.10, 5))]
+WAIT = re.compile(r"\bsleep\b|\bsqueue\b|\bsacct\b|scontrol show|herdr (pane read|agent wait)"
+                  r"|nvidia-smi|\bpgrep\b|tail -f|until .*; do")
+TEST = [("pytest", r"\bpytest\b"), ("python -c", r"python3? -c "),
+        ("check/verify script", r"(verify|check|smoke|selftest|validate)[\w-]*\.(py|sh)|--(check|verify|selftest)"),
+        ("lint/compile", r"py_compile|\bruff\b|pyright|mypy")]
+READ = re.compile(r"^\s*(cat|head|tail|grep|rg|find|ls|sed -n|wc)\b")
+
+
+def price(model):
+    for key, p in PRICES:
+        if key in (model or ""):
+            return p
+
+
+def project(dirname):
+    s = dirname.replace("-home-user-azirar-", "", 1) if dirname != "-home-user-azirar" else "HOME"
+    return re.split(r"--claude-worktrees-|-worktrees-|-wt-", s)[0]
+
+
+def classify(tool):
+    if tool is None:
+        return "answer (no tool)"
+    name, inp = tool.get("name"), tool.get("input") or {}
+    if name in ("Monitor", "ReadNotifications", "TaskOutput"):
+        return "waiting"
+    if name != "Bash":
+        return name
+    cmd = inp.get("command", "")
+    if WAIT.search(cmd):
+        return "waiting"
+    for label, rx in TEST:
+        if re.search(rx, cmd):
+            return "testing/checking"
+    if READ.search(cmd):
+        return "reading output"
+    return "Bash other"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--days", type=int, default=7)
+    ap.add_argument("--project")
+    ap.add_argument("--top", type=int, default=12)
+    a = ap.parse_args()
+    since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=a.days)).isoformat()[:19]
+    calls = {}            # key -> [usd, model, ctx, tool, file, kind, proj, cost parts]
+    sess = {}             # file -> [start, first_compaction, title, startup_ctx]
+    skills = collections.Counter()
+    for f in glob.glob(ROOT + "/**/*.jsonl", recursive=True):
+        if "/memory/" in f or os.path.getmtime(f) < (dt.datetime.now().timestamp() - a.days * 86400):
+            continue
+        rel = os.path.relpath(f, ROOT)
+        proj = project(rel.split("/")[0])
+        if a.project and proj != a.project:
+            continue
+        kind = "subagent" if "/subagents/" in rel else None
+        s = sess.setdefault(f, [None, None, None, None])
+        for line in open(f, errors="ignore"):
+            try:
+                d = json.loads(line)
+            except ValueError:
+                continue
+            ts = d.get("timestamp") or ""
+            if ts and ts[:19] < since:
+                continue
+            t = d.get("type")
+            if t == "ai-title":
+                s[2] = d.get("aiTitle")
+            if ts and not s[0]:
+                s[0] = ts
+            if t == "system" and d.get("subtype") == "compact_boundary" and not s[1]:
+                s[1] = ts
+            if t != "assistant":
+                continue
+            m = d.get("message") or {}
+            tools = [b for b in m.get("content") or [] if isinstance(b, dict) and b.get("type") == "tool_use"]
+            for b in tools:
+                inp = json.dumps(b.get("input") or {})
+                for sk in re.findall(r"skills/([\w:.-]+)/SKILL\.md", inp):
+                    skills[sk] += 1
+                if b.get("name") == "Skill":
+                    skills[(b.get("input") or {}).get("skill")] += 1
+            key = (m.get("id"), d.get("requestId"))
+            if key in calls:
+                if tools and calls[key][3] is None:
+                    calls[key][3] = tools[0]
+                continue
+            u, p = m.get("usage"), price(m.get("model"))
+            if not u or not p:
+                continue
+            cc = u.get("cache_creation") or {}
+            w5, w1 = cc.get("ephemeral_5m_input_tokens", 0) or 0, cc.get("ephemeral_1h_input_tokens", 0) or 0
+            if not w5 + w1:
+                w5 = u.get("cache_creation_input_tokens", 0) or 0
+            cr, inp_t, out = (u.get("cache_read_input_tokens", 0) or 0), (u.get("input_tokens", 0) or 0), (u.get("output_tokens", 0) or 0)
+            parts = {"cache read": cr * p[3] / 1e6, "cache write": (w5 * p[1] + w1 * p[2]) / 1e6,
+                     "output": out * p[4] / 1e6, "input": inp_t * p[0] / 1e6}
+            ctx = cr + w5 + w1 + inp_t
+            if s[3] is None:
+                s[3] = ctx
+            k = kind or ("headless" if d.get("entrypoint") == "sdk-cli" else "interactive")
+            calls[key] = [sum(parts.values()), m.get("model"), ctx, tools[0] if tools else None, f, k, proj, parts]
+    if not calls:
+        print("no calls in range"); return
+    total = sum(c[0] for c in calls.values())
+
+    def table(title, keyf, n=a.top):
+        acc = collections.defaultdict(lambda: [0.0, 0])
+        for c in calls.values():
+            k = keyf(c)
+            if k is not None:
+                x = acc[k]; x[0] += c[0]; x[1] += 1
+        print(f"\n{title}")
+        for k, (usd, cnt) in sorted(acc.items(), key=lambda kv: -kv[1][0])[:n]:
+            print(f"  {str(k)[:46]:46s} {usd:9.0f} $ {100 * usd / total:5.1f}%  {cnt:7d} calls")
+
+    days = a.days
+    print(f"Claude Code usage, last {days} days{' · ' + a.project if a.project else ''} · API-equivalent USD")
+    print(f"  {total:,.0f} $ over {len(calls):,} calls in {len({c[4] for c in calls.values()}):,} sessions"
+          f" · {total / days:,.0f} $/day")
+    parts = collections.Counter()
+    for c in calls.values():
+        parts.update(c[7])
+    print("  " + " · ".join(f"{k} {100 * v / total:.0f}%" for k, v in parts.most_common()))
+    ctxs = [c[2] for c in calls.values()]
+    print(f"  context per call: median {st.median(ctxs) / 1e3:.0f}K · share of cost from calls over 250K: "
+          f"{100 * sum(c[0] for c in calls.values() if c[2] > 250e3) / total:.0f}%")
+    starts = [s[3] for f, s in sess.items() if s[3] and "/subagents/" not in f]
+    gaps = [(dt.datetime.fromisoformat(s[1][:19]) - dt.datetime.fromisoformat(s[0][:19])).total_seconds() / 3600
+            for s in sess.values() if s[0] and s[1]]
+    if starts:
+        print(f"  start-up context per session: median {st.median(starts) / 1e3:.0f}K tokens")
+    if gaps:
+        print(f"  hours until first compaction: median {st.median(gaps):.1f} ({len(gaps)} sessions compacted)")
+
+    table("By model", lambda c: c[1])
+    table("By session kind", lambda c: c[5])
+    table("By project", lambda c: c[6])
+    table("By what the call did", lambda c: classify(c[3]))
+    table("Waiting calls by model", lambda c: c[1] if classify(c[3]) == "waiting" else None, 6)
+    persess = collections.defaultdict(lambda: [0.0, 0])
+    for c in calls.values():
+        x = persess[c[4]]; x[0] += c[0]; x[1] += 1
+    print("\nLargest sessions")
+    for f, (usd, cnt) in sorted(persess.items(), key=lambda kv: -kv[1][0])[:a.top]:
+        print(f"  {usd:7.0f} $ {cnt:6d} calls  {project(os.path.relpath(f, ROOT).split('/')[0])[:22]:22s} {str(sess[f][2])[:60]}")
+    print(f"\nSkills read: {len(skills)} distinct · " + ", ".join(f"{k} {v}" for k, v in skills.most_common(15)))
+
+
+if __name__ == "__main__":
+    main()
