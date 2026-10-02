@@ -1,11 +1,11 @@
 ---
 name: prompt-claude-opus-5
-description: Create, shorten, or adapt prompts, task cards, CLAUDE.md or AGENTS.md instructions, and agent handoffs specifically for Claude Opus 5 in native Claude Code. Use when the target model is Opus 5 and the prompt should constrain verbosity, scope growth, redundant verification, and unnecessary subagents while preserving direct productive work. Do not use for ordinary task execution or prompts targeting GPT models.
+description: Write or shorten prompts, worker briefs, CLAUDE.md/AGENTS.md instructions and handoffs for Claude Opus 5.x in Claude Code. Use when the target is an Opus worker or session; not for ordinary task execution or GPT prompts.
 ---
 
-# Prompt Claude Opus 5
+# Prompt Claude Opus 5.x
 
-Produce a complete but compact prompt for Claude Opus 5. Preserve the user's
+Produce a complete but compact prompt for Claude Opus 5.5 (and 5.x). Preserve the user's
 meaning while removing instructions that duplicate behavior the model already
 performs.
 
@@ -23,43 +23,33 @@ performs.
 
 ## Preserve the operating standard
 
-- Direct at least 90% of active task slots and agent-hours toward changing
-  code, data, experiments, evaluations, accepted evidence, or paper content.
-- Count orchestration, collaborative planning, advice, checking, status, and
-  waiting inside the shared 10% control budget.
-- Deliver exactly the requested scope through the smallest coherent change.
-- Do not add test suites, browser testing, broad review, cleanup, abstractions,
-  files, or features unless requested or necessary for the done condition.
-- Treat the user's standing request as authorization to create small,
-  human-readable commits and synchronize the canonical repository.
+- Deliver exactly the requested scope through the smallest coherent change,
+  run one direct check of the result, commit with a plain message, and stop.
+- Do not add test suites, smoke runs, repeated re-checks, "measure first"
+  steps, browser testing, broad review, cleanup, abstractions, files, or
+  features unless requested or necessary for the done condition.
 - Resolve routine details directly. Ask only when different interpretations
   would cause materially different work or before destructive, costly,
   unrelated external, or scope-expanding action.
-- Keep human communication natural and omit internal IDs, hashes, phase labels,
-  and bureaucratic language.
-- Reuse the strongest existing project or official-upstream implementation
-  before writing a new path. Delete clearly bad, dead, duplicated, misleading,
-  or superseded code rather than preserving it behind wrappers without a named
-  live consumer.
-- For concrete failures, require `goal-directed-repair`: identify the causal
-  source, make the smallest source-level change, and run only the direct done
-  check. Forbid symptom bandages, broad debugging ceremony, compulsory new
-  tests, architecture speculation, and surrender after one coherent failure.
-- Create no side artifacts unless they are the requested deliverable: no
-  reports, manifests, dashboards, project hubs, review files, duplicate
-  documentation, or status files.
-- Keep the existing compact `RESTART_HANDOFF.md` current after material
-  results, active-task changes, external waits, and decisions. Do not turn it
-  into a transcript or second plan.
+- Reuse the strongest existing implementation; delete dead, duplicated or
+  superseded code rather than wrapping it.
+- For concrete failures, require `goal-directed-repair`: fix the causal source
+  with the smallest change and run only the direct done check.
+- Create no side artifacts unless they are the deliverable: no plans, reports,
+  manifests, dashboards, review files, or status files. Keep an existing
+  `RESTART_HANDOFF.md` compact and current at milestones.
+- Never wait inside a turn: no sleep or polling loops; use Monitor with an
+  until-condition and timeout, a background command, or a watcher that sends
+  `herdr-role-message`.
 
-## Tune for Claude Opus 5
+## Tune for Claude Opus 5.x
 
 - Explicitly request focused, brief user-facing responses; effort controls
   thinking volume, not visible response length.
 - Ask for one short initial intent, updates only for important findings or a
   changed direction, and a final response that leads with the outcome.
 - Remove blanket instructions to double-check, re-verify, run a separate final
-  verification, or create a verifier subagent. Opus 5 already self-corrects and
+  verification, or create a verifier subagent. Opus 5.x verifies its own work and
   these prompts cause over-verification.
 - Delegate only substantial, genuinely independent, parallel work. Never
   delegate a small task or use a subagent merely to review the parent.
@@ -71,23 +61,14 @@ performs.
 - Keep written artifacts proportional; remove filler sections, repeated
   summaries, and boilerplate.
 
-## Preserve role boundaries
+## Worker briefs
 
-- A productive Opus worker exists only when explicitly selected. It receives
-  one minimal package in a fresh chat from Operations Lead or one owning
-  suborchestrator and reports only to that assigning role.
-- Forbid direct contact with the Human Orchestrator or user, edits to
-  `HUMAN_PLAN.md`, new agents, unrelated work, and scope expansion.
-- An Opus second eye receives one bounded artifact or claim from Operations Lead,
-  returns concrete mismatches only to Operations Lead, and stops. It never
-  becomes an approver or starts a repair itself.
-- Include the canonical `worker` role block from
-  `launch-herdr-agent/scripts/validate_role_card.py` in a productive-worker
-  prompt.
-- The worker wakes its assigning orchestrator with `herdr-role-message` and
-  stops. Do not ask Opus to poll, wait for acknowledgement, or maintain a usage
-  report; the parent uses `herdr-emergency-wake` as its silence fallback and
-  `herdr-costs report` supplies the deterministic time/token/cost tree.
+- A Herdr tab worker is Opus 5.5 (`claude-acct run -a <seat> -- --model
+  claude-opus-5-5`) with its own worktree, one task, one done check, and a brief
+  in a file. Read-only surveys go to the `scout` subagent instead.
+- Forbid new agents, unrelated work, and scope expansion.
+- The worker reports once to its parent with `herdr-role-message` and stops.
+  Do not ask it to poll, wait for acknowledgement, or write a usage report.
 
 When the user asks for current or latest guidance, check the official
 [Claude Opus 5 prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)
