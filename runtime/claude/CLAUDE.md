@@ -37,6 +37,8 @@ workers, and the lead keeps only what needs its judgement.
   reading logs or remote state: the `scout` subagent (Sonnet 5.5, read-only),
   so file contents stay out of this session. Never a general-purpose subagent
   for these.
+- Reviews and research synthesis that judge but do not edit: a general-purpose
+  subagent with `model: sonnet`.
 - Implementation that needs judgement but not hours: a general-purpose
   subagent (Opus 5.5, also under a Fable lead).
 - Multi-hour implementation or GPU work: one Herdr tab worker,
