@@ -23,8 +23,7 @@ CLAUDE.md (or this file if it is global) in the same turn.
 - Never wait inside a turn: no `sleep`, `squeue`, `nvidia-smi` or
   `herdr pane read` loops.
 - Use Monitor with an until-condition, a failure condition and a timeout, or a
-  background command that notifies on exit. For multi-hour cluster jobs, a
-  watcher script sends `herdr-role-message` when the job ends or fails.
+  background command that notifies on exit (re-arm it for multi-hour jobs).
 
 ## Delegation
 
@@ -34,10 +33,14 @@ CLAUDE.md (or this file if it is global) in the same turn.
 - Implementation that needs judgement but not hours: a general-purpose
   subagent (inherits this session's model).
 - Multi-hour implementation or GPU work: one Herdr tab worker,
-  `claude-acct run -a <seat> -- --model claude-opus-5-5`, on any seat whose
-  WEEK and SESS windows have room. Its own worktree, a tab named
-  `<PersonName> <What It Does>`, a brief in a file, one task, one done check.
-  It reports once with `herdr-role-message` and its tab is closed.
+  `claude-acct run -a <seat> -- --model claude-opus-5-5 -n "<PersonName> <What It Does>"`,
+  on any seat whose WEEK and SESS windows have room. Its own worktree, the tab
+  given the same name, a brief in a file, one task, one done check. It reports
+  once with SendMessage to the lead's name and its tab is closed.
+- Talk to another Claude session with SendMessage (`ListAgents` for names),
+  never with herdr keystrokes (`send-text`, `herdr agent prompt`,
+  `herdr-ask`, `herdr-role-message`): they can report "submitted" when nothing
+  arrived, or submit the user's half-typed draft.
 - Hard decision: `/advisor fable`, or one short Fable session for one bounded
   question. Fable never runs a lead session and never waits on jobs.
 - No agent teams.
