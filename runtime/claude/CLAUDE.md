@@ -61,8 +61,8 @@ workers, and the lead keeps only what needs its judgement.
   restarts from it instead of running for days and updates it when a milestone
   lands (goal, current result, what is running, next action). Do not create one
   in a project that has none unless asked.
-- Leads run on Fable 5.1, or on Opus 5.5 at effort high when the user starts
-  one that way. Workers and subagents run on Opus 5.5 at effort medium;
+- Leads run on Fable 5.1, or on Opus 5.5 when the user starts one that way.
+  Opus 5.5 runs at effort high (leads, workers, subagents); `scout` at medium;
   `/effort xhigh` for hard problems.
 
 ## Writing
