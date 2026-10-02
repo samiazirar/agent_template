@@ -81,7 +81,7 @@ exists; keep that list under 30 lines and drop lines that stop being true.
 - Time a function alone before trusting cProfile on call-heavy code.
 - Find dead code by import closure, not by hand-made lists.
 - When rebuilding a path, keep the old one runnable as the baseline the new one must beat.
-- herdr: a multi-KB prompt pastes but never submits; send a one-line pointer to a brief file. Backticks in `send-text` run as commands.
+- herdr: a multi-KB prompt pastes but never submits; send a one-line pointer to a brief file. Backticks in `send-text` run as commands. Closing a workspace's last pane closes the workspace; to end a session but keep its workspace, open a fresh pane there first.
 - `sbatch --parsable` can print site notices; the job id is the first numeric line.
 - Never copy a `.credentials.json` between Claude profiles; one login lives in one file.
 - No silent fallbacks: use an explicit input verbatim or fail loudly.
