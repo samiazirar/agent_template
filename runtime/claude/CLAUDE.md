@@ -27,11 +27,18 @@ CLAUDE.md (or this file if it is global) in the same turn.
 
 ## Delegation
 
-- Small task: do it yourself.
-- Reading across many files, logs, datasets or docs: the `scout` subagent
-  (Sonnet 5.5, read-only), so file contents stay out of this session.
+Delegate proactively, without being asked: a lead's context is for decisions
+and the user, not for file dumps or long runs. Before starting a task, split it:
+independent parts go out together in one message as parallel subagents or
+workers, and the lead keeps only what needs its judgement.
+
+- Small task (a few files, minutes): do it yourself.
+- Reading, searching, checking numbers against papers, literature surveys,
+  reading logs or remote state: the `scout` subagent (Sonnet 5.5, read-only),
+  so file contents stay out of this session. Never a general-purpose subagent
+  for these.
 - Implementation that needs judgement but not hours: a general-purpose
-  subagent (inherits this session's model).
+  subagent (Opus 5.5, also under a Fable lead).
 - Multi-hour implementation or GPU work: one Herdr tab worker,
   `claude-acct run -a <seat> -- --model claude-opus-5-5 -n "<PersonName> <What It Does>"`,
   on any seat whose WEEK and SESS windows have room. Its own worktree, the tab
@@ -41,8 +48,7 @@ CLAUDE.md (or this file if it is global) in the same turn.
   never with herdr keystrokes (`send-text`, `herdr agent prompt`,
   `herdr-ask`, `herdr-role-message`): they can report "submitted" when nothing
   arrived, or submit the user's half-typed draft.
-- Hard decision: `/advisor fable`, or one short Fable session for one bounded
-  question. Fable never runs a lead session and never waits on jobs.
+- Hard decision in an Opus session: `/advisor fable`.
 - No agent teams.
 - Never Gemini Flash, Codex or DeepSeek as a worker. Gemini is fine for
   non-worker model calls (VLM judge, rewrites, object naming) with the key from
@@ -55,7 +61,9 @@ CLAUDE.md (or this file if it is global) in the same turn.
   restarts from it instead of running for days and updates it when a milestone
   lands (goal, current result, what is running, next action). Do not create one
   in a project that has none unless asked.
-- Opus 5.5 at effort medium is the default; `/effort xhigh` for hard problems.
+- Leads run on Fable 5.1, or on Opus 5.5 at effort high when the user starts
+  one that way. Workers and subagents run on Opus 5.5 at effort medium;
+  `/effort xhigh` for hard problems.
 
 ## Writing
 
